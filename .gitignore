@@ -1,0 +1,43 @@
+# Firebase
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+
+# Env
+.env
+.env.*
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+.DS_Store
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+pubspec.lock
+**/*.g.dart
+**/*.freezed.dart
+
+# Coverage
+coverage/
+
+# Android
+android/.gradle
+android/local.properties
+android/key.properties
+android/app/release/
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Runner.xcworkspace/xcuserdata/
+ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+ios/Runner.xcodeproj/xcuserdata/

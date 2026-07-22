@@ -1,0 +1,74 @@
+name: neuroup
+description: "Neuroup - Eğitim, Haber, Chat ve Oyun uygulaması"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management & DI
+  flutter_riverpod: ^2.6.1
+
+  # Routing
+  go_router: ^14.6.2
+
+  # Backend
+  firebase_core: ^3.12.1
+  firebase_auth: ^5.5.1
+  cloud_firestore: ^5.6.5
+  firebase_storage: ^12.4.4
+  firebase_messaging: ^15.2.4
+  firebase_analytics: ^11.4.4
+
+  # Networking
+  dio: ^5.7.0
+
+  # Storage
+  shared_preferences: ^2.3.4
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.5
+
+  # Game engine
+  flame: ^1.21.0
+
+  # UI / utilities
+  cached_network_image: ^3.4.1
+  flutter_animate: ^4.5.2
+  shimmer: ^3.0.0
+  flutter_svg: ^2.0.16
+  intl: ^0.20.1
+
+  # Logging & errors
+  logger: ^2.5.0
+  talker_flutter: ^4.7.7
+  sentry_flutter: ^8.14.0
+
+  # Misc
+  equatable: ^2.0.7
+  collection: ^1.19.0
+  url_launcher: ^6.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  # Strict lint
+  very_good_analysis: ^9.0.0
+
+  # Testing
+  mocktail: ^1.0.4
+  fake_cloud_firestore: ^3.1.0
+
+flutter:
+  uses-material-design: true
+  generate: true
