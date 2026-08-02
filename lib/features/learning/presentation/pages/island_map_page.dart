@@ -728,29 +728,32 @@ class _MapIntroSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(12, 0, 12, 16),
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1A1330), Color(0xFF221F3D)],
-          ),
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.25),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
+      // Compact boyut (≤360 px width) için kalan yükseklik küçük olur;
+      // SingleChildScrollView ile içerik taşma yapmaz.
+      child: SingleChildScrollView(
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF1A1330), Color(0xFF221F3D)],
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
               child: Container(
                 width: 44,
                 height: 4,
@@ -853,6 +856,7 @@ class _MapIntroSheet extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -14,6 +14,7 @@ import 'package:neuroup/features/reels/presentation/pages/reels_page.dart';
 import 'package:neuroup/features/news/presentation/pages/news_page.dart';
 import 'package:neuroup/features/learning/presentation/pages/island_map_page.dart';
 
+const Size kCompactSize = Size(320, 568); // iPhone SE — küçük telefon
 const Size kPhoneSize = Size(393, 851);
 const Size kTabletSize = Size(768, 1024);
 const Size kWideSize = Size(916, 1440);
@@ -88,6 +89,37 @@ Future<void> _overflowTest(
 }
 
 void main() {
+  // iPhone SE gibi çok küçük telefon — kompakt.
+  testWidgets('DemoLandingNoOverflow_Compact', (tester) async =>
+      _overflowTest(tester, 'DemoLandingPage', const DemoLandingPage(),
+          size: kCompactSize));
+  testWidgets('ProfileNoOverflow_Compact', (tester) async =>
+      _overflowTest(tester, 'ProfilePage', const ProfilePage(),
+          size: kCompactSize));
+  testWidgets('ReelsNoOverflow_Compact', (tester) async =>
+      _overflowTest(tester, 'ReelsPage', const ReelsPage(),
+          size: kCompactSize));
+  testWidgets('NewsNoOverflow_Compact', (tester) async =>
+      _overflowTest(tester, 'NewsPage', const NewsPage(),
+          size: kCompactSize));
+  testWidgets('IslandMapNoOverflow_Compact', (tester) async =>
+      _overflowTest(tester, 'IslandMapPage', const IslandMapPage(),
+          size: kCompactSize));
+
+  // Pixel 5 — standart modern telefon.
+  testWidgets('ProfileNoOverflow_Phone', (tester) async =>
+      _overflowTest(tester, 'ProfilePage', const ProfilePage(),
+          size: kPhoneSize));
+  testWidgets('ReelsNoOverflow_Phone', (tester) async =>
+      _overflowTest(tester, 'ReelsPage', const ReelsPage(),
+          size: kPhoneSize));
+  testWidgets('NewsNoOverflow_Phone', (tester) async =>
+      _overflowTest(tester, 'NewsPage', const NewsPage(),
+          size: kPhoneSize));
+  testWidgets('IslandMapNoOverflow_Phone', (tester) async =>
+      _overflowTest(tester, 'IslandMapPage', const IslandMapPage(),
+          size: kPhoneSize));
+
   // Tablet portrait — iPad benzeri
   testWidgets('DemoLandingNoOverflow_Tablet', (tester) async =>
       _overflowTest(tester, 'DemoLandingPage', const DemoLandingPage(),

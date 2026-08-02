@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../shared/utils/layout_helper.dart';
+
 /// Bottom navigation bar için ayrılan toplam yükseklik
 /// (margin + bar içerik + alt safe area).
 const double kBottomBarHeight = 84;
@@ -195,6 +197,11 @@ class _PillTabItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
+    // Tablet+ boyutlarında geniş layout → tüm tab'lar etiketli.
+    // Telefon boyutunda → sadece aktif tab etiketli (kompakt).
+    final isExpanded = LayoutHelper.isExpandedLayout(context);
+    final showLabel = isExpanded || active;
+
     // Aktif renk: primary. Pasif renk: onSurfaceVariant.
     final fg = active ? scheme.onPrimary : scheme.onSurfaceVariant;
 
@@ -216,10 +223,10 @@ class _PillTabItem extends StatelessWidget {
               horizontal: 4,
               vertical: 8,
             ),
-            // Aktifken daha ferah padding (geniş pill), pasifte sıkı.
+            // Aktifken geniş, pasifte dar (veya expanded'da sabit).
             padding: EdgeInsets.symmetric(
-              horizontal: active ? 18 : 10,
-              vertical: active ? 10 : 8,
+              horizontal: showLabel ? 18 : 10,
+              vertical: showLabel ? 10 : 8,
             ),
             decoration: BoxDecoration(
               // Pill — ana renklerde yumuşak gradient.
@@ -244,8 +251,7 @@ class _PillTabItem extends StatelessWidget {
                     ]
                   : null,
             ),
-            // Yatay (Row): ikon yanda — eski istenen layout.
-            // Aktif ise pill genişler + label açılır (soldan sağa animasyon).
+            // Row(ikon + label yanda) — eski istenen layout.
             child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -257,18 +263,19 @@ class _PillTabItem extends StatelessWidget {
                   color: fg,
                   size: 24,
                 ),
-                // Label — aktifle AnimatedSize ile açılır.
+                // Label — showLabel ise göster.
                 AnimatedSize(
                   duration: const Duration(milliseconds: 260),
                   curve: Curves.easeOutCubic,
-                  // Pasif durumda tamamen collapsed — pill daralır.
                   child: SizedBox(
-                    width: active ? null : 0,
-                    height: active ? null : 0,
+                    width: showLabel ? null : 0,
+                    height: showLabel ? null : 0,
                     child: Padding(
-                      padding: EdgeInsets.only(left: active ? 8 : 0),
+                      padding: EdgeInsets.only(left: showLabel ? 8 : 0),
                       child: Text(
                         item.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.visible,
                         style: TextStyle(
                           color: fg,
                           fontSize: 13,

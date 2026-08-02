@@ -5,13 +5,31 @@ import 'package:flutter/widgets.dart';
 class LayoutHelper {
   LayoutHelper._();
 
+  /// Tablet alt-bar breakpoint: < 600 px telefon, ≥ 600 tablet+.
+  /// Bileşenler farklı label politikası kullanır.
+  static const double kTabletBreakpoint = 600;
+
+  /// Geniş ekran breakpoint: tablet üstü.
+  static const double kDesktopBreakpoint = 1024;
+
+  /// Çok küçük ekran breakpoint: < 360 px (dar telefonlar için).
+  static const double kCompactBreakpoint = 360;
+
   /// Ekran genişliği 600'den büyükse tablet.
   static bool isTablet(BuildContext context) =>
-      MediaQuery.of(context).size.width >= 600;
+      MediaQuery.of(context).size.width >= kTabletBreakpoint;
 
   /// Ekran genişliği 1024'den büyükse desktop.
   static bool isDesktop(BuildContext context) =>
-      MediaQuery.of(context).size.width >= 1024;
+      MediaQuery.of(context).size.width >= kDesktopBreakpoint;
+
+  /// Çok küçük ekran (< 360 px): kompakt layout için.
+  static bool isCompact(BuildContext context) =>
+      MediaQuery.of(context).size.width < kCompactBreakpoint;
+
+  /// Geniş ekran — tablet+ (>600px): label her zaman gösterilir.
+  static bool isExpandedLayout(BuildContext context) =>
+      MediaQuery.of(context).size.width >= kTabletBreakpoint;
 
   /// Ekran kısa mı (küçük mobil yatay)?
   static bool isShort(BuildContext context) =>
