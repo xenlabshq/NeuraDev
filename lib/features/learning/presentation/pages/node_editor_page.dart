@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart' hide ErrorHint;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/colors.dart';
 import '../../data/python_simulator.dart';
 import '../../domain/entities/error_hint.dart';
+import '../../domain/entities/learning_island.dart';
 import '../providers/adaptive_providers.dart';
 import '../providers/learning_providers.dart';
 
@@ -32,14 +34,22 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
   bool _showTutorial = true;
   ErrorHint? _hint;
 
+  /// Aktif ada ve node'u tek seferde arar; bulunamazsa null döner.
+  /// F-19: Artık `StateError` riski yok.
+  (LearningIsland?, LearningNode?) _findActive() {
+    final island = ref
+        .read(islandsProvider)
+        .firstWhereOrNull((i) => i.id == widget.islandId);
+    final node = island?.nodes
+        .firstWhereOrNull((n) => n.id == widget.nodeId);
+    return (island, node);
+  }
+
   @override
   void initState() {
     super.initState();
-    final island = ref
-        .read(islandsProvider)
-        .firstWhere((i) => i.id == widget.islandId);
-    final node = island.nodes.firstWhere((n) => n.id == widget.nodeId);
-    _code = TextEditingController(text: node.starterCode);
+    final (_, node) = _findActive();
+    _code = TextEditingController(text: node?.starterCode ?? '');
     _editorScroll = ScrollController();
   }
 
@@ -64,11 +74,14 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
     Future<void>.delayed(const Duration(milliseconds: 300), () {
       if (!mounted) return;
       // Beklenen çıktıyı simülatöre geçir → akıllı hata analizi için.
-      final node = ref
-          .read(islandsProvider)
-          .firstWhere((i) => i.id == widget.islandId)
-          .nodes
-          .firstWhere((n) => n.id == widget.nodeId);
+      final (island, node) = _findActive();
+      if (island == null || node == null) {
+        setState(() {
+          _running = false;
+          _error = 'Ders bulunamadı (id: ${widget.islandId}/${widget.nodeId}).';
+        });
+        return;
+      }
       final result = _simulator.run(
         _code.text,
         expectedOutput: node.expectedOutput,
@@ -108,10 +121,8 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
   }
 
   void _showSolution() {
-    final island = ref
-        .read(islandsProvider)
-        .firstWhere((i) => i.id == widget.islandId);
-    final node = island.nodes.firstWhere((n) => n.id == widget.nodeId);
+    final (_, node) = _findActive();
+    if (node == null) return;
     setState(() {
       _code.text = node.solution;
     });
@@ -126,10 +137,8 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
       );
       return;
     }
-    final island = ref
-        .read(islandsProvider)
-        .firstWhere((i) => i.id == widget.islandId);
-    final node = island.nodes.firstWhere((n) => n.id == widget.nodeId);
+    final (island, node) = _findActive();
+    if (island == null || node == null) return;
     ref.read(learningProgressProvider.notifier).markNodeCompleted(
           widget.nodeId,
           xpEarned: node.points,
@@ -155,10 +164,17 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    final island = ref
-        .read(islandsProvider)
-        .firstWhere((i) => i.id == widget.islandId);
-    final node = island.nodes.firstWhere((n) => n.id == widget.nodeId);
+    final (island, node) = _findActive();
+    if (island == null || node == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Ders bulunamadı')),
+        body: Center(
+          child: Text(
+            'Ders yüklenemedi (id: ${widget.islandId}/${widget.nodeId}).',
+          ),
+        ),
+      );
+    }
     final isWide = MediaQuery.of(context).size.width > 700;
 
     return Scaffold(
@@ -412,18 +428,27 @@ class _LineNumbers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // F-15: Column + for-loop yerine sabit genişlikli ListView.builder.
+    // Her tuş vuruşunda tüm satırlar için widget instantiate etmek
+    // yerine sadece scroll'a giren satırlar oluşturulur.
     return ValueListenableBuilder<TextEditingValue>(
       valueListenable: controller,
       builder: (_, value, __) {
         final count = '\n'.allMatches(value.text).length + 1;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            for (var i = 1; i <= count; i++)
-              Padding(
+        // Maks satır sayısı — sanal listeleme. Aşırı büyük olmasın.
+        const maxLines = 9999;
+        final itemCount = count.clamp(1, maxLines);
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          itemCount: itemCount,
+          itemExtent: 19.5, // 13px font * 1.5 height
+          itemBuilder: (_, i) {
+            return SizedBox(
+              height: 19.5,
+              child: Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: Text(
-                  '$i',
+                  '${i + 1}',
                   style: const TextStyle(
                     color: Color(0xFF858585),
                     fontFamily: 'monospace',
@@ -432,7 +457,8 @@ class _LineNumbers extends StatelessWidget {
                   ),
                 ),
               ),
-          ],
+            );
+          },
         );
       },
     );

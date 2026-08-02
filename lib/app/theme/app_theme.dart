@@ -7,45 +7,40 @@ class AppTheme {
 
   static const String? _fontFamily = null; // System default
 
-  static ThemeData light() {
-    const scheme = ColorScheme.light(
-      primary: AppColors.primary,
-      onPrimary: Colors.white,
-      primaryContainer: Color(0xFFE0E7FF),
-      onPrimaryContainer: AppColors.primaryDark,
-      secondary: AppColors.accent,
-      onSecondary: Colors.white,
-      tertiary: AppColors.gold,
-      surface: Colors.white,
-      onSurface: AppColors.textPrimary,
-      surfaceContainerHighest: Color(0xFFF1F5F9),
-      surfaceContainerHigh: Color(0xFFF8FAFC),
-      error: AppColors.error,
-      onError: Colors.white,
-    );
+  /// Light ThemeData — bir kez hesaplanır, sonra reuse edilir.
+  /// F-04: Her MaterialApp rebuild'inde yeniden ThemeData üretimini önler.
+  static final ThemeData light = _build(const ColorScheme.light(
+    primary: AppColors.primary,
+    onPrimary: Colors.white,
+    primaryContainer: Color(0xFFE0E7FF),
+    onPrimaryContainer: AppColors.primaryDark,
+    secondary: AppColors.accent,
+    onSecondary: Colors.white,
+    tertiary: AppColors.gold,
+    surface: Colors.white,
+    onSurface: AppColors.textPrimary,
+    surfaceContainerHighest: Color(0xFFF1F5F9),
+    surfaceContainerHigh: Color(0xFFF8FAFC),
+    error: AppColors.error,
+    onError: Colors.white,
+  ));
 
-    return _build(scheme);
-  }
-
-  static ThemeData dark() {
-    const scheme = ColorScheme.dark(
-      primary: AppColors.primaryLight,
-      onPrimary: AppColors.textPrimary,
-      primaryContainer: Color(0xFF312E81),
-      onPrimaryContainer: Color(0xFFE0E7FF),
-      secondary: AppColors.accentLight,
-      onSecondary: AppColors.textPrimary,
-      tertiary: AppColors.gold,
-      surface: Color(0xFF0F172A),
-      onSurface: Color(0xFFF1F5F9),
-      surfaceContainerHighest: Color(0xFF1E293B),
-      surfaceContainerHigh: Color(0xFF1E293B),
-      error: AppColors.error,
-      onError: Colors.white,
-    );
-
-    return _build(scheme);
-  }
+  /// Dark ThemeData — bir kez hesaplanır, sonra reuse edilir.
+  static final ThemeData dark = _build(const ColorScheme.dark(
+    primary: AppColors.primaryLight,
+    onPrimary: AppColors.textPrimary,
+    primaryContainer: Color(0xFF312E81),
+    onPrimaryContainer: Color(0xFFE0E7FF),
+    secondary: AppColors.accentLight,
+    onSecondary: AppColors.textPrimary,
+    tertiary: AppColors.gold,
+    surface: Color(0xFF0F172A),
+    onSurface: Color(0xFFF1F5F9),
+    surfaceContainerHighest: Color(0xFF1E293B),
+    surfaceContainerHigh: Color(0xFF1E293B),
+    error: AppColors.error,
+    onError: Colors.white,
+  ));
 
   static ThemeData _build(ColorScheme scheme) {
     final base = ThemeData(

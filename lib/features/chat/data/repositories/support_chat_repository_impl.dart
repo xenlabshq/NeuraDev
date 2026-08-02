@@ -98,9 +98,7 @@ class SupportChatRepositoryImpl implements SupportChatRepository {
         'lastMessageAt': msg.createdAt,
         'lastMessageSenderId': senderId,
         'status': isModerator
-            ? (chatRef.id.isEmpty
-                ? SupportChatStatus.assigned.name
-                : SupportChatStatus.assigned.name)
+            ? SupportChatStatus.assigned.name
             : SupportChatStatus.open.name,
       });
     });
@@ -121,9 +119,4 @@ class SupportChatRepositoryImpl implements SupportChatRepository {
       'status': SupportChatStatus.closed.name,
     });
   }
-}
-
-extension on Object {
-  // ignore: unused_element
-  Result<void> okOrThrow(Object e) => Err(failureFromException(e));
 }

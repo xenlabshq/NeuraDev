@@ -18,15 +18,17 @@ Neuroup geliştirme sürecinin canlı durumu. Agent'lar bu dosyayı okuyarak pro
 | Modül | Durum | Notlar |
 |---|---|---|
 | **Auth (Firebase email/şifre)** | ✅ Çalışıyor | Demo'da otomatik sahte kullanıcı |
-| **Education (dersler + quiz)** | ✅ Çalışıyor | In-memory |
 | **Learning (Python Adaları)** | ✅ Çalışıyor | Fancade-tarzı yılan path haritası, 10 ada × ~3 node |
 | **News (21 demo haber)** | ✅ Çalışıyor | InMemoryNewsRepository, priority sıralama |
 | **Chat (öğrenci ↔ moderatör)** | ✅ Çalışıyor | Demo'da AI lokal echo cevap veriyor |
 | **AI Chat (Soru-Cevap)** | ✅ Çalışıyor | 8 hazır cevap, gerçek API bağlı değil |
-| **Game (Kelime Avı, Quick Math, Color Match)** | ✅ Çalışıyor | 3 mini oyun |
 | **Profile (seviye + rozetler + tier çerçevesi)** | ✅ Çalışıyor | CustomPaint avatar frame |
 | **Reels (oyun vitrini)** | ✅ Çalışıyor | 5 demo reel, PageView dikey scroll |
-| **Bottom Navigation (6 tab)** | ✅ Çalışıyor | iOS-style glass bar |
+| **Bottom Navigation (5 tab)** | ✅ Çalışıyor | iOS-style glass bar |
+| **Adaptive Learning Engine** | ✅ Çalışıyor | SM-2 spaced repetition, NodeMemory, zayıf nokta tespit |
+| **Smart Error Analyzer** | ✅ Çalışıyor | 9 hata tipi ipucu sistemi |
+
+> **Kaldırılan:** `Education` ve `Game` (eski arcade/quiz sistemi) featureları silindi. `features/education/`, `features/game/` klasörleri + testleri kaldırıldı.
 
 ---
 

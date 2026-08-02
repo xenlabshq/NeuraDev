@@ -20,8 +20,8 @@ class NeuroupApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'Neuroup',
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       themeMode: themeMode,
       routerConfig: router,
       debugShowCheckedModeBanner: false,

@@ -65,8 +65,6 @@ Future<void> bootstrap(Widget Function() builder) async {
         return ErrorWidget(details.exception);
       };
 
-      Env.load;
-
       // Firebase is optional in dev (no google-services.json). In production
       // it must succeed.
       if (Env.firebaseConfigured) {

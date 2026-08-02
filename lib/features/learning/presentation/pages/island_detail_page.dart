@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,7 +17,13 @@ class IslandDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final islands = ref.watch(islandsProvider);
-    final island = islands.firstWhere((i) => i.id == islandId);
+    final island = islands.firstWhereOrNull((i) => i.id == islandId);
+    if (island == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Ada bulunamadı')),
+        body: Center(child: Text('Ada bulunamadı (id: $islandId).')),
+      );
+    }
     final notifier = ref.read(learningProgressProvider.notifier);
     final nodes = notifier.nodesWithState(island);
 

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -60,23 +61,6 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
           progress: const UserLearningProgress(),
         ));
 
-  /// Gerçek unlocked durumlarıyla güncellenmiş ada listesi.
-  /// İlk ada her zaman açık. Sonraki adalar, bir önceki tüm
-  /// node'ları tamamlandıysa açılır.
-  List<LearningIsland> get _unlockedIslands {
-    final completed = state.progress.completedNodeIds;
-    final result = <LearningIsland>[];
-    for (var i = 0; i < state.islands.length; i++) {
-      final island = state.islands[i];
-      final isUnlocked = i == 0 ||
-          state.islands[i - 1]
-              .nodes
-              .every((n) => completed.contains(n.id));
-      result.add(island.copyWith(unlocked: isUnlocked));
-    }
-    return result;
-  }
-
   /// Ada unlocked mi?
   bool isIslandUnlocked(int islandIndex) {
     if (islandIndex == 0) return true;
@@ -91,7 +75,8 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
 
   /// Node unlocked mi?
   bool isNodeUnlocked(String islandId, int nodeIndex) {
-    final island = state.islands.firstWhere((i) => i.id == islandId);
+    final island = state.islands.firstWhereOrNull((i) => i.id == islandId);
+    if (island == null) return false;
     if (nodeIndex == 0) return true;
     final prevNodeId = island.nodes[nodeIndex - 1].id;
     return state.progress.completedNodeIds.contains(prevNodeId);
@@ -101,12 +86,24 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
       state.progress.completedNodeIds.contains(nodeId);
 
   /// Node tamamlandı olarak işaretle, XP ve streak güncelle.
-  /// Bir sonraki ada otomatik açılır (island list otomatik güncellenir).
+  /// F-09: tek adayı + bir sonraki komşunun unlocked'unu günceller;
+  /// tüm ada listesini `copyWith` ile yeniden oluşturmaz.
   void markNodeCompleted(String nodeId, {required int xpEarned}) {
     if (state.progress.completedNodeIds.contains(nodeId)) return;
     final newCompleted = {...state.progress.completedNodeIds, nodeId};
-    state = state.copyWith(
-      progress: state.progress.copyWith(
+
+    // Yeni ada listesi: hedef ada (kilit→kilit değil aynı kalır) +
+    // bir sonraki komşunun unlocked bayrağı (öncekinin tamamlanması ile
+    // otomatik açılır).
+    final newIslands = _updateUnlockedForNode(
+      state.islands,
+      newCompleted,
+      completedNodeId: nodeId,
+    );
+
+    state = IslandsState(
+      islands: newIslands,
+      progress: UserLearningProgress(
         completedNodeIds: newCompleted,
         totalXp: state.progress.totalXp + xpEarned,
         streak: state.progress.streak + 1,
@@ -114,18 +111,45 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
     );
   }
 
+  /// Tek bir node tamamlandığında etkilenen iki adayı (`prev`, `next`)
+  /// immutable şekilde yeniden hesaplar; diğer ada instance'ları aynen
+  /// korunur → referans eşitliği korunur, gereksiz rebuild tetiklenmez.
+  static List<LearningIsland> _updateUnlockedForNode(
+    List<LearningIsland> islands,
+    Set<String> completed, {
+    required String completedNodeId,
+  }) {
+    final updated = List<LearningIsland>.from(islands);
+    for (var i = 0; i < updated.length; i++) {
+      final island = updated[i];
+      if (!island.nodes.any((n) => n.id == completedNodeId)) continue;
+      // Önceki adanın tüm node'ları tamamlandıysa → bu ada unlock olabilir.
+      if (i > 0) {
+        final prev = updated[i - 1];
+        final prevAllDone = prev.nodes.every((n) => completed.contains(n.id));
+        if (prevAllDone && !prev.unlocked) {
+          updated[i - 1] = prev.copyWith(unlocked: true);
+        }
+      }
+      // Bir sonraki adanın tüm node'ları tamamlandıysa → o da unlock.
+      if (i + 1 < updated.length) {
+        final next = updated[i + 1];
+        final nextAllDone = next.nodes.every((n) => completed.contains(n.id));
+        if (nextAllDone && !next.unlocked) {
+          updated[i + 1] = next.copyWith(unlocked: true);
+        }
+      }
+      // Hedef ada zaten unlocked'tı; bir şey değiştirme (referans korunur).
+      break;
+    }
+    return updated;
+  }
+
   /// Streak sıfırlama (yanlış cevap).
   void resetStreak() {
     if (state.progress.streak == 0) return;
     state = state.copyWith(
       progress: state.progress.copyWith(streak: 0),
-    );
-  }
-
-  /// Sadece progress'i değiştir, adaları yeniden hesapla.
-  void _recomputeIslands() {
-    state = state.copyWith(
-      islands: List<LearningIsland>.from(_unlockedIslands),
     );
   }
 

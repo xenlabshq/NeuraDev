@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neuroup/app/theme/colors.dart';
@@ -61,12 +62,7 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
     final delta = d.localPosition - _lastFocal;
     _lastFocal = d.localPosition;
     if (delta.distanceSquared > 0.1) {
-      setState(() => _camera = IsometricCamera(
-            viewportSize: _camera.viewportSize,
-            center: _camera.center + delta,
-            zoom: _camera.zoom,
-            angle: _camera.angle,
-          ));
+      setState(() => _camera = _camera.withPan(delta));
     }
   }
 
@@ -126,7 +122,10 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
   /// Zayıf ada için "odaklanman gereken dersler" bottom sheet.
   /// Spaced repetition motorunun önerdiği node'ları sıralı gösterir.
   void _showFocusSheet(String islandId) {
-    final island = ref.read(islandsProvider).firstWhere((i) => i.id == islandId);
+    final island = ref
+        .read(islandsProvider)
+        .firstWhereOrNull((i) => i.id == islandId);
+    if (island == null) return;
     final mems = island.nodes
         .map((n) => ref.read(nodeMemoryProvider(n.id)))
         .whereType<NodeMemory>()
@@ -229,7 +228,9 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
                   )
                 else
                   ...focused.take(5).map((m) {
-                    final node = island.nodes.firstWhere((n) => n.id == m.nodeId);
+                    final node = island.nodes
+                        .firstWhereOrNull((n) => n.id == m.nodeId);
+                    if (node == null) return const SizedBox.shrink();
                     final isTop = m.nodeId == recommendedId;
                     return _FocusTile(
                       node: node,
@@ -309,24 +310,23 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
           // 3D sahne + gesture (Listener ile pan, ayrı GestureDetector ile tap)
           LayoutBuilder(
             builder: (context, constraints) {
-              _camera = IsometricCamera(
-                viewportSize: Size(constraints.maxWidth, constraints.maxHeight),
-                center: _camera.center == Offset.zero
-                    ? const Offset(0, 60)
-                    : _camera.center,
-                zoom: _camera.zoom,
+              _camera = _camera.withViewportSize(
+                Size(constraints.maxWidth, constraints.maxHeight),
               );
+              if (_camera.center == Offset.zero) {
+                _camera = _camera.withPan(const Offset(0, 60));
+              }
               return Stack(
                 children: [
                   CustomPaint(
                     size: Size(constraints.maxWidth, constraints.maxHeight),
-                    painter: _IsometricBackgroundPainter(),
+                    painter: const _IsometricBackgroundPainter(),
                   ),
                   // Derinlik sırası: arkadan öne
                   ..._renderDepthOrdered(positioned),
                   CustomPaint(
                     size: Size(constraints.maxWidth, constraints.maxHeight),
-                    painter: _IsometricGroundPainter(),
+                    painter: const _IsometricGroundPainter(),
                   ),
                   // Tap layer — sadece tap, recognizer çakışması yok
                   Positioned.fill(
@@ -421,9 +421,10 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
     // y + z'ye göre sırala (arkadan öne)
     final sorted = [...islands]..sort((a, b) => (a.y + a.z).compareTo(b.y + b.z));
     final widgets = <Widget>[];
-    // Adaptive engine'den zayıf ada verilerini al
+    // Adaptive engine'den zayıf ada verilerini al.
+    // F-08: artık pre-computed map'ten okuyoruz (O(1) lookup).
     final weakByIsland = ref.watch(weakNodesByIslandProvider);
-    final islandStats = ref.watch(adaptiveMemoryProvider).islandStats();
+    final islandStats = ref.watch(adaptiveMemoryProvider).islandStatsMap;
     // Önce adalar
     for (final island in sorted) {
       // Sadece açık (unlocked) adalar için hover aktif.
@@ -497,6 +498,8 @@ class _PosIsland {
 }
 
 class _IsometricBackgroundPainter extends CustomPainter {
+  const _IsometricBackgroundPainter();
+
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
@@ -532,6 +535,8 @@ class _IsometricBackgroundPainter extends CustomPainter {
 }
 
 class _IsometricGroundPainter extends CustomPainter {
+  const _IsometricGroundPainter();
+
   @override
   void paint(Canvas canvas, Size size) {
     // Zemin grid (Fancade tarzı yarı saydam grid)

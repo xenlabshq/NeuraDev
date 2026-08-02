@@ -21,6 +21,4 @@ abstract class Env {
   static const bool firebaseConfigured = bool.fromEnvironment(
     'FIREBASE_CONFIGURED',
   );
-
-  static Future<void> load() async {}
 }
