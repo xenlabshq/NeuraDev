@@ -259,58 +259,18 @@ class _LevelCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Üst satır: tier chip + seviye (compact ise sadece chip)
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: level.tier.gradient,
-                  ),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.star_rounded,
-                        color: Colors.white, size: 14),
-                    const SizedBox(width: 4),
-                    Text(
-                      level.tier.label.toUpperCase(),
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.surface,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Seviye ${level.level}',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: AppColorsTextX.textSecondary(context),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // XP + Progress
+          // XP row — tier renkli sayı olarak (avatar çerçevesi zaten
+          // tier'ı görsel olarak taşıyor; bu sayede çift pill yok).
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 '${level.currentXp}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.8,
+                  color: level.tier.color,
                 ),
               ),
               const SizedBox(width: 6),
@@ -325,7 +285,35 @@ class _LevelCard extends ConsumerWidget {
                   ),
                 ),
               ),
+              const Spacer(),
+              // Mini seviye pill'i — kompakt: 'SEV. 1'.
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: level.tier.color.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  'SEV. ${level.level}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: level.tier.color,
+                  ),
+                ),
+              ),
             ],
+          ),
+          const SizedBox(height: 6),
+          // 'Sonraki seviyeye X XP kaldı' alt metin.
+          Text(
+            'Sonraki seviyeye ${level.xpToNext} XP kaldı',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColorsTextX.textSecondary(context),
+            ),
           ),
           const SizedBox(height: 8),
           ClipRRect(
@@ -340,15 +328,6 @@ class _LevelCard extends ConsumerWidget {
                 backgroundColor: AppColorsTextX.surfaceAlt(context),
                 valueColor: AlwaysStoppedAnimation<Color>(level.tier.color),
               ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Sonraki seviyeye ${level.xpToNext} XP kaldı',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColorsTextX.textSecondary(context),
             ),
           ),
           const SizedBox(height: 14),
