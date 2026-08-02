@@ -42,6 +42,8 @@ class _NewsPageState extends ConsumerState<NewsPage> {
         : ref.watch(newsByCategoryProvider(_selected!));
 
     return Scaffold(
+      // News her iki temada da karanlık tasarımlı (mor-siyah gradient).
+      // iMessage haberler tarzı.
       backgroundColor: const Color(0xFF0A0812),
       body: Stack(
         children: [

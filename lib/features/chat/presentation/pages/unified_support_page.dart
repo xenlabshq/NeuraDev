@@ -29,6 +29,8 @@ class _UnifiedSupportPageState extends ConsumerState<UnifiedSupportPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Destek sohbeti her iki temada da karanlık zemin üzerinde
+      // çalışır — iMessage tarzı. Tema değişse bile içerik okunabilir.
       backgroundColor: const Color(0xFF1F1B2E),
       body: Column(
         children: [

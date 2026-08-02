@@ -1254,7 +1254,7 @@ class _SettingTile extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: item.color.withValues(alpha: 0.14),
+                  color: item.color.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 alignment: Alignment.center,
@@ -1267,28 +1267,28 @@ class _SettingTile extends StatelessWidget {
                   children: [
                     Text(
                       item.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       item.subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF475569),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         height: 1.3,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
-                color: Color(0xFF94A3B8),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 22,
               ),
             ],
