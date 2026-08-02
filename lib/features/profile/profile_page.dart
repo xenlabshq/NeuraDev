@@ -191,6 +191,8 @@ class _ProfileHeader extends StatelessWidget {
                       const SizedBox(height: 12),
                       Text(
                         user.displayName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.surface,
                           fontSize: 22,
@@ -201,6 +203,8 @@ class _ProfileHeader extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         user.email,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.85),
                           fontSize: 13,
@@ -499,9 +503,11 @@ class _BadgesSection extends ConsumerWidget {
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            // Aspect 0.7 = her hücre (genişlik=80) için 80/0.7 ~ 114 px.
-            // Bu yükseklik AspectRatio 80 + aralık + 2-satır Text için yeterli.
-            childAspectRatio: 0.7,
+            // Aspect 0.62 = her hücre (genişlik≈73) için 73/0.62 ≈ 117 px.
+            // Bu yükseklik AspectRatio 73 + 6 spacer + 2-satır Text (~26 px)
+            // = 105 px + güvenlik marjı. 0.7 ile 4 px overflow
+            // hata veriyordu (hücre 104 px ama içerik 105 px).
+            childAspectRatio: 0.62,
             children: Badges.all.map((b) {
               final isUnlocked = unlocks.containsKey(b.id);
               final unlockedAt = unlocks[b.id];

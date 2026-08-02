@@ -614,7 +614,7 @@ class _CtaButton extends StatelessWidget {
         onTap: () => context.push(route),
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           alignment: Alignment.center,
           child: const Text(
             '▶ Oyunu Dene',

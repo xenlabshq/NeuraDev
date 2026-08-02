@@ -144,6 +144,8 @@ class _IslandHeader extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         island.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 26,
@@ -155,10 +157,13 @@ class _IslandHeader extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         island.subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
+                          height: 1.3,
                         ),
                       ),
                       const SizedBox(height: 12),

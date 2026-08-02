@@ -194,7 +194,7 @@ class _NewsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 200,
+      expandedHeight: 220,
       pinned: true,
       backgroundColor: Colors.transparent,
       foregroundColor: Colors.white,
