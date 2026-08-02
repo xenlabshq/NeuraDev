@@ -7,6 +7,7 @@ import 'package:neuroup/core/providers/app_settings_provider.dart';
 import 'package:neuroup/features/chat/presentation/providers/chat_providers.dart'
     show currentAuthUserProvider;
 import 'package:neuroup/features/learning/presentation/providers/learning_providers.dart';
+import 'package:neuroup/features/profile/presentation/badge_providers.dart';
 import 'package:neuroup/shared/models/user_level.dart';
 import 'package:neuroup/shared/models/user_profile.dart';
 import 'package:neuroup/shared/utils/layout_helper.dart';
@@ -59,15 +60,13 @@ class ProfilePage extends ConsumerWidget {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Expanded(child: _BadgesSection(
-                              unlocked: _unlockedBadgeIds,
-                            )),
+                            const Expanded(child: _BadgesSection()),
                             const SizedBox(width: 12),
                             Expanded(child: _SettingsSection(user: effectiveUser)),
                           ],
                         )
                       else ...[
-                        _BadgesSection(unlocked: _unlockedBadgeIds),
+                        const _BadgesSection(),
                         const SizedBox(height: 16),
                         _SettingsSection(user: effectiveUser),
                       ],
@@ -416,40 +415,62 @@ class _Stat extends StatelessWidget {
   }
 }
 
-class _BadgesSection extends StatelessWidget {
-  const _BadgesSection({required this.unlocked});
-  final Set<String> unlocked;
+class _BadgesSection extends ConsumerWidget {
+  const _BadgesSection();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tokens = AppColors.tokensOf(context);
+    final unlocks = ref.watch(badgeUnlocksProvider);
+    final unlockedCount = unlocks.length;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: tokens.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: AppColors.border.withValues(alpha: 0.5),
+          color: tokens.border.withValues(alpha: 0.5),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: tokens.shadow.withValues(alpha: 0.5),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Text(
+              Text(
                 'Rozetler',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
+                  color: tokens.textPrimary,
                 ),
               ),
               const Spacer(),
-              Text(
-                '${unlocked.length} / ${Badges.all.length}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary,
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '$unlockedCount / ${Badges.all.length}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ),
             ],
@@ -463,13 +484,27 @@ class _BadgesSection extends StatelessWidget {
             crossAxisSpacing: 12,
             childAspectRatio: 0.8,
             children: Badges.all.map((b) {
-              final isUnlocked = unlocked.contains(b.id);
+              final isUnlocked = unlocks.containsKey(b.id);
+              final unlockedAt = unlocks[b.id];
               return _BadgeTile(
                 template: b,
                 isUnlocked: isUnlocked,
+                unlockedAt: unlockedAt,
               );
             }).toList(),
           ),
+          if (unlockedCount < Badges.all.length) ...[
+            const SizedBox(height: 12),
+            Center(
+              child: TextButton.icon(
+                onPressed: () => ref
+                    .read(badgeUnlockProvider.notifier)
+                    .unlockAll(),
+                icon: const Icon(Icons.bolt_outlined, size: 16),
+                label: const Text('Debug: tüm rozetleri aç'),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -477,32 +512,40 @@ class _BadgesSection extends StatelessWidget {
 }
 
 class _BadgeTile extends StatelessWidget {
-  const _BadgeTile({required this.template, required this.isUnlocked});
+  const _BadgeTile({
+    required this.template,
+    required this.isUnlocked,
+    this.unlockedAt,
+  });
   final BadgeTemplate template;
   final bool isUnlocked;
+  final DateTime? unlockedAt;
 
   @override
   Widget build(BuildContext context) {
+    final tokens = AppColors.tokensOf(context);
     return Column(
       children: [
         AspectRatio(
           aspectRatio: 1,
-          child: Container(
+          child: Tooltip(
+            message: isUnlocked
+                ? '${template.name}: ${template.description}'
+                : 'Henüz kazanılmadı: ${template.description}',
+            child: Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isUnlocked
-                  ? template.color.withValues(alpha: 0.12)
-                  : AppColors.surfaceAlt,
+                  ? template.color.withValues(alpha: 0.18)
+                  : tokens.surfaceAlt,
               border: Border.all(
-                color: isUnlocked
-                    ? template.color
-                    : AppColors.border,
+                color: isUnlocked ? template.color : tokens.border,
                 width: isUnlocked ? 2 : 1,
               ),
               boxShadow: isUnlocked
                   ? [
                       BoxShadow(
-                        color: template.color.withValues(alpha: 0.3),
+                        color: template.color.withValues(alpha: 0.4),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -511,12 +554,13 @@ class _BadgeTile extends StatelessWidget {
             ),
             alignment: Alignment.center,
             child: Opacity(
-              opacity: isUnlocked ? 1 : 0.3,
+              opacity: isUnlocked ? 1 : 0.35,
               child: Text(
                 template.emoji ?? '🏅',
                 style: const TextStyle(fontSize: 28),
               ),
             ),
+          ),
           ),
         ),
         const SizedBox(height: 6),
@@ -525,9 +569,8 @@ class _BadgeTile extends StatelessWidget {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w700,
-            color: isUnlocked
-                ? AppColors.textPrimary
-                : AppColors.textTertiary,
+            color:
+                isUnlocked ? tokens.textPrimary : tokens.textTertiary,
           ),
           textAlign: TextAlign.center,
           maxLines: 2,

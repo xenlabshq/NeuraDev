@@ -18,36 +18,50 @@ class AppTheme {
     onSecondary: Colors.white,
     tertiary: AppColors.gold,
     surface: Colors.white,
-    onSurface: AppColors.textPrimary,
+    onSurface: AppColors.textPrimaryLight,
     surfaceContainerHighest: Color(0xFFF1F5F9),
     surfaceContainerHigh: Color(0xFFF8FAFC),
+    surfaceContainerLow: Color(0xFFF8FAFC),
+    surfaceContainer: Color(0xFFEEF0F3),
+    onSurfaceVariant: AppColors.textSecondaryLight,
+    outline: AppColors.borderLight,
     error: AppColors.error,
     onError: Colors.white,
   ));
 
   /// Dark ThemeData — bir kez hesaplanır, sonra reuse edilir.
+  /// Tüm renkler koyu temaya göre optimize edildi: surface zengin siyah
+  /// (göz yormaz), text neredeyse beyaz (okunabilir), border subtle.
   static final ThemeData dark = _build(const ColorScheme.dark(
     primary: AppColors.primaryLight,
-    onPrimary: AppColors.textPrimary,
+    onPrimary: Color(0xFF0F172A),
     primaryContainer: Color(0xFF312E81),
-    onPrimaryContainer: Color(0xFFE0E7FF),
+    onPrimaryContainer: Color(0xFFC7D2FE),
     secondary: AppColors.accentLight,
-    onSecondary: AppColors.textPrimary,
+    onSecondary: Color(0xFF0F172A),
     tertiary: AppColors.gold,
-    surface: Color(0xFF0F172A),
-    onSurface: Color(0xFFF1F5F9),
-    surfaceContainerHighest: Color(0xFF1E293B),
-    surfaceContainerHigh: Color(0xFF1E293B),
-    error: AppColors.error,
-    onError: Colors.white,
+    onTertiary: Color(0xFF1A1A1A),
+    surface: AppColors.surfaceDark,
+    onSurface: AppColors.textPrimaryDark,
+    surfaceContainerHighest: AppColors.surfaceContainerDark,
+    surfaceContainerHigh: AppColors.surfaceAltDark,
+    surfaceContainerLow: Color(0xFF14171F),
+    surfaceContainer: AppColors.surfaceAltDark,
+    onSurfaceVariant: AppColors.textSecondaryDark,
+    outline: AppColors.borderDark,
+    outlineVariant: Color(0xFF222631),
+    error: Color(0xFFF87171), // koyu temada daha açık hata
+    onError: Color(0xFF0F172A),
   ));
 
   static ThemeData _build(ColorScheme scheme) {
     final base = ThemeData(
       useMaterial3: true,
+      brightness: scheme.brightness,
       colorScheme: scheme,
       fontFamily: _fontFamily,
       scaffoldBackgroundColor: scheme.surface,
+      canvasColor: scheme.surface,
       visualDensity: VisualDensity.adaptivePlatformDensity,
     );
 
@@ -73,14 +87,14 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
+          side: BorderSide(color: scheme.outline.withValues(alpha: 0.5)),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(54),
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
           textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -95,8 +109,8 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(54),
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary, width: 1.5),
+          foregroundColor: scheme.primary,
+          side: BorderSide(color: scheme.primary, width: 1.5),
           textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -108,7 +122,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: scheme.primary,
           textStyle: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
@@ -130,30 +144,31 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: BorderSide(color: scheme.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+          borderSide: BorderSide(color: scheme.error, width: 1.5),
         ),
-        labelStyle: const TextStyle(
-          color: AppColors.textSecondary,
+        labelStyle: TextStyle(
+          color: scheme.onSurfaceVariant,
           fontWeight: FontWeight.w500,
         ),
-        hintStyle: const TextStyle(
-          color: AppColors.textTertiary,
+        hintStyle: TextStyle(
+          color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
           fontWeight: FontWeight.w500,
         ),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: scheme.surfaceContainerHigh,
-        selectedColor: AppColors.primary,
-        labelStyle: const TextStyle(
+        selectedColor: scheme.primary,
+        labelStyle: TextStyle(
+          color: scheme.onSurface,
           fontWeight: FontWeight.w600,
           fontSize: 13,
         ),
-        secondaryLabelStyle: const TextStyle(
-          color: Colors.white,
+        secondaryLabelStyle: TextStyle(
+          color: scheme.onPrimary,
           fontWeight: FontWeight.w600,
           fontSize: 13,
         ),
@@ -163,8 +178,8 @@ class AppTheme {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
-      dividerTheme: const DividerThemeData(
-        color: AppColors.border,
+      dividerTheme: DividerThemeData(
+        color: scheme.outline,
         thickness: 1,
         space: 1,
       ),
@@ -172,7 +187,7 @@ class AppTheme {
         backgroundColor: scheme.surface,
         elevation: 0,
         height: 72,
-        indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+        indicatorColor: scheme.primary.withValues(alpha: 0.12),
         labelTextStyle: WidgetStatePropertyAll(
           TextStyle(
             fontSize: 12,
@@ -182,9 +197,10 @@ class AppTheme {
         ),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.textPrimary,
-        contentTextStyle: const TextStyle(
-          color: Colors.white,
+        // Koyu temada snackbar açık, aydınlık temada koyu göster.
+        backgroundColor: scheme.inverseSurface,
+        contentTextStyle: TextStyle(
+          color: scheme.onInverseSurface,
           fontWeight: FontWeight.w500,
         ),
         shape: RoundedRectangleBorder(
@@ -196,95 +212,96 @@ class AppTheme {
   }
 
   static TextTheme _textTheme(TextTheme base, ColorScheme scheme) {
-    const primary = AppColors.textPrimary;
-    const secondary = AppColors.textSecondary;
+    // Tema-aware: text renkleri scheme'den gelir, hardcoded token yok.
+    final onSurface = scheme.onSurface;
+    final onSurfaceVariant = scheme.onSurfaceVariant;
     return base.copyWith(
       displayLarge: base.displayLarge?.copyWith(
         fontSize: 48,
         fontWeight: FontWeight.w800,
         letterSpacing: -1.5,
-        color: primary,
+        color: onSurface,
         height: 1.1,
       ),
       displayMedium: base.displayMedium?.copyWith(
         fontSize: 36,
         fontWeight: FontWeight.w800,
         letterSpacing: -1,
-        color: primary,
+        color: onSurface,
         height: 1.15,
       ),
       displaySmall: base.displaySmall?.copyWith(
         fontSize: 28,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.5,
-        color: primary,
+        color: onSurface,
       ),
       headlineLarge: base.headlineLarge?.copyWith(
         fontSize: 24,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.4,
-        color: primary,
+        color: onSurface,
       ),
       headlineMedium: base.headlineMedium?.copyWith(
         fontSize: 20,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.3,
-        color: primary,
+        color: onSurface,
       ),
       headlineSmall: base.headlineSmall?.copyWith(
         fontSize: 18,
         fontWeight: FontWeight.w700,
-        color: primary,
+        color: onSurface,
       ),
       titleLarge: base.titleLarge?.copyWith(
         fontSize: 16,
         fontWeight: FontWeight.w700,
-        color: primary,
+        color: onSurface,
       ),
       titleMedium: base.titleMedium?.copyWith(
         fontSize: 15,
         fontWeight: FontWeight.w600,
-        color: primary,
+        color: onSurface,
       ),
       titleSmall: base.titleSmall?.copyWith(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: primary,
+        color: onSurface,
       ),
       bodyLarge: base.bodyLarge?.copyWith(
         fontSize: 16,
         fontWeight: FontWeight.w400,
         height: 1.5,
-        color: primary,
+        color: onSurface,
       ),
       bodyMedium: base.bodyMedium?.copyWith(
         fontSize: 14,
         fontWeight: FontWeight.w400,
         height: 1.5,
-        color: secondary,
+        color: onSurfaceVariant,
       ),
       bodySmall: base.bodySmall?.copyWith(
         fontSize: 12,
         fontWeight: FontWeight.w500,
         height: 1.4,
-        color: secondary,
+        color: onSurfaceVariant,
       ),
       labelLarge: base.labelLarge?.copyWith(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: primary,
+        color: onSurface,
         letterSpacing: 0.1,
       ),
       labelMedium: base.labelMedium?.copyWith(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: secondary,
+        color: onSurfaceVariant,
         letterSpacing: 0.3,
       ),
       labelSmall: base.labelSmall?.copyWith(
         fontSize: 11,
         fontWeight: FontWeight.w600,
-        color: secondary,
+        color: onSurfaceVariant,
         letterSpacing: 0.5,
       ),
     );

@@ -51,7 +51,7 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
         : reels.firstWhereOrNull((r) => r.id == _activeCommentsReelId);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0812),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Stack(
         children: [
           PageView.builder(
