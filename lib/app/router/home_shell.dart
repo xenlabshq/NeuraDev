@@ -180,8 +180,8 @@ class _FloatingBar extends StatelessWidget {
   }
 }
 
-/// Tek tab öğesi — aktif ise yumuşak iOS pill + label görünür,
-/// değilse sadece icon.
+/// Tek tab öğesi — sabit ikon boyutu, aktif/pasif renk farkı.
+/// AGENTS.md gereği sade tutarlı davranış; iOS Dock stili.
 class _PillTabItem extends StatelessWidget {
   const _PillTabItem({
     required this.item,
@@ -197,12 +197,6 @@ class _PillTabItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    // iOS Dock stili: alt barda hiçbir zaman yazı görünmez, sadece
-    // ikonlar. Aktif durum pill rengi ile (mor-pembe gradient) ifade
-    // edilir. AGENTS.md gereği ekran boyutundan bağımsız tutarlı.
-    final showLabel = false;
-
-    // Aktif renk: primary. Pasif renk: onSurfaceVariant.
     final fg = active ? scheme.onPrimary : scheme.onSurfaceVariant;
 
     return Semantics(
@@ -213,23 +207,21 @@ class _PillTabItem extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          // Pill tıklamasını yumuşat.
           highlightColor: scheme.primary.withValues(alpha: 0.08),
           splashColor: scheme.primary.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(22),
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 280),
+            duration: const Duration(milliseconds: 220),
             curve: Curves.easeOutCubic,
             margin: const EdgeInsets.symmetric(
-              horizontal: 4,
+              horizontal: 8,
               vertical: 8,
             ),
-            // Aktifken geniş, pasifte dar (veya expanded'da sabit).
-            padding: EdgeInsets.symmetric(
-              horizontal: showLabel ? 18 : 10,
-              vertical: showLabel ? 10 : 8,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
             ),
             decoration: BoxDecoration(
-              // Pill — ana renklerde yumuşak gradient.
               gradient: active
                   ? LinearGradient(
                       begin: Alignment.topLeft,
@@ -251,42 +243,10 @@ class _PillTabItem extends StatelessWidget {
                     ]
                   : null,
             ),
-            // Row(ikon + label yanda) — eski istenen layout.
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // İkon
-                Icon(
-                  active ? item.activeIcon : item.icon,
-                  color: fg,
-                  size: 24,
-                ),
-                // Label — showLabel ise göster.
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 260),
-                  curve: Curves.easeOutCubic,
-                  child: SizedBox(
-                    width: showLabel ? null : 0,
-                    height: showLabel ? null : 0,
-                    child: Padding(
-                      padding: EdgeInsets.only(left: showLabel ? 8 : 0),
-                      child: Text(
-                        item.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.visible,
-                        style: TextStyle(
-                          color: fg,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.1,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            child: Icon(
+              active ? item.activeIcon : item.icon,
+              color: fg,
+              size: 24,
             ),
           ),
         ),
