@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neuroup/app/theme/colors.dart';
 import 'package:neuroup/features/learning/domain/entities/learning_island.dart';
+import 'package:neuroup/features/learning/domain/entities/learning_memory.dart';
 import 'package:neuroup/features/learning/presentation/painters/island_block_painter.dart';
 import 'package:neuroup/features/learning/presentation/painters/isometric_camera.dart';
+import 'package:neuroup/features/learning/presentation/providers/adaptive_providers.dart';
 import 'package:neuroup/features/learning/presentation/providers/learning_providers.dart';
 import 'package:neuroup/features/learning/presentation/pages/island_detail_page.dart';
 
@@ -95,6 +97,14 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
     final hit = _hitTest(d.localPosition, islands);
     if (hit == null) return;
     if (hit.unlocked) {
+      // Zayıf ada ise önce "odaklanman gereken dersler" sheet'i göster.
+      final weakCount = ref
+          .read(adaptiveMemoryProvider.notifier)
+          .weakCountForIsland(hit.id);
+      if (weakCount > 0) {
+        _showFocusSheet(hit.id);
+        return;
+      }
       Navigator.of(context).push<Widget>(
         MaterialPageRoute<Widget>(
           builder: (_) => IslandDetailPage(islandId: hit.id),
@@ -111,6 +121,178 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
         const SnackBar(content: Text('Bu ada kilitli. Önceki adayı tamamla!')),
       );
     }
+  }
+
+  /// Zayıf ada için "odaklanman gereken dersler" bottom sheet.
+  /// Spaced repetition motorunun önerdiği node'ları sıralı gösterir.
+  void _showFocusSheet(String islandId) {
+    final island = ref.read(islandsProvider).firstWhere((i) => i.id == islandId);
+    final mems = island.nodes
+        .map((n) => ref.read(nodeMemoryProvider(n.id)))
+        .whereType<NodeMemory>()
+        .toList();
+    // Zayıf + due olan node'ları confidence'a göre sırala
+    final focused = mems.where((m) => m.isWeak || m.isDue).toList()
+      ..sort((a, b) => a.confidence.compareTo(b.confidence));
+    final recommendedId = ref
+        .read(adaptiveMemoryProvider.notifier)
+        .recommendedNodeFor(islandId);
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetCtx) {
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF1A1330), Color(0xFF221F3D)],
+              ),
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [AppColors.warning, AppColors.error],
+                        ),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text('🎯', style: TextStyle(fontSize: 24)),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Odaklanman Gereken Dersler',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          Text(
+                            island.title,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                if (focused.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      'Tüm dersler öğrenilmiş görünüyor!',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                  )
+                else
+                  ...focused.take(5).map((m) {
+                    final node = island.nodes.firstWhere((n) => n.id == m.nodeId);
+                    final isTop = m.nodeId == recommendedId;
+                    return _FocusTile(
+                      node: node,
+                      memory: m,
+                      isRecommended: isTop,
+                    );
+                  }),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white24),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(sheetCtx).pop();
+                          Navigator.of(context).push<Widget>(
+                            MaterialPageRoute<Widget>(
+                              builder: (_) => IslandDetailPage(islandId: islandId),
+                            ),
+                          );
+                        },
+                        child: const Text('Tüm Dersleri Gör'),
+                      ),
+                    ),
+                    if (recommendedId != null) ...[
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.of(sheetCtx).pop();
+                            Navigator.of(context).push<Widget>(
+                              MaterialPageRoute<Widget>(
+                                builder: (_) => IslandDetailPage(islandId: islandId),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                          label: const Text('Önerilenle Başla'),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -239,10 +421,17 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
     // y + z'ye göre sırala (arkadan öne)
     final sorted = [...islands]..sort((a, b) => (a.y + a.z).compareTo(b.y + b.z));
     final widgets = <Widget>[];
+    // Adaptive engine'den zayıf ada verilerini al
+    final weakByIsland = ref.watch(weakNodesByIslandProvider);
+    final islandStats = ref.watch(adaptiveMemoryProvider).islandStats();
     // Önce adalar
     for (final island in sorted) {
       // Sadece açık (unlocked) adalar için hover aktif.
       final hovered = (island.id == _hoveredIslandId) && island.unlocked;
+      final weakCount = weakByIsland[island.id]?.length ?? 0;
+      final stats = islandStats[island.id];
+      final isCritical = stats?.isCritical ?? false;
+      final avgConf = stats?.averageConfidence ?? 1.0;
       widgets.add(
         AnimatedScale(
           scale: island.id == _pressedIslandId ? 0.92 : 1.0,
@@ -253,6 +442,9 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
               camera: _camera,
               island: island,
               hovered: hovered,
+              weakCount: weakCount,
+              isCritical: isCritical,
+              averageConfidence: avgConf,
             ),
           ),
         ),
@@ -685,6 +877,116 @@ class _IntroStep extends StatelessWidget {
                     fontSize: 12,
                     height: 1.3,
                   ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FocusTile extends StatelessWidget {
+  const _FocusTile({
+    required this.node,
+    required this.memory,
+    required this.isRecommended,
+  });
+
+  final dynamic node;
+  final NodeMemory memory;
+  final bool isRecommended;
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = (memory.confidence * 100).round();
+    final color = isRecommended ? AppColors.warning : Colors.white;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isRecommended
+            ? AppColors.warning.withValues(alpha: 0.12)
+            : Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isRecommended
+              ? AppColors.warning.withValues(alpha: 0.4)
+              : Colors.white.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: (isRecommended ? AppColors.warning : Colors.white)
+                  .withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: Text(node.emoji as String,
+                style: const TextStyle(fontSize: 18)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        node.title as String,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (isRecommended)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 6),
+                        child: Text(
+                          '⭐ Önerilen',
+                          style: TextStyle(
+                            color: AppColors.warning,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: memory.confidence,
+                          minHeight: 6,
+                          backgroundColor: Colors.white.withValues(alpha: 0.12),
+                          valueColor: AlwaysStoppedAnimation<Color>(color),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '%$pct',
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

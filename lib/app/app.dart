@@ -27,14 +27,15 @@ class NeuroupApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       // Kullanıcı ayarlarındaki metin boyutunu sistemin font ölçeğiyle birleştir.
       builder: (context, child) {
-        // Sistem textScaler'ı clamp'leyip kendi textScale'imizle birleştir.
         final base = MediaQuery.textScalerOf(context).clamp(
           minScaleFactor: 0.85,
           maxScaleFactor: 1.3,
         );
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.linear(base.scale(14) / 14 * settings.textScale),
+            textScaler: TextScaler.linear(
+              base.scale(14) / 14 * settings.textScale,
+            ),
           ),
           child: child!,
         );

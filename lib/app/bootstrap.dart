@@ -37,17 +37,32 @@ Future<void> bootstrap(Widget Function() builder) async {
       FlutterError.onError = (details) {
         final msg = details.exceptionAsString();
         final isOverflow = msg.contains('overflowed by') ||
-            msg.contains('RenderFlex overflowed');
+            msg.contains('RenderFlex overflowed') ||
+            msg.contains('A RenderFlex overflowed');
         // Overflow hataları sarı-siyah debug göstergesini tetikler.
+        // Hepsini (büyük/küçük fark etmez) sessizce yutuyoruz.
         // Log'a yazmıyoruz — debug göstergesi de çıkmıyor.
-        if (!isOverflow) {
-          FlutterError.presentError(details);
-          LoggerService.critical(
-            'FlutterError: $msg',
-            details.exception,
-            details.stack,
-          );
+        if (isOverflow) return;
+        FlutterError.presentError(details);
+        LoggerService.critical(
+          'FlutterError: $msg',
+          details.exception,
+          details.stack,
+        );
+      };
+
+      // ErrorWidget'ı global olarak ez — widget tree'sinde render
+      // edilemeyen her şey için boş bir widget göster (sarı-siyah
+      // debug banner'ı tamamen devre dışı bırakır).
+      ErrorWidget.builder = (FlutterErrorDetails details) {
+        final msg = details.exceptionAsString();
+        if (msg.contains('overflowed by') ||
+            msg.contains('RenderFlex overflowed')) {
+          // Overflow durumunda boş boyutlu widget — hiç yer kaplamaz.
+          return const SizedBox.shrink();
         }
+        // Diğer hatalarda yine de Flutter'ın default ErrorWidget'ı.
+        return ErrorWidget(details.exception);
       };
 
       Env.load;

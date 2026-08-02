@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide ErrorHint;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/colors.dart';
 import '../../data/python_simulator.dart';
+import '../../domain/entities/error_hint.dart';
+import '../providers/adaptive_providers.dart';
 import '../providers/learning_providers.dart';
 
 class NodeEditorPage extends ConsumerStatefulWidget {
@@ -28,6 +30,7 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
   bool _running = false;
   bool _success = false;
   bool _showTutorial = true;
+  ErrorHint? _hint;
 
   @override
   void initState() {
@@ -47,7 +50,12 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
     super.dispose();
   }
 
+  DateTime? _runStartTime;
+  int _sessionAttempts = 0;
+
   void _run() {
+    if (_runStartTime == null) _runStartTime = DateTime.now();
+    _sessionAttempts++;
     setState(() {
       _running = true;
       _error = null;
@@ -55,21 +63,48 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
     });
     Future<void>.delayed(const Duration(milliseconds: 300), () {
       if (!mounted) return;
-      final result = _simulator.run(_code.text);
+      // Beklenen çıktıyı simülatöre geçir → akıllı hata analizi için.
+      final node = ref
+          .read(islandsProvider)
+          .firstWhere((i) => i.id == widget.islandId)
+          .nodes
+          .firstWhere((n) => n.id == widget.nodeId);
+      final result = _simulator.run(
+        _code.text,
+        expectedOutput: node.expectedOutput,
+      );
+      final timeMs = _runStartTime != null
+          ? DateTime.now().difference(_runStartTime!).inMilliseconds
+          : 0;
+
+      final isCorrect = result.success &&
+          result.combinedOutput.trim() == node.expectedOutput.trim();
+
       setState(() {
         _output = result.output;
         _error = result.errors.isEmpty ? null : result.errors.join('\n');
         _running = false;
-        if (result.success) {
-          final node = ref
-              .read(islandsProvider)
-              .firstWhere((i) => i.id == widget.islandId)
-              .nodes
-              .firstWhere((n) => n.id == widget.nodeId);
-          _success = result.combinedOutput.trim() == node.expectedOutput.trim();
-        }
+        _success = isCorrect;
+        _hint = result.hint; // akıllı ipucu
       });
+
+      // Adaptive engine'e deneme kaydı.
+      ref.read(adaptiveMemoryProvider.notifier).recordAttempt(
+            widget.nodeId,
+            success: result.success && isCorrect,
+            attemptsInSession: _sessionAttempts,
+            difficulty: _inferDifficulty(),
+            timeMs: timeMs,
+          );
     });
+  }
+
+  /// Kullanıcının zorluk algısını çıktıdan çıkar.
+  /// Çok deneme yaptıysa zorlanmış demektir.
+  double _inferDifficulty() {
+    if (_sessionAttempts == 0) return 0.5;
+    // 1. denemede yaptıysa kolay, 5+ denemede yaptıysa zor
+    return (_sessionAttempts / 5.0).clamp(0.0, 1.0);
   }
 
   void _showSolution() {
@@ -184,6 +219,7 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
                           running: _running,
                           success: _success,
                           expected: node.expectedOutput,
+                          hint: _hint,
                         ),
                       ),
                     ],
@@ -206,6 +242,7 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
                           running: _running,
                           success: _success,
                           expected: node.expectedOutput,
+                          hint: _hint,
                         ),
                       ),
                     ],
@@ -409,6 +446,7 @@ class _OutputPanel extends StatelessWidget {
     required this.running,
     required this.success,
     required this.expected,
+    this.hint,
   });
 
   final List<String> output;
@@ -416,6 +454,7 @@ class _OutputPanel extends StatelessWidget {
   final bool running;
   final bool success;
   final String expected;
+  final ErrorHint? hint;
 
   @override
   Widget build(BuildContext context) {
@@ -545,6 +584,11 @@ class _OutputPanel extends StatelessWidget {
                         height: 1.5,
                       ),
                     ),
+                  // Akıllı öğretmen ipucu kartı — hata veya yanlış çıktı varsa.
+                  if (hint != null) ...[
+                    const SizedBox(height: 16),
+                    _ErrorHintCard(hint: hint),
+                  ],
                   if (output.isNotEmpty && !success) ...[
                     const SizedBox(height: 16),
                     Container(
@@ -757,6 +801,145 @@ class _SuccessDialog extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Akıllı öğretmen ipucu kartı. Hata türüne göre renk + emoji + mesaj + örnek.
+class _ErrorHintCard extends StatefulWidget {
+  const _ErrorHintCard({required this.hint});
+  final ErrorHint? hint;
+
+  @override
+  State<_ErrorHintCard> createState() => _ErrorHintCardState();
+}
+
+class _ErrorHintCardState extends State<_ErrorHintCard> {
+  bool _expanded = true;
+
+  Color _bgFor(ErrorKind k) => switch (k) {
+        ErrorKind.syntax => const Color(0xFF3A1A1F),
+        ErrorKind.name => const Color(0xFF3A2A1A),
+        ErrorKind.type => const Color(0xFF2A1A3A),
+        ErrorKind.outOfBounds => const Color(0xFF3A2A1F),
+        ErrorKind.logic => const Color(0xFF3A361A),
+        ErrorKind.timeout => const Color(0xFF1A2A3A),
+        ErrorKind.zeroDivision => const Color(0xFF3A1A2A),
+        ErrorKind.empty => const Color(0xFF2A2A2A),
+        ErrorKind.unknown => const Color(0xFF2A2A2A),
+      };
+
+  Color _borderFor(ErrorKind k) => switch (k) {
+        ErrorKind.syntax => const Color(0xFFEF4444),
+        ErrorKind.name => const Color(0xFFF59E0B),
+        ErrorKind.type => const Color(0xFFA855F7),
+        ErrorKind.outOfBounds => const Color(0xFFB45309),
+        ErrorKind.logic => const Color(0xFFEAB308),
+        ErrorKind.timeout => const Color(0xFF3B82F6),
+        ErrorKind.zeroDivision => const Color(0xFFEC4899),
+        ErrorKind.empty => const Color(0xFF6B7280),
+        ErrorKind.unknown => const Color(0xFF6B7280),
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final h = widget.hint;
+    if (h == null) return const SizedBox.shrink();
+    final color = _borderFor(h.kind);
+    final bg = _bgFor(h.kind);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: bg,
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 1.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () => setState(() => _expanded = !_expanded),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+              child: Row(
+                children: [
+                  Text(h.kind.emoji, style: const TextStyle(fontSize: 18)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '💡 ${h.title}',
+                          style: TextStyle(
+                            color: color,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        if (h.lineHint != null)
+                          Text(
+                            'Yaklaşık satır: ${h.lineHint}',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.5),
+                              fontSize: 10,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    _expanded ? Icons.expand_less : Icons.expand_more,
+                    color: Colors.white60,
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_expanded)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    h.message,
+                    style: const TextStyle(
+                      color: Color(0xFFE0E0E0),
+                      fontSize: 12,
+                      height: 1.5,
+                    ),
+                  ),
+                  if (h.example != null) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.08),
+                        ),
+                      ),
+                      child: Text(
+                        h.example!,
+                        style: const TextStyle(
+                          color: Color(0xFFB8E986),
+                          fontFamily: 'monospace',
+                          fontSize: 11,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }

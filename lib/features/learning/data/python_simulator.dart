@@ -1,3 +1,5 @@
+import '../domain/entities/error_hint.dart';
+
 /// Basit Python yorumlayıcı simülasyonu.
 /// Gerçek Python çalıştırmaz — öğretici senaryoları karşılayacak kadar
 /// yeterli, güvenli ve tahmin edilebilir davranış sağlar.
@@ -14,7 +16,7 @@ class PythonSimulator {
   bool get hasError => _errors.isNotEmpty;
 
   /// Python kodunu çalıştırır, çıktıyı ve hataları döner.
-  PythonSimulatorResult run(String code) {
+  PythonSimulatorResult run(String code, {String? expectedOutput}) {
     _output.clear();
     _errors.clear();
     _variables.clear();
@@ -26,6 +28,20 @@ class PythonSimulator {
       _errors.add(e.toString());
     }
 
+    // Hata varsa veya çıktı beklenenle eşleşmiyorsa akıllı ipucu üret.
+    ErrorHint? hint;
+    if (hasError ||
+        (expectedOutput != null &&
+            expectedOutput.isNotEmpty &&
+            _output.join('\n').trim() != expectedOutput.trim())) {
+      hint = ErrorAnalyzer.analyze(
+        errors: _errors,
+        output: _output,
+        expectedOutput: expectedOutput,
+        sourceCode: code,
+      );
+    }
+
     if (_output.length > _maxOutputLines) {
       final truncated = _output.sublist(0, _maxOutputLines);
       truncated.add('... (çıktı kırpıldı)');
@@ -33,6 +49,7 @@ class PythonSimulator {
         output: truncated,
         errors: List.from(_errors),
         success: !hasError,
+        hint: hint,
       );
     }
 
@@ -40,6 +57,7 @@ class PythonSimulator {
       output: List.from(_output),
       errors: List.from(_errors),
       success: !hasError,
+      hint: hint,
     );
   }
 
@@ -650,10 +668,14 @@ class PythonSimulatorResult {
     required this.output,
     required this.errors,
     required this.success,
+    this.hint,
   });
   final List<String> output;
   final List<String> errors;
   final bool success;
+
+  /// Akıllı hata analizi sonucu — kullanıcıya öğretmen gibi ipucu verir.
+  final ErrorHint? hint;
 
   /// Çıktıyı tek string olarak (her satır newline ile).
   String get combinedOutput => output.join('\n');

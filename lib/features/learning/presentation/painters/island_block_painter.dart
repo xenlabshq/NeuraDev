@@ -14,11 +14,17 @@ class IslandBlockPainter extends CustomPainter {
     required this.camera,
     required this.island,
     this.hovered = false,
+    this.weakCount = 0,
+    this.isCritical = false,
+    this.averageConfidence = 1.0,
   });
 
   final IsometricCamera camera;
   final LearningIsland island;
   final bool hovered;
+  final int weakCount;
+  final bool isCritical;
+  final double averageConfidence;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -132,6 +138,69 @@ class IslandBlockPainter extends CustomPainter {
     canvas.drawPath(topPath, edgePaint);
     canvas.drawPath(basePath, edgePaint);
 
+    // ----- ZAYIF ADA UYARISI -----
+    // weakCount > 0 ise kırmızı kenarlık + dikkat üçgeni göster.
+    if (weakCount > 0 && !locked) {
+      // Kırmızı kenarlık glow (kritik ise daha yoğun)
+      final alertColor = isCritical
+          ? const Color(0xFFEF4444)
+          : const Color(0xFFF59E0B);
+      final alertAlpha = isCritical ? 0.85 : 0.55;
+      canvas.drawPath(
+        topPath,
+        Paint()
+          ..color = alertColor.withValues(alpha: alertAlpha)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = isCritical ? 4.0 : 2.5
+          ..maskFilter = MaskFilter.blur(
+            BlurStyle.outer,
+            isCritical ? 6 : 3,
+          ),
+      );
+
+      // Kritik ada için ekstra "!" badge sağ üstte
+      if (isCritical) {
+        final tpBadge = TextPainter(
+          text: TextSpan(
+            text: '⚠️',
+            style: TextStyle(fontSize: s * 0.35),
+          ),
+          textDirection: TextDirection.ltr,
+        );
+        tpBadge.layout();
+        tpBadge.paint(
+          canvas,
+          Offset(
+            pos.dx + s * 0.5,
+            pos.dy - s * 0.7,
+          ),
+        );
+      }
+
+      // weakCount göstergesi (küçük sayaç)
+      if (weakCount > 0) {
+        final tpCount = TextPainter(
+          text: TextSpan(
+            text: '$weakCount zayıf',
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              color: alertColor,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        );
+        tpCount.layout();
+        tpCount.paint(
+          canvas,
+          Offset(
+            pos.dx - tpCount.width / 2,
+            pos.dy + s * 0.35,
+          ),
+        );
+      }
+    }
+
     // ----- HOVER SCALE GÖLGESİ -----
     if (hovered && !locked) {
       canvas.drawPath(
@@ -222,7 +291,10 @@ class IslandBlockPainter extends CustomPainter {
   bool shouldRepaint(covariant IslandBlockPainter old) =>
       old.camera != camera ||
       old.island != island ||
-      old.hovered != hovered;
+      old.hovered != hovered ||
+      old.weakCount != weakCount ||
+      old.isCritical != isCritical ||
+      old.averageConfidence != averageConfidence;
 }
 
 /// Adalar arası ahşap yol çizgisi çizer.
