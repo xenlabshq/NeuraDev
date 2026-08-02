@@ -218,8 +218,8 @@ class _PillTabItem extends StatelessWidget {
             ),
             // Aktifken daha ferah padding (geniş pill), pasifte sıkı.
             padding: EdgeInsets.symmetric(
-              horizontal: active ? 16 : 8,
-              vertical: active ? 8 : 6,
+              horizontal: active ? 18 : 10,
+              vertical: active ? 10 : 8,
             ),
             decoration: BoxDecoration(
               // Pill — ana renklerde yumuşak gradient.
@@ -244,36 +244,36 @@ class _PillTabItem extends StatelessWidget {
                     ]
                   : null,
             ),
-            // Dikey (Column): ikon üstte, etiket altta — iOS standart
-            // alt-bar tasarımına uygun.
-            child: Column(
+            // Yatay (Row): ikon yanda — eski istenen layout.
+            // Aktif ise pill genişler + label açılır (soldan sağa animasyon).
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // İkon — sabit boyut (animasyonda kayma olmaz)
+                // İkon
                 Icon(
                   active ? item.activeIcon : item.icon,
                   color: fg,
-                  size: 22,
+                  size: 24,
                 ),
-                // Etiket — aktifken yumuşak aç/kapa animasyonu.
+                // Label — aktifle AnimatedSize ile açılır.
                 AnimatedSize(
-                  duration: const Duration(milliseconds: 240),
+                  duration: const Duration(milliseconds: 260),
                   curve: Curves.easeOutCubic,
+                  // Pasif durumda tamamen collapsed — pill daralır.
                   child: SizedBox(
                     width: active ? null : 0,
                     height: active ? null : 0,
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 2),
+                      padding: EdgeInsets.only(left: active ? 8 : 0),
                       child: Text(
                         item.label,
                         style: TextStyle(
                           color: fg,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
                           letterSpacing: -0.1,
-                          height: 1.0,
                         ),
                       ),
                     ),
