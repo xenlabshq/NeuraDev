@@ -13,6 +13,23 @@ import 'package:neuroup/shared/models/user_profile.dart';
 import 'package:neuroup/shared/utils/layout_helper.dart';
 import 'package:neuroup/shared/widgets/level_frame.dart';
 
+/// Tema-aware erişim: context'ten scheme alarak hardcoded token
+/// yerine `Theme.of(context)` döndürür.
+extension AppColorsTextX on AppColors {
+  static Color textPrimary(BuildContext c) =>
+      Theme.of(c).colorScheme.onSurface;
+  static Color textSecondary(BuildContext c) =>
+      Theme.of(c).colorScheme.onSurfaceVariant;
+  static Color textTertiary(BuildContext c) =>
+      Theme.of(c).colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
+  static Color border(BuildContext c) =>
+      Theme.of(c).colorScheme.outline;
+  static Color surface(BuildContext c) =>
+      Theme.of(c).colorScheme.surface;
+  static Color surfaceAlt(BuildContext c) =>
+      Theme.of(c).colorScheme.surfaceContainerHigh;
+}
+
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
@@ -174,8 +191,8 @@ class _ProfileHeader extends StatelessWidget {
                       const SizedBox(height: 12),
                       Text(
                         user.displayName,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.surface,
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.4,
@@ -223,10 +240,10 @@ class _LevelCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: AppColors.border.withValues(alpha: 0.5),
+          color: AppColorsTextX.border(context).withValues(alpha: 0.5),
         ),
         boxShadow: [
           BoxShadow(
@@ -258,8 +275,8 @@ class _LevelCard extends ConsumerWidget {
                     const SizedBox(width: 4),
                     Text(
                       level.tier.label.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.surface,
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1.2,
@@ -271,10 +288,10 @@ class _LevelCard extends ConsumerWidget {
               const Spacer(),
               Text(
                 'Seviye ${level.level}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary,
+                  color: AppColorsTextX.textSecondary(context),
                 ),
               ),
             ],
@@ -296,10 +313,10 @@ class _LevelCard extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Text(
                   '/ ${level.xpForNextLevel} XP',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+                    color: AppColorsTextX.textSecondary(context),
                   ),
                 ),
               ),
@@ -315,7 +332,7 @@ class _LevelCard extends ConsumerWidget {
               builder: (_, value, __) => LinearProgressIndicator(
                 value: value,
                 minHeight: 10,
-                backgroundColor: AppColors.surfaceAlt,
+                backgroundColor: AppColorsTextX.surfaceAlt(context),
                 valueColor: AlwaysStoppedAnimation<Color>(level.tier.color),
               ),
             ),
@@ -323,10 +340,10 @@ class _LevelCard extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             'Sonraki seviyeye ${level.xpToNext} XP kaldı',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              color: AppColorsTextX.textSecondary(context),
             ),
           ),
           const SizedBox(height: 16),
@@ -345,7 +362,7 @@ class _LevelCard extends ConsumerWidget {
               Container(
                 width: 1,
                 height: 40,
-                color: AppColors.border,
+                color: AppColorsTextX.border(context),
               ),
               Expanded(
                 child: _Stat(
@@ -358,7 +375,7 @@ class _LevelCard extends ConsumerWidget {
               Container(
                 width: 1,
                 height: 40,
-                color: AppColors.border,
+                color: AppColorsTextX.border(context),
               ),
               Expanded(
                 child: _Stat(
@@ -404,10 +421,10 @@ class _Stat extends StatelessWidget {
         ),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
+            color: AppColorsTextX.textSecondary(context),
           ),
         ),
       ],
@@ -634,7 +651,7 @@ class _SettingsSection extends ConsumerWidget {
         icon: Icons.info_outline_rounded,
         title: 'Hakkında',
         subtitle: 'Sürüm 1.0.0',
-        color: AppColors.textSecondary,
+        color: AppColorsTextX.textSecondary(context),
         onTap: () => _showAbout(context),
       ),
       if (user.email != 'demo@neuroup.app')
@@ -650,7 +667,7 @@ class _SettingsSection extends ConsumerWidget {
         icon: Icons.refresh_rounded,
         title: 'İlerlemeyi Sıfırla',
         subtitle: 'Tüm ada/node ilerlemesini sıfırlar',
-        color: AppColors.textTertiary,
+        color: AppColorsTextX.textTertiary(context),
         onTap: () => _confirmResetProgress(context, ref),
       ),
     ];
@@ -658,10 +675,10 @@ class _SettingsSection extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
         border: Border.all(
-          color: AppColors.border.withValues(alpha: 0.5),
+          color: AppColorsTextX.border(context).withValues(alpha: 0.5),
         ),
       ),
       child: Column(
@@ -673,7 +690,7 @@ class _SettingsSection extends ConsumerWidget {
                 padding: const EdgeInsets.only(left: 56),
                 child: Divider(
                   height: 1,
-                  color: AppColors.border.withValues(alpha: 0.5),
+                  color: AppColorsTextX.border(context).withValues(alpha: 0.5),
                 ),
               ),
           ],
@@ -710,7 +727,7 @@ class _SettingsSection extends ConsumerWidget {
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(28),
             ),
             child: Column(
@@ -801,7 +818,7 @@ class _SettingsSection extends ConsumerWidget {
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(28),
             ),
             child: Column(
@@ -876,7 +893,7 @@ class _SettingsSection extends ConsumerWidget {
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(28),
             ),
             child: Column(
@@ -953,7 +970,7 @@ class _SettingsSection extends ConsumerWidget {
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(28),
             ),
             child: Column(
@@ -1032,9 +1049,9 @@ class _SettingsSection extends ConsumerWidget {
           minChildSize: 0.4,
           maxChildSize: 0.95,
           builder: (_, scrollCtrl) => Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             ),
             child: Column(
               children: [
@@ -1043,7 +1060,7 @@ class _SettingsSection extends ConsumerWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.border,
+                    color: AppColorsTextX.border(context),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -1097,11 +1114,11 @@ class _SettingsSection extends ConsumerWidget {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
+      builder: (ctx) => Container(
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        decoration: BoxDecoration(
+          color: Theme.of(ctx).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1112,7 +1129,7 @@ class _SettingsSection extends ConsumerWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.border,
+                  color: AppColorsTextX.border(context),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
