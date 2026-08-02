@@ -197,10 +197,11 @@ class _PillTabItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    // Tablet+ boyutlarında geniş layout → tüm tab'lar etiketli.
-    // Telefon boyutunda → sadece aktif tab etiketli (kompakt).
-    final isExpanded = LayoutHelper.isExpandedLayout(context);
-    final showLabel = isExpanded || active;
+    // Sadece aktif tab'ın etiketini göster — kompakt iOS stili.
+    // Telefon ve tablet'te aynı davranış: pasif tab'lar sadece ikon.
+    // (Geniş ekranda ayrı bir "label always visible" varyantı
+    // buradan türetilebilir — şimdilik tutarlı davranış tercih edildi.)
+    final showLabel = active;
 
     // Aktif renk: primary. Pasif renk: onSurfaceVariant.
     final fg = active ? scheme.onPrimary : scheme.onSurfaceVariant;

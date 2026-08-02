@@ -73,20 +73,17 @@ class ProfilePage extends ConsumerWidget {
                     children: [
                       _LevelCard(user: effectiveUser),
                       const SizedBox(height: 16),
+                      // Level + Rozet kart'ı (entegre). Ayarlar kartı ayrı.
+                      _LevelCard(user: effectiveUser),
                       if (isWide)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Expanded(child: _BadgesSection()),
-                            const SizedBox(width: 12),
-                            Expanded(child: _SettingsSection(user: effectiveUser)),
-                          ],
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: _SettingsSection(user: effectiveUser),
                         )
-                      else ...[
-                        const _BadgesSection(),
+                      else
                         const SizedBox(height: 16),
+                      if (!isWide)
                         _SettingsSection(user: effectiveUser),
-                      ],
                       const SizedBox(height: 96),
                     ],
                   ),
@@ -234,6 +231,10 @@ class _LevelCard extends ConsumerWidget {
 
     final totalNodes = islands.fold<int>(0, (s, i) => s + i.totalNodes);
     final completedNodes = progress.completedNodeIds.length;
+    final unlocks = ref.watch(badgeUnlocksProvider);
+    final unlockedCount = unlocks.length;
+
+    final isExpanded = LayoutHelper.isExpandedLayout(context);
 
     final level = UserLevel(
       level: user.level,
@@ -260,6 +261,7 @@ class _LevelCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Üst satır: tier chip + seviye (compact ise sadece chip)
           Row(
             children: [
               Container(
@@ -289,7 +291,7 @@ class _LevelCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Text(
                 'Seviye ${level.level}',
                 style: TextStyle(
@@ -298,9 +300,31 @@ class _LevelCard extends ConsumerWidget {
                   color: AppColorsTextX.textSecondary(context),
                 ),
               ),
+              const Spacer(),
+              // Rozet sayacı (kompakt pill)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '🏅 $unlockedCount / ${Badges.all.length}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
+          // XP + Progress
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -350,9 +374,8 @@ class _LevelCard extends ConsumerWidget {
               color: AppColorsTextX.textSecondary(context),
             ),
           ),
-          const SizedBox(height: 16),
-          const Divider(),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
+          // İstatistikler (Streak / Tamamlanan / Toplam)
           Row(
             children: [
               Expanded(
@@ -391,7 +414,141 @@ class _LevelCard extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          // Rozetin YATAY scroll listesi — telefon için kompakt,
+          // grid overflow sorununu ortadan kaldırır çünkü scroll
+          // kendi overflow yönetimini yapar.
+          Row(
+            children: [
+              Text(
+                'Rozetler',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: AppColorsTextX.textPrimary(context),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Compact'ta debug butonunu gizle (sığmaz), tablet+ göster.
+              if (isExpanded &&
+                  unlockedCount < Badges.all.length) ...[
+                const SizedBox(width: 4),
+                TextButton(
+                  onPressed: () => ref
+                      .read(badgeUnlockProvider.notifier)
+                      .unlockAll(),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 0),
+                    minimumSize: const Size(0, 28),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  child: Text(
+                    'Tümünü aç',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColorsTextX.textTertiary(context),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 86, // kompakt sabit yükseklik — overflow'a yer yok.
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: Badges.all.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (_, i) {
+                final b = Badges.all[i];
+                final isUnlocked = unlocks.containsKey(b.id);
+                return _BadgeMini(
+                  template: b,
+                  isUnlocked: isUnlocked,
+                );
+              },
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+/// Kompakt rozet — listede tek sıra. Sadece daire + emoji;
+/// Tooltip ile rozet adı + açıklaması gösterir.
+class _BadgeMini extends StatelessWidget {
+  const _BadgeMini({
+    required this.template,
+    required this.isUnlocked,
+  });
+
+  final BadgeTemplate template;
+  final bool isUnlocked;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = AppColors.tokensOf(context);
+    final tokenscheme = Theme.of(context).colorScheme;
+    return Tooltip(
+      message: isUnlocked
+          ? '${template.name}: ${template.description}'
+          : 'Henüz kazanılmadı: ${template.description}',
+      child: Container(
+        width: 70,
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: isUnlocked
+              ? template.color.withValues(alpha: 0.15)
+              : tokens.surfaceAlt,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isUnlocked
+                ? template.color.withValues(alpha: 0.7)
+                : tokens.border.withValues(alpha: 0.5),
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Opacity(
+              opacity: isUnlocked ? 1 : 0.4,
+              child: Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isUnlocked
+                      ? template.color.withValues(alpha: 0.18)
+                      : tokenscheme.surfaceContainerHigh,
+                ),
+                child: Text(
+                  template.emoji ?? '🏅',
+                  style: const TextStyle(fontSize: 22),
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              template.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
+                color: isUnlocked
+                    ? tokens.textPrimary
+                    : tokens.textTertiary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -430,176 +587,6 @@ class _Stat extends StatelessWidget {
             fontWeight: FontWeight.w600,
             color: AppColorsTextX.textSecondary(context),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class _BadgesSection extends ConsumerWidget {
-  const _BadgesSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tokens = AppColors.tokensOf(context);
-    final unlocks = ref.watch(badgeUnlocksProvider);
-    final unlockedCount = unlocks.length;
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: tokens.surface,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(
-          color: tokens.border.withValues(alpha: 0.5),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: tokens.shadow.withValues(alpha: 0.5),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                'Rozetler',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: tokens.textPrimary,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  '$unlockedCount / ${Badges.all.length}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          GridView.count(
-            crossAxisCount: 4,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            // Aspect 0.62 = her hücre (genişlik≈73) için 73/0.62 ≈ 117 px.
-            // Bu yükseklik AspectRatio 73 + 6 spacer + 2-satır Text (~26 px)
-            // = 105 px + güvenlik marjı. 0.7 ile 4 px overflow
-            // hata veriyordu (hücre 104 px ama içerik 105 px).
-            childAspectRatio: 0.62,
-            children: Badges.all.map((b) {
-              final isUnlocked = unlocks.containsKey(b.id);
-              final unlockedAt = unlocks[b.id];
-              return _BadgeTile(
-                template: b,
-                isUnlocked: isUnlocked,
-                unlockedAt: unlockedAt,
-              );
-            }).toList(),
-          ),
-          if (unlockedCount < Badges.all.length) ...[
-            const SizedBox(height: 12),
-            Center(
-              child: TextButton.icon(
-                onPressed: () => ref
-                    .read(badgeUnlockProvider.notifier)
-                    .unlockAll(),
-                icon: const Icon(Icons.bolt_outlined, size: 16),
-                label: const Text('Debug: tüm rozetleri aç'),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _BadgeTile extends StatelessWidget {
-  const _BadgeTile({
-    required this.template,
-    required this.isUnlocked,
-    this.unlockedAt,
-  });
-  final BadgeTemplate template;
-  final bool isUnlocked;
-  final DateTime? unlockedAt;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = AppColors.tokensOf(context);
-    return Column(
-      children: [
-        AspectRatio(
-          aspectRatio: 1,
-          child: Tooltip(
-            message: isUnlocked
-                ? '${template.name}: ${template.description}'
-                : 'Henüz kazanılmadı: ${template.description}',
-            child: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isUnlocked
-                  ? template.color.withValues(alpha: 0.18)
-                  : tokens.surfaceAlt,
-              border: Border.all(
-                color: isUnlocked ? template.color : tokens.border,
-                width: isUnlocked ? 2 : 1,
-              ),
-              boxShadow: isUnlocked
-                  ? [
-                      BoxShadow(
-                        color: template.color.withValues(alpha: 0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : null,
-            ),
-            alignment: Alignment.center,
-            child: Opacity(
-              opacity: isUnlocked ? 1 : 0.35,
-              child: Text(
-                template.emoji ?? '🏅',
-                style: const TextStyle(fontSize: 28),
-              ),
-            ),
-          ),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          template.name,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            color:
-                isUnlocked ? tokens.textPrimary : tokens.textTertiary,
-          ),
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
