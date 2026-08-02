@@ -3,9 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../theme/colors.dart';
-
-/// Bottom navigation bar yüksekliği px (çubuk + margin + safe area).
+/// Bottom navigation bar için ayrılan toplam yükseklik
+/// (margin + bar içerik + alt safe area).
 const double kBottomBarHeight = 84;
 
 class HomeShell extends StatelessWidget {
@@ -59,19 +58,24 @@ class HomeShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
     final index = _indexFor(location);
-    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      // extendBody=false → içerik otomatik olarak bottom nav'ın
-      // üstünde biter. Cam efekt için bar transparan + blur, görsel
-      // olarak içeriden bağımsız.
-      body: child,
-      extendBody: false,
-      bottomNavigationBar: _GlassBottomBar(
-        items: _tabs,
-        currentIndex: index,
-        backgroundColor: scheme.surface.withValues(alpha: 0.78),
-        onTap: (i) => context.go(_tabs[i].route),
+      // extendBody=true → child barın altına uzanır (orada
+      // padding ile biz korumaya alıyoruz). Stack'in konumlandırması
+      // böylece bar yüzer halde görünür.
+      body: Stack(
+        children: [
+          Positioned.fill(child: child),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _FloatingBar(
+              items: _tabs,
+              currentIndex: index,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -90,43 +94,63 @@ class _TabItem {
   final String label;
 }
 
-/// iOS tarzı cam efektli alt bar.
-class _GlassBottomBar extends StatelessWidget {
-  const _GlassBottomBar({
+/// iOS-style floating tab bar — ekranın altından 12 px yukarıda,
+/// mobil için 16 px yan marj, içeride yumuşak cam efekt + pill indicator.
+class _FloatingBar extends StatelessWidget {
+  const _FloatingBar({
     required this.items,
     required this.currentIndex,
-    required this.onTap,
-    required this.backgroundColor,
   });
 
   final List<_TabItem> items;
   final int currentIndex;
-  final ValueChanged<int> onTap;
-  final Color backgroundColor;
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Glass tint: dark mode'da hafif açık overlay (cam hissi), light
+    // mode'da hafif koyu overlay (okunabilir contrast).
+    final glassColor = isDark
+        ? scheme.surface.withValues(alpha: 0.55)
+        : scheme.surface.withValues(alpha: 0.7);
+
     return SafeArea(
       top: false,
+      // SafeArea(insets) Accounta ek, ek 0 kullanıyoruz çünkü
+      // tüm platform'larda zaten ekrandan biraz yukarıda konumlandır.
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(32),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-            child: Container(
-              height: 60,
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              height: 64,
               decoration: BoxDecoration(
-                color: backgroundColor,
-                borderRadius: BorderRadius.circular(24),
+                color: glassColor,
                 border: Border.all(
-                  color: AppColors.border.withValues(alpha: 0.6),
+                  color: scheme.outline.withValues(alpha: 0.3),
+                  width: 0.5,
                 ),
+                borderRadius: BorderRadius.circular(32),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
+                    // Floating shadow
+                    color: Colors.black.withValues(
+                      alpha: isDark ? 0.4 : 0.16,
+                    ),
+                    blurRadius: 32,
+                    offset: const Offset(0, 12),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(
+                      alpha: isDark ? 0.25 : 0.08,
+                    ),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
@@ -134,10 +158,10 @@ class _GlassBottomBar extends StatelessWidget {
                 children: [
                   for (var i = 0; i < items.length; i++)
                     Expanded(
-                      child: _BarItem(
+                      child: _PillTabItem(
                         item: items[i],
                         active: i == currentIndex,
-                        onTap: () => onTap(i),
+                        onTap: () => _onTap(context, items[i].route),
                       ),
                     ),
                 ],
@@ -148,52 +172,111 @@ class _GlassBottomBar extends StatelessWidget {
       ),
     );
   }
+
+  void _onTap(BuildContext context, String route) {
+    context.go(route);
+  }
 }
 
-class _BarItem extends StatelessWidget {
-  const _BarItem({
+/// Tek tab öğesi — aktif ise yumuşak iOS pill + label görünür,
+/// değilse sadece icon.
+class _PillTabItem extends StatelessWidget {
+  const _PillTabItem({
     required this.item,
     required this.active,
     required this.onTap,
   });
+
   final _TabItem item;
   final bool active;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? AppColors.primary : AppColors.textTertiary;
-    return Tooltip(
-      message: item.label,
+    final scheme = Theme.of(context).colorScheme;
+
+    // Aktif renk: primary. Pasif renk: onSurfaceVariant.
+    final fg = active ? scheme.onPrimary : scheme.onSurfaceVariant;
+
+    return Semantics(
+      label: item.label,
+      selected: active,
+      button: true,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
           onTap: onTap,
-          child: Center(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 240),
-              curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                gradient: active ? AppColors.primaryGradient : null,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: active
-                    ? [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.35),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Icon(
-                active ? item.activeIcon : item.icon,
-                color: active ? Colors.white : color,
-                size: 24,
-              ),
+          // Pill tıklamasını yumuşat.
+          highlightColor: scheme.primary.withValues(alpha: 0.08),
+          splashColor: scheme.primary.withValues(alpha: 0.12),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 280),
+            curve: Curves.easeOutCubic,
+            margin: const EdgeInsets.symmetric(
+              horizontal: 4,
+              vertical: 8,
+            ),
+            padding: EdgeInsets.symmetric(horizontal: active ? 12 : 8),
+            decoration: BoxDecoration(
+              // Pill — ana renklerde yumuşak gradient.
+              gradient: active
+                  ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        scheme.primary,
+                        scheme.secondary,
+                      ],
+                    )
+                  : null,
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: active
+                  ? [
+                      BoxShadow(
+                        color: scheme.primary.withValues(alpha: 0.35),
+                        blurRadius: 14,
+                        offset: const Offset(0, 6),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // İkon
+                Icon(
+                  active ? item.activeIcon : item.icon,
+                  color: fg,
+                  size: 24,
+                ),
+                // Aktif ise label'ı yumuşak aç/kapa animasyonu ile
+                // göster (iOS "slide + fade" animasyonu).
+                ClipRect(
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 240),
+                    curve: Curves.easeOutCubic,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (active) ...[
+                          const SizedBox(width: 6),
+                          Text(
+                            item.label,
+                            style: TextStyle(
+                              color: fg,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.1,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
