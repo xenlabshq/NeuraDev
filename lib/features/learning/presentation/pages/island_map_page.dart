@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:neuroup/app/router/home_shell.dart' show kBottomBarHeight;
 import 'package:neuroup/app/theme/colors.dart';
 import 'package:neuroup/features/learning/domain/entities/learning_island.dart';
 import 'package:neuroup/features/learning/domain/entities/learning_memory.dart';
@@ -47,10 +48,21 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => _MapIntroSheet(
-        islands: islands,
-        onDismiss: () {},
+      // Bottom sheet içeriği floating barın altına sızmasın.
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.7,
       ),
+      builder: (sheetCtx) {
+        final bottomClearance = MediaQuery.viewPaddingOf(sheetCtx).bottom +
+            kBottomBarHeight;
+        return Padding(
+          padding: EdgeInsets.only(bottom: bottomClearance - 16),
+          child: _MapIntroSheet(
+            islands: islands,
+            onDismiss: () => Navigator.of(sheetCtx).pop(),
+          ),
+        );
+      },
     );
   }
 
@@ -147,11 +159,16 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
         maxHeight: MediaQuery.sizeOf(context).height * 0.75,
       ),
       builder: (sheetCtx) {
+        // Alt navigation bar 84 px + safe area (gesture indicator).
+        // toplamını alt marj olarak ekleyerek sheet floating bar'ın
+        // altına sızmasını engelle.
+        final bottomClearance = MediaQuery.viewPaddingOf(sheetCtx).bottom +
+            kBottomBarHeight;
         return SafeArea(
           child: SingleChildScrollView(
             child: Container(
-              margin: const EdgeInsets.fromLTRB(12, 0, 12, 16),
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
+              margin: EdgeInsets.fromLTRB(12, 0, 12, bottomClearance),
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,

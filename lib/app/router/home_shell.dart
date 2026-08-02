@@ -216,7 +216,11 @@ class _PillTabItem extends StatelessWidget {
               horizontal: 4,
               vertical: 8,
             ),
-            padding: EdgeInsets.symmetric(horizontal: active ? 12 : 8),
+            // Aktifken daha ferah padding (geniş pill), pasifte sıkı.
+            padding: EdgeInsets.symmetric(
+              horizontal: active ? 16 : 8,
+              vertical: active ? 8 : 6,
+            ),
             decoration: BoxDecoration(
               // Pill — ana renklerde yumuşak gradient.
               gradient: active
@@ -233,46 +237,45 @@ class _PillTabItem extends StatelessWidget {
               boxShadow: active
                   ? [
                       BoxShadow(
-                        color: scheme.primary.withValues(alpha: 0.35),
-                        blurRadius: 14,
-                        offset: const Offset(0, 6),
+                        color: scheme.primary.withValues(alpha: 0.4),
+                        blurRadius: 18,
+                        offset: const Offset(0, 8),
                       ),
                     ]
                   : null,
             ),
-            child: Row(
+            // Dikey (Column): ikon üstte, etiket altta — iOS standart
+            // alt-bar tasarımına uygun.
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // İkon
+                // İkon — sabit boyut (animasyonda kayma olmaz)
                 Icon(
                   active ? item.activeIcon : item.icon,
                   color: fg,
-                  size: 24,
+                  size: 22,
                 ),
-                // Aktif ise label'ı yumuşak aç/kapa animasyonu ile
-                // göster (iOS "slide + fade" animasyonu).
-                ClipRect(
-                  child: AnimatedSize(
-                    duration: const Duration(milliseconds: 240),
-                    curve: Curves.easeOutCubic,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (active) ...[
-                          const SizedBox(width: 6),
-                          Text(
-                            item.label,
-                            style: TextStyle(
-                              color: fg,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.1,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                        ],
-                      ],
+                // Etiket — aktifken yumuşak aç/kapa animasyonu.
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 240),
+                  curve: Curves.easeOutCubic,
+                  child: SizedBox(
+                    width: active ? null : 0,
+                    height: active ? null : 0,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        item.label,
+                        style: TextStyle(
+                          color: fg,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.1,
+                          height: 1.0,
+                        ),
+                      ),
                     ),
                   ),
                 ),
