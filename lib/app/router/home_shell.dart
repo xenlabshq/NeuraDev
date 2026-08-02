@@ -197,11 +197,10 @@ class _PillTabItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    // Sadece aktif tab'ın etiketini göster — kompakt iOS stili.
-    // Telefon ve tablet'te aynı davranış: pasif tab'lar sadece ikon.
-    // (Geniş ekranda ayrı bir "label always visible" varyantı
-    // buradan türetilebilir — şimdilik tutarlı davranış tercih edildi.)
-    final showLabel = active;
+    // iOS Dock stili: alt barda hiçbir zaman yazı görünmez, sadece
+    // ikonlar. Aktif durum pill rengi ile (mor-pembe gradient) ifade
+    // edilir. AGENTS.md gereği ekran boyutundan bağımsız tutarlı.
+    final showLabel = false;
 
     // Aktif renk: primary. Pasif renk: onSurfaceVariant.
     final fg = active ? scheme.onPrimary : scheme.onSurfaceVariant;

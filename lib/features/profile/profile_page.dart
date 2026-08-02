@@ -234,8 +234,6 @@ class _LevelCard extends ConsumerWidget {
     final unlocks = ref.watch(badgeUnlocksProvider);
     final unlockedCount = unlocks.length;
 
-    final isExpanded = LayoutHelper.isExpandedLayout(context);
-
     final level = UserLevel(
       level: user.level,
       currentXp: user.xp,
@@ -298,27 +296,6 @@ class _LevelCard extends ConsumerWidget {
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: AppColorsTextX.textSecondary(context),
-                ),
-              ),
-              const Spacer(),
-              // Rozet sayacı (kompakt pill)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  '🏅 $unlockedCount / ${Badges.all.length}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
                 ),
               ),
             ],
@@ -415,50 +392,11 @@ class _LevelCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          // Rozetin YATAY scroll listesi — telefon için kompakt,
-          // grid overflow sorununu ortadan kaldırır çünkü scroll
-          // kendi overflow yönetimini yapar.
-          Row(
-            children: [
-              Text(
-                'Rozetler',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: AppColorsTextX.textPrimary(context),
-                ),
-              ),
-              const SizedBox(width: 8),
-              // Compact'ta debug butonunu gizle (sığmaz), tablet+ göster.
-              if (isExpanded &&
-                  unlockedCount < Badges.all.length) ...[
-                const SizedBox(width: 4),
-                TextButton(
-                  onPressed: () => ref
-                      .read(badgeUnlockProvider.notifier)
-                      .unlockAll(),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 0),
-                    minimumSize: const Size(0, 28),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  child: Text(
-                    'Tümünü aç',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: AppColorsTextX.textTertiary(context),
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: 8),
+          // Yatay scroll rozet listesi — telefonda kompakt, başlık
+          // yok (sadece daireler). AGENTS.md gereği dinamik yükseklik
+          // yerine sabit 86 px kullanılır (overflow riski yok).
           SizedBox(
-            height: 86, // kompakt sabit yükseklik — overflow'a yer yok.
+            height: 86,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: Badges.all.length,
