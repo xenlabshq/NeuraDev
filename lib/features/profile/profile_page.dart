@@ -499,7 +499,9 @@ class _BadgesSection extends ConsumerWidget {
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            childAspectRatio: 0.8,
+            // Aspect 0.7 = her hücre (genişlik=80) için 80/0.7 ~ 114 px.
+            // Bu yükseklik AspectRatio 80 + aralık + 2-satır Text için yeterli.
+            childAspectRatio: 0.7,
             children: Badges.all.map((b) {
               final isUnlocked = unlocks.containsKey(b.id);
               final unlockedAt = unlocks[b.id];

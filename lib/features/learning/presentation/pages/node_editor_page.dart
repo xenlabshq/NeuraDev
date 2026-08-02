@@ -210,7 +210,11 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
       ),
       body: Column(
         children: [
-          if (_showTutorial)
+          // Klavye açıldığında (viewInsets.bottom > 0) tutorial'i gizle.
+          // Küçük ekranda aynı anda tutorial + minLines:8 editor + klavye
+          // olamaz; tutorial RenderFlex overflow'a neden olur.
+          if (_showTutorial &&
+              MediaQuery.viewInsetsOf(context).bottom == 0)
             _TutorialPanel(
               tutorial: node.tutorial,
               onClose: () => setState(() => _showTutorial = false),
@@ -287,7 +291,12 @@ class _TutorialPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+      // Maksimum yükseklik (ekranın %40'ı) — uzun tutorial metinleri
+      // bu sınırı aştığında scroll edilir. Bu sayede küçük ekranda
+      // editor + output alanı sıkışmaz.
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.4,
+      ),
       decoration: BoxDecoration(
         color: const Color(0xFF1E1E1E),
         border: Border(
@@ -297,39 +306,48 @@ class _TutorialPanel extends StatelessWidget {
         ),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.lightbulb_rounded, color: AppColors.gold, size: 18),
-              const SizedBox(width: 6),
-              const Text(
-                'EĞİTİM',
-                style: TextStyle(
-                  color: AppColors.gold,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
+            child: Row(
+              children: [
+                const Icon(Icons.lightbulb_rounded, color: AppColors.gold, size: 18),
+                const SizedBox(width: 6),
+                const Text(
+                  'EĞİTİM',
+                  style: TextStyle(
+                    color: AppColors.gold,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1,
+                  ),
                 ),
-              ),
-              const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.close_rounded,
-                    color: Colors.white70, size: 18),
-                onPressed: onClose,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded,
+                      color: Colors.white70, size: 18),
+                  onPressed: onClose,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 6),
-          Text(
-            tutorial,
-            style: const TextStyle(
-              color: Color(0xFFD4D4D4),
-              fontFamily: 'monospace',
-              fontSize: 12,
-              height: 1.5,
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Text(
+                tutorial,
+                style: const TextStyle(
+                  color: Color(0xFFD4D4D4),
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                  height: 1.5,
+                ),
+              ),
             ),
           ),
         ],

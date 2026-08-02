@@ -39,10 +39,21 @@ Future<void> bootstrap(Widget Function() builder) async {
         final isOverflow = msg.contains('overflowed by') ||
             msg.contains('RenderFlex overflowed') ||
             msg.contains('A RenderFlex overflowed');
-        // Overflow hataları sarı-siyah debug göstergesini tetikler.
-        // Hepsini (büyük/küçük fark etmez) sessizce yutuyoruz.
-        // Log'a yazmıyoruz — debug göstergesi de çıkmıyor.
-        if (isOverflow) return;
+        if (isOverflow) {
+          // Sadece küçük (1-3 px) rounding hatalarını bastır.
+          // 4+ px olan gerçek overflow AGENTS.md gereği loglanmalı.
+          final pixels = _extractOverflowPixels(msg);
+          if (pixels != null && pixels <= 3) {
+            return;
+          }
+          FlutterError.presentError(details);
+          LoggerService.critical(
+            'Overflow ${pixels ?? '?'}px: $msg',
+            details.exception,
+            details.stack,
+          );
+          return;
+        }
         FlutterError.presentError(details);
         LoggerService.critical(
           'FlutterError: $msg',
@@ -51,17 +62,17 @@ Future<void> bootstrap(Widget Function() builder) async {
         );
       };
 
-      // ErrorWidget'ı global olarak ez — widget tree'sinde render
-      // edilemeyen her şey için boş bir widget göster (sarı-siyah
-      // debug banner'ı tamamen devre dışı bırakır).
+      // ErrorWidget'ı global olarak ez. 1-3 px overflow dışındaki
+      // (>=4 px gerçek hata) ErrorWidget'ı default bırak ki görünür olsun.
       ErrorWidget.builder = (FlutterErrorDetails details) {
         final msg = details.exceptionAsString();
         if (msg.contains('overflowed by') ||
             msg.contains('RenderFlex overflowed')) {
-          // Overflow durumunda boş boyutlu widget — hiç yer kaplamaz.
-          return const SizedBox.shrink();
+          final pixels = _extractOverflowPixels(msg);
+          if (pixels != null && pixels <= 3) {
+            return const SizedBox.shrink();
+          }
         }
-        // Diğer hatalarda yine de Flutter'ın default ErrorWidget'ı.
         return ErrorWidget(details.exception);
       };
 
@@ -95,4 +106,15 @@ Future<void> bootstrap(Widget Function() builder) async {
       LoggerService.critical('Uncaught zone error', error, stack);
     },
   );
+}
+
+/// RenderFlex overflow mesajından piksel sayısını çıkarır.
+/// "overflowed by 5 pixels" → 5. "overflowed by 12.3 pixels" → 12 (yuvarlama).
+/// Bulunamazsa null döner — bu durumda caller güvenli tarafta kalır
+/// (4+ kabul edip loglar).
+int? _extractOverflowPixels(String message) {
+  final pattern = RegExp(r'overflowed by\s+([\d.]+)\s*pixels?');
+  final match = pattern.firstMatch(message);
+  if (match == null) return null;
+  return double.tryParse(match.group(1) ?? '')?.round();
 }

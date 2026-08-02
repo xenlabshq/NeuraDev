@@ -162,6 +162,8 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
                         children: [
                           Text(
                             'AI Asistan',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 22,

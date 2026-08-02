@@ -141,10 +141,16 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      // Küçük ekranda taşmayı önlemek için içeriği viewport'un
+      // maksimum %75'i ile sınırla. Büyük ekranda serbest büyür.
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.75,
+      ),
       builder: (sheetCtx) {
         return SafeArea(
-          child: Container(
-            margin: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+          child: SingleChildScrollView(
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(12, 0, 12, 16),
             padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -290,6 +296,7 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
                 ),
               ],
             ),
+          ),
           ),
         );
       },

@@ -266,6 +266,8 @@ class _NewsHeader extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       'Dünyadan ve eğitimden son dakika',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 13,
@@ -394,14 +396,14 @@ class _BreakingBanner extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   articles.first.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     height: 1.3,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -494,6 +496,8 @@ class _FeaturedArticle extends StatelessWidget {
                     const SizedBox(height: 10),
                     Text(
                       article.title,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -505,13 +509,13 @@ class _FeaturedArticle extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       article.summary,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.75),
                         fontSize: 14,
                         height: 1.5,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 10),
                     Row(

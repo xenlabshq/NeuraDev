@@ -92,7 +92,11 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
             Positioned(
               left: 0,
               right: 0,
-              bottom: 0,
+              // Alt navigation bar + safe area (klavye) üzerinde konumlan.
+              // 84 px = HomeShell kBottomBarHeight, + bottom inset klavye.
+              bottom: MediaQuery.viewPaddingOf(context).bottom > 0
+                  ? MediaQuery.viewInsetsOf(context).bottom
+                  : 84 + MediaQuery.paddingOf(context).bottom,
               child: ReelCommentsDrawer(
                 reel: activeReel,
                 isOpen: _activeCommentsReelId != null,

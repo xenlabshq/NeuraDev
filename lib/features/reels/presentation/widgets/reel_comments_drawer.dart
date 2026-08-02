@@ -49,11 +49,19 @@ class _ReelCommentsDrawerState extends ConsumerState<ReelCommentsDrawer> {
   @override
   Widget build(BuildContext context) {
     final current = ref.watch(reelProvider(widget.reel.id)) ?? widget.reel;
+    final mq = MediaQuery.of(context);
+    // Yükseklik %68 yerine, klavye açıksa (viewInsets.bottom) onun
+    // üstünde bitirip viewport'un %70'ini kaplayacak şekilde sınırla.
+    // Çok küçük ekranda minimum 280 px garantisi ver.
+    final double maxAllowed = (mq.size.height - mq.viewInsets.bottom) * 0.7;
+    final double drawerHeight = widget.isOpen
+        ? (maxAllowed < 280 ? 280 : maxAllowed)
+        : 0.0;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 280),
       curve: Curves.ease,
-      height: widget.isOpen ? MediaQuery.of(context).size.height * 0.68 : 0,
+      height: drawerHeight,
       decoration: const BoxDecoration(
         color: Color(0xFF201933),
         border: Border(top: BorderSide(color: Color(0xFF382C52))),
