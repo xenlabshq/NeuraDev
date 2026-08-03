@@ -331,62 +331,72 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
       backgroundColor: const Color(0xFFB3E5FC),
       body: Stack(
         children: [
-          // 3D sahne + gesture (Listener ile pan, ayrı GestureDetector ile tap)
-          LayoutBuilder(
-            builder: (context, constraints) {
-              _camera = _camera.withViewportSize(
-                Size(constraints.maxWidth, constraints.maxHeight),
-              );
-              if (_camera.center == Offset.zero) {
-                _camera = _camera.withPan(const Offset(0, 60));
-              }
-              return Stack(
-                children: [
-                  CustomPaint(
-                    size: Size(constraints.maxWidth, constraints.maxHeight),
-                    painter: const _IsometricBackgroundPainter(),
-                  ),
-                  // Derinlik sırası: arkadan öne
-                  ..._renderDepthOrdered(positioned),
-                  CustomPaint(
-                    size: Size(constraints.maxWidth, constraints.maxHeight),
-                    painter: const _IsometricGroundPainter(),
-                  ),
-                  // Tap layer — sadece tap, recognizer çakışması yok
-                  Positioned.fill(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTapUp: (d) => _onTapUp(d, positioned),
-                    ),
-                  ),
-                  // Pointer layer — pan/zoom + hover detection.
-                  // Listener recognizer değil, tap ile çakışmaz.
-                  Positioned.fill(
-                    child: Listener(
-                      behavior: HitTestBehavior.translucent,
-                      onPointerDown: (e) {
-                        _updateHover(e.localPosition, positioned);
-                        _onPointerDown(e);
-                      },
-                      onPointerMove: (e) {
-                        _updateHover(e.localPosition, positioned);
-                        _onPointerMove(e);
-                      },
-                      onPointerHover: (e) =>
-                          _updateHover(e.localPosition, positioned),
-                    ),
-                  ),
-                ],
-              );
-            },
+          // 3D sahne + gesture (Listener ile pan, ayrı GestureDetector ile tap).
+          // Kayan alt barın altına sızmasın diye alt SafeArea ile
+          // boyutu kırpıyoruz — ada/düğümler barın altında kaybolmasın.
+          SafeArea(
+            top: false,
+            bottom: false,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: kBottomBarHeight + 12),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  _camera = _camera.withViewportSize(
+                    Size(constraints.maxWidth, constraints.maxHeight),
+                  );
+                  if (_camera.center == Offset.zero) {
+                    _camera = _camera.withPan(const Offset(0, 60));
+                  }
+                  return Stack(
+                    children: [
+                      CustomPaint(
+                        size: Size(constraints.maxWidth, constraints.maxHeight),
+                        painter: const _IsometricBackgroundPainter(),
+                      ),
+                      // Derinlik sırası: arkadan öne
+                      ..._renderDepthOrdered(positioned),
+                      CustomPaint(
+                        size: Size(constraints.maxWidth, constraints.maxHeight),
+                        painter: const _IsometricGroundPainter(),
+                      ),
+                      // Tap layer — sadece tap, recognizer çakışması yok
+                      Positioned.fill(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTapUp: (d) => _onTapUp(d, positioned),
+                        ),
+                      ),
+                      // Pointer layer — pan/zoom + hover detection.
+                      // Listener recognizer değil, tap ile çakışmaz.
+                      Positioned.fill(
+                        child: Listener(
+                          behavior: HitTestBehavior.translucent,
+                          onPointerDown: (e) {
+                            _updateHover(e.localPosition, positioned);
+                            _onPointerDown(e);
+                          },
+                          onPointerMove: (e) {
+                            _updateHover(e.localPosition, positioned);
+                            _onPointerMove(e);
+                          },
+                          onPointerHover: (e) =>
+                              _updateHover(e.localPosition, positioned),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
           // HUD: üstte XP ve ilerleme
           _TopHud(islands: islands),
-          // Bottom info: zoom indicator + hint (bottom nav yüksekliği kadar yukarı)
-          const Positioned(
+          // Bottom info: zoom indicator + hint (kBottomBarHeight + 12
+          // yukarıda — alt barın üstünde).
+          Positioned(
             left: 0,
             right: 0,
-            bottom: 96,
+            bottom: kBottomBarHeight + 12,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -842,7 +852,11 @@ class _MapIntroSheet extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  // onDismiss zaten modal sheet'i pop ediyor;
+                  // burada ekstra Navigator.of(context).pop() çağrısı
+                  // go_router'ın son route'unu da kapatıp
+                  // 'popped the last page off of the stack' hatasına
+                  // yol açıyordu.
                   onDismiss();
                 },
                 child: const Text(

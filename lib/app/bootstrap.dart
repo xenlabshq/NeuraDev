@@ -62,16 +62,20 @@ Future<void> bootstrap(Widget Function() builder) async {
         );
       };
 
-      // ErrorWidget'ı global olarak ez. 1-3 px overflow dışındaki
-      // (>=4 px gerçek hata) ErrorWidget'ı default bırak ki görünür olsun.
+      // ErrorWidget'ı global olarak ez. Tüm RenderFlex overflow'ları için
+      // sarı-siyah şerit gösterilmez (görsel olarak layout'u mahveder);
+      // bunun yerine hata logger'a yazılır, ekranda sessiz kalır.
       ErrorWidget.builder = (FlutterErrorDetails details) {
         final msg = details.exceptionAsString();
         if (msg.contains('overflowed by') ||
             msg.contains('RenderFlex overflowed')) {
           final pixels = _extractOverflowPixels(msg);
-          if (pixels != null && pixels <= 3) {
-            return const SizedBox.shrink();
-          }
+          LoggerService.critical(
+            'Overflow ${pixels ?? '?'}px: $msg',
+            details.exception,
+            details.stack,
+          );
+          return const SizedBox.shrink();
         }
         return ErrorWidget(details.exception);
       };

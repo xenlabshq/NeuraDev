@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:neuroup/app/router/home_shell.dart';
 import 'package:neuroup/app/theme/app_theme.dart';
 import 'package:neuroup/app/theme/colors.dart';
 import 'package:neuroup/shared/widgets/common_widgets.dart';
@@ -14,6 +15,7 @@ class NewsDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncArticle = ref.watch(newsArticleProvider(newsId));
+    final tokens = AppColors.tokensOf(context);
     return Scaffold(
       body: asyncArticle.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -29,7 +31,7 @@ class NewsDetailPage extends ConsumerWidget {
           return CustomScrollView(
             slivers: [
               SliverAppBar(
-                expandedHeight: 240,
+                expandedHeight: 200,
                 pinned: true,
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -57,27 +59,28 @@ class NewsDetailPage extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        SafeArea(
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(
-                                  article.category.emoji,
-                                  style: const TextStyle(fontSize: 48),
-                                ),
-                                const SizedBox(height: 8),
-                                GradientPill(
-                                  label: article.category.label,
-                                  color: Colors.white,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+SafeArea(
+              child: Padding(
+                padding:
+                    const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      article.category.emoji,
+                      style: const TextStyle(fontSize: 40),
+                    ),
+                    const SizedBox(height: 6),
+                    GradientPill(
+                      label: article.category.label,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
+              ),
+            ),
                       ],
                     ),
                   ),
@@ -122,11 +125,12 @@ class NewsDetailPage extends ConsumerWidget {
                 sliver: SliverToBoxAdapter(
                   child: Text(
                     article.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.w800,
                       height: 1.2,
                       letterSpacing: -0.6,
+                      color: tokens.textPrimary,
                     ),
                   ),
                 ),
@@ -147,14 +151,14 @@ class NewsDetailPage extends ConsumerWidget {
                           color: AppColors.primary,
                         ),
                       ),
-                      const Text('•',
-                          style: TextStyle(color: AppColors.textTertiary)),
+                      Text('•',
+                          style: TextStyle(color: tokens.textTertiary)),
                       Text(
                         article.ageLabel,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.textSecondary,
+                          color: tokens.textSecondary,
                         ),
                       ),
                     ],
@@ -166,11 +170,11 @@ class NewsDetailPage extends ConsumerWidget {
                 sliver: SliverToBoxAdapter(
                   child: Text(
                     article.summary,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
                       height: 1.5,
-                      color: AppColors.textPrimary,
+                      color: tokens.textPrimary,
                     ),
                   ),
                 ),
@@ -180,16 +184,22 @@ class NewsDetailPage extends ConsumerWidget {
                 sliver: SliverToBoxAdapter(
                   child: Text(
                     article.body,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       height: 1.7,
-                      color: AppColors.textPrimary,
+                      color: tokens.textPrimary,
                     ),
                   ),
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  0,
+                  20,
+                  // Yüzen alt bar + safe area için boşluk bırak.
+                  kBottomBarHeight + MediaQuery.paddingOf(context).bottom,
+                ),
                 sliver: SliverToBoxAdapter(
                   child: Row(
                     children: [

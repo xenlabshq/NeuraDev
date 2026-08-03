@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart' hide ErrorHint;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:neuroup/app/router/home_shell.dart' show LessonOverlayScope;
 
 import '../../../../app/theme/colors.dart';
 import '../../data/python_simulator.dart';
@@ -33,6 +34,7 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
   bool _success = false;
   bool _showTutorial = true;
   ErrorHint? _hint;
+  LessonOverlayScope? _overlayScope;
 
   /// Aktif ada ve node'u tek seferde arar; bulunamazsa null döner.
   /// F-19: Artık `StateError` riski yok.
@@ -51,10 +53,14 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
     final (_, node) = _findActive();
     _code = TextEditingController(text: node?.starterCode ?? '');
     _editorScroll = ScrollController();
+    // Shell altındaki floating tab bar'ı gizle: bu sayfa push'lı
+    // tam ekran node editörüdür. Dispose'da sayacı geri al.
+    _overlayScope = LessonOverlayScope(context);
   }
 
   @override
   void dispose() {
+    _overlayScope?.dispose();
     _code.dispose();
     _editorScroll.dispose();
     super.dispose();
@@ -401,6 +407,12 @@ class _CodeEditor extends StatelessWidget {
                       border: InputBorder.none,
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
+                      filled: true,
+                      // Material TextField light tema'da default
+                      // olarak beyaz arka plan alıyor; bu da koyu
+                      // editör içinde açık gri yazıyı görünmez
+                      // yapıyordu. Container rengini zorla.
+                      fillColor: Color(0xFF1E1E1E),
                       hintText: '# Python kodunu buraya yaz...',
                       hintStyle: TextStyle(
                         color: Color(0xFF6A6A6A),

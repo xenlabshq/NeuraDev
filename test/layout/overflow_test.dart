@@ -102,6 +102,74 @@ void main() {
   testWidgets('NewsNoOverflow_Compact', (tester) async =>
       _overflowTest(tester, 'NewsPage', const NewsPage(),
           size: kCompactSize));
+  testWidgets('NewsNoOverflow_Compact_TextScale15', (tester) async {
+    final errors = <String>[];
+    final origOnError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      errors.add(details.exceptionAsString());
+    };
+    try {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(
+                size: kCompactSize,
+                platformBrightness: Brightness.dark,
+                devicePixelRatio: 1.0,
+                textScaler: TextScaler.linear(1.5),
+              ),
+              child: const NewsPage(),
+            ),
+            debugShowCheckedModeBanner: false,
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+    } finally {
+      FlutterError.onError = origOnError;
+    }
+    final ov = errors
+        .where((e) => e.contains('overflowed') && e.contains('pixels'))
+        .toList();
+    expect(ov, isEmpty,
+        reason: 'NewsPage compact+1.5x overflow:\n${ov.join("\n")}');
+  });
+  testWidgets('NewsHeader_FlexibleLongTitle_Compact', (tester) async {
+    // "Haberler" başlığı artık Flexible(loose) + pill container içinde;
+    // uzun metin veya büyük text scale'de RenderFlex overflow vermemeli.
+    final errors = <String>[];
+    final origOnError = FlutterError.onError;
+    FlutterError.onError = (details) {
+      errors.add(details.exceptionAsString());
+    };
+    try {
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(
+                size: kCompactSize,
+                platformBrightness: Brightness.dark,
+                devicePixelRatio: 1.0,
+                textScaler: TextScaler.linear(2.0),
+              ),
+              child: const NewsPage(),
+            ),
+            debugShowCheckedModeBanner: false,
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+    } finally {
+      FlutterError.onError = origOnError;
+    }
+    final ov = errors
+        .where((e) => e.contains('overflowed') && e.contains('pixels'))
+        .toList();
+    expect(ov, isEmpty,
+        reason: 'NewsPage compact+2.0x header overflow:\n${ov.join("\n")}');
+  });
   testWidgets('IslandMapNoOverflow_Compact', (tester) async =>
       _overflowTest(tester, 'IslandMapPage', const IslandMapPage(),
           size: kCompactSize));

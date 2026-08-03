@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:neuroup/app/router/home_shell.dart';
 import 'package:neuroup/app/theme/app_theme.dart';
 import 'package:neuroup/app/theme/colors.dart';
 import 'package:neuroup/core/providers/app_settings_provider.dart';
@@ -73,8 +74,6 @@ class ProfilePage extends ConsumerWidget {
                     children: [
                       _LevelCard(user: effectiveUser),
                       const SizedBox(height: 16),
-                      // Level + Rozet kart'ı (entegre). Ayarlar kartı ayrı.
-                      _LevelCard(user: effectiveUser),
                       if (isWide)
                         Padding(
                           padding: const EdgeInsets.only(top: 16),
@@ -241,7 +240,7 @@ class _LevelCard extends ConsumerWidget {
     );
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -305,7 +304,7 @@ class _LevelCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           // 'Sonraki seviyeye X XP kaldı' alt metin.
           Text(
             'Sonraki seviyeye ${level.xpToNext} XP kaldı',
@@ -315,7 +314,7 @@ class _LevelCard extends ConsumerWidget {
               color: AppColorsTextX.textSecondary(context),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: TweenAnimationBuilder<double>(
@@ -330,7 +329,7 @@ class _LevelCard extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
           // İstatistikler (Streak / Tamamlanan / Toplam)
           Row(
             children: [
@@ -370,12 +369,12 @@ class _LevelCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           // Yatay scroll rozet listesi — telefonda kompakt, başlık
           // yok (sadece daireler). AGENTS.md gereği dinamik yükseklik
-          // yerine sabit 86 px kullanılır (overflow riski yok).
+          // yerine sabit 76 px kullanılır (overflow riski yok).
           SizedBox(
-            height: 86,
+            height: 76,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: Badges.all.length,
@@ -635,8 +634,20 @@ class _SettingsSection extends ConsumerWidget {
           bottom: MediaQuery.of(ctx).viewInsets.bottom,
         ),
         child: SafeArea(
+          // Yüzen alt barın altında kalmaması için margin bottom
+          // yeterince büyük olmalı (kBottomBarHeight + alt safe area).
           child: Container(
-            margin: const EdgeInsets.all(12),
+            margin: EdgeInsets.fromLTRB(
+              12,
+              12,
+              12,
+              // Klavye açıksa sadece viewInsets'e göre konumlan; bar
+              // genelde gizli sayılır (sheet onu örter). Aksi halde
+              // bar + safe area kadar boşluk bırak.
+              MediaQuery.of(ctx).viewInsets.bottom > 0
+                  ? 12
+                  : kBottomBarHeight + 12,
+            ),
             padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
@@ -719,6 +730,7 @@ class _SettingsSection extends ConsumerWidget {
     final prefs = ref.read(appSettingsProvider);
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         var enabled = prefs.notificationsEnabled;
@@ -726,62 +738,109 @@ class _SettingsSection extends ConsumerWidget {
         var email = prefs.emailDigest;
         var sound = prefs.soundEnabled;
         return StatefulBuilder(builder: (ctx, setLocal) {
-          return Container(
-            margin: const EdgeInsets.all(12),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(28),
+          return Padding(
+            // Klavyenin altında kalmamak için viewInsets, yüzen alt
+            // bar için kBottomBarHeight.
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(ctx).viewInsets.bottom > 0
+                  ? MediaQuery.of(ctx).viewInsets.bottom
+                  : kBottomBarHeight + 12,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Bildirimler', style: Theme.of(ctx).textTheme.headlineSmall),
-                const SizedBox(height: 8),
-                SwitchListTile(
-                  title: const Text('Bildirimlere izin ver'),
-                  value: enabled,
-                  onChanged: (v) {
-                    setLocal(() => enabled = v);
-                    ref.read(appSettingsProvider.notifier).setNotificationsEnabled(v);
-                  },
+            child: SafeArea(
+              top: false,
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(28),
+                    bottom: Radius.circular(28),
+                  ),
                 ),
-                SwitchListTile(
-                  title: const Text('Push bildirimler'),
-                  value: push,
-                  onChanged: !enabled
-                      ? null
-                      : (v) {
-                          setLocal(() => push = v);
-                          ref.read(appSettingsProvider.notifier).setPushEnabled(v);
-                        },
+                // SwitchListTile ink splashes — Material ile sarılmazsa
+                // Container'ın rengi splash'ı gizler. Bu yüzden tüm
+                // içeriği Material içine alıyoruz; aynı zamanda içeriği
+                // SingleChildScrollView ile sarıp olası RenderFlex
+                // overflow'u önlüyoruz.
+                child: Material(
+                  color: Colors.transparent,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(8, 16, 8, 12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Row(
+                            children: [
+                              Text(
+                                'Bildirimler',
+                                style: Theme.of(ctx).textTheme.headlineSmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        SwitchListTile(
+                          title: const Text('Bildirimlere izin ver'),
+                          value: enabled,
+                          onChanged: (v) {
+                            setLocal(() => enabled = v);
+                            ref
+                                .read(appSettingsProvider.notifier)
+                                .setNotificationsEnabled(v);
+                          },
+                        ),
+                        SwitchListTile(
+                          title: const Text('Push bildirimler'),
+                          value: push,
+                          onChanged: !enabled
+                              ? null
+                              : (v) {
+                                  setLocal(() => push = v);
+                                  ref
+                                      .read(appSettingsProvider.notifier)
+                                      .setPushEnabled(v);
+                                },
+                        ),
+                        SwitchListTile(
+                          title: const Text('E-posta özeti'),
+                          value: email,
+                          onChanged: !enabled
+                              ? null
+                              : (v) {
+                                  setLocal(() => email = v);
+                                  ref
+                                      .read(appSettingsProvider.notifier)
+                                      .setEmailDigest(v);
+                                },
+                        ),
+                        SwitchListTile(
+                          title: const Text('Bildirim sesi'),
+                          value: sound,
+                          onChanged: !enabled
+                              ? null
+                              : (v) {
+                                  setLocal(() => sound = v);
+                                  ref
+                                      .read(appSettingsProvider.notifier)
+                                      .setSoundEnabled(v);
+                                },
+                        ),
+                        const SizedBox(height: 4),
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 8),
+                          child: FilledButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text('Tamam'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                SwitchListTile(
-                  title: const Text('E-posta özeti'),
-                  value: email,
-                  onChanged: !enabled
-                      ? null
-                      : (v) {
-                          setLocal(() => email = v);
-                          ref.read(appSettingsProvider.notifier).setEmailDigest(v);
-                        },
-                ),
-                SwitchListTile(
-                  title: const Text('Bildirim sesi'),
-                  value: sound,
-                  onChanged: !enabled
-                      ? null
-                      : (v) {
-                          setLocal(() => sound = v);
-                          ref.read(appSettingsProvider.notifier).setSoundEnabled(v);
-                        },
-                ),
-                const SizedBox(height: 8),
-                FilledButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('Tamam'),
-                ),
-              ],
+              ),
             ),
           );
         });
@@ -801,66 +860,104 @@ class _SettingsSection extends ConsumerWidget {
         var lang = prefs.language;
         var scale = prefs.textScale;
         return StatefulBuilder(builder: (ctx, setLocal) {
-          return Container(
-            margin: const EdgeInsets.all(12),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(28),
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(ctx).viewInsets.bottom > 0
+                  ? MediaQuery.of(ctx).viewInsets.bottom
+                  : kBottomBarHeight + 12,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Görünüm', style: Theme.of(ctx).textTheme.headlineSmall),
-                const SizedBox(height: 12),
-                const Text('Tema'),
-                const SizedBox(height: 4),
-                SegmentedButton<AppThemeMode>(
-                  segments: const [
-                    ButtonSegment(value: AppThemeMode.system, label: Text('Sistem')),
-                    ButtonSegment(value: AppThemeMode.light, label: Text('Açık')),
-                    ButtonSegment(value: AppThemeMode.dark, label: Text('Koyu')),
-                  ],
-                  selected: {theme},
-                  onSelectionChanged: (s) {
-                    setLocal(() => theme = s.first);
-                    ref.read(appSettingsProvider.notifier).setThemeMode(s.first);
-                  },
+            child: SafeArea(
+              top: false,
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(28),
+                    bottom: Radius.circular(28),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                const Text('Dil'),
-                const SizedBox(height: 4),
-                SegmentedButton<AppLanguage>(
-                  segments: const [
-                    ButtonSegment(value: AppLanguage.tr, label: Text('Türkçe')),
-                    ButtonSegment(value: AppLanguage.en, label: Text('English')),
-                  ],
-                  selected: {lang},
-                  onSelectionChanged: (s) {
-                    setLocal(() => lang = s.first);
-                    ref.read(appSettingsProvider.notifier).setLanguage(s.first);
-                  },
+                // SingleChildScrollView ile olası RenderFlex overflow
+                // önlendi (küçük pencerede butonlar sığmazsa scroll).
+                child: Material(
+                  color: Colors.transparent,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Görünüm',
+                            style: Theme.of(ctx).textTheme.headlineSmall),
+                        const SizedBox(height: 12),
+                        const Text('Tema'),
+                        const SizedBox(height: 4),
+                        SegmentedButton<AppThemeMode>(
+                          segments: const [
+                            ButtonSegment(
+                                value: AppThemeMode.system,
+                                label: Text('Sistem')),
+                            ButtonSegment(
+                                value: AppThemeMode.light,
+                                label: Text('Açık')),
+                            ButtonSegment(
+                                value: AppThemeMode.dark,
+                                label: Text('Koyu')),
+                          ],
+                          selected: {theme},
+                          onSelectionChanged: (s) {
+                            setLocal(() => theme = s.first);
+                            ref
+                                .read(appSettingsProvider.notifier)
+                                .setThemeMode(s.first);
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('Dil'),
+                        const SizedBox(height: 4),
+                        SegmentedButton<AppLanguage>(
+                          segments: const [
+                            ButtonSegment(
+                                value: AppLanguage.tr,
+                                label: Text('Türkçe')),
+                            ButtonSegment(
+                                value: AppLanguage.en,
+                                label: Text('English')),
+                          ],
+                          selected: {lang},
+                          onSelectionChanged: (s) {
+                            setLocal(() => lang = s.first);
+                            ref
+                                .read(appSettingsProvider.notifier)
+                                .setLanguage(s.first);
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                            'Metin boyutu: ${(scale * 100).round()}%'),
+                        Slider(
+                          value: scale,
+                          min: 0.8,
+                          max: 1.4,
+                          divisions: 6,
+                          label: '${(scale * 100).round()}%',
+                          onChanged: (v) {
+                            setLocal(() => scale = v);
+                            ref
+                                .read(appSettingsProvider.notifier)
+                                .setTextScale(v);
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        FilledButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: const Text('Tamam'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                Text('Metin boyutu: ${(scale * 100).round()}%'),
-                Slider(
-                  value: scale,
-                  min: 0.8,
-                  max: 1.4,
-                  divisions: 6,
-                  label: '${(scale * 100).round()}%',
-                  onChanged: (v) {
-                    setLocal(() => scale = v);
-                    ref.read(appSettingsProvider.notifier).setTextScale(v);
-                  },
-                ),
-                const SizedBox(height: 12),
-                FilledButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('Tamam'),
-                ),
-              ],
+              ),
             ),
           );
         });
@@ -873,47 +970,89 @@ class _SettingsSection extends ConsumerWidget {
     final prefs = ref.read(appSettingsProvider);
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         var analytics = prefs.analyticsEnabled;
         var crash = prefs.crashReportsEnabled;
         return StatefulBuilder(builder: (ctx, setLocal) {
-          return Container(
-            margin: const EdgeInsets.all(12),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(28),
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(ctx).viewInsets.bottom > 0
+                  ? MediaQuery.of(ctx).viewInsets.bottom
+                  : kBottomBarHeight + 12,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Gizlilik', style: Theme.of(ctx).textTheme.headlineSmall),
-                const SizedBox(height: 8),
-                SwitchListTile(
-                  title: const Text('Anonim analiz'),
-                  subtitle: const Text('Kullanım verilerini paylaş'),
-                  value: analytics,
-                  onChanged: (v) {
-                    setLocal(() => analytics = v);
-                    ref.read(appSettingsProvider.notifier).setAnalyticsEnabled(v);
-                  },
+            child: SafeArea(
+              top: false,
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(28),
+                    bottom: Radius.circular(28),
+                  ),
                 ),
-                SwitchListTile(
-                  title: const Text('Çökme raporları'),
-                  subtitle: const Text('Hata loglarını gönder'),
-                  value: crash,
-                  onChanged: (v) {
-                    setLocal(() => crash = v);
-                    ref.read(appSettingsProvider.notifier).setCrashReportsEnabled(v);
-                  },
+                // SwitchListTile ink splashes — Material ile sarılmazsa
+                // Container rengi splash'ı gizler. Aynı zamanda içerik
+                // SingleChildScrollView ile sarılarak olası RenderFlex
+                // overflow önlendi.
+                child: Material(
+                  color: Colors.transparent,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(8, 16, 8, 12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 8),
+                          child: Row(
+                            children: [
+                              Text(
+                                'Gizlilik',
+                                style: Theme.of(ctx).textTheme.headlineSmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        SwitchListTile(
+                          title: const Text('Anonim analiz'),
+                          subtitle: const Text('Kullanım verilerini paylaş'),
+                          value: analytics,
+                          onChanged: (v) {
+                            setLocal(() => analytics = v);
+                            ref
+                                .read(appSettingsProvider.notifier)
+                                .setAnalyticsEnabled(v);
+                          },
+                        ),
+                        SwitchListTile(
+                          title: const Text('Çökme raporları'),
+                          subtitle: const Text('Hata loglarını gönder'),
+                          value: crash,
+                          onChanged: (v) {
+                            setLocal(() => crash = v);
+                            ref
+                                .read(appSettingsProvider.notifier)
+                                .setCrashReportsEnabled(v);
+                          },
+                        ),
+                        const SizedBox(height: 4),
+                        Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 8),
+                          child: FilledButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text('Tamam'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                FilledButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('Tamam'),
-                ),
-              ],
+              ),
             ),
           );
         });
@@ -994,7 +1133,15 @@ class _SettingsSection extends ConsumerWidget {
                 Expanded(
                   child: ListView.separated(
                     controller: scrollCtrl,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: EdgeInsets.fromLTRB(
+                      8,
+                      8,
+                      8,
+                      // Yüzen alt barın altında kalmaması için scroll
+                      // içeriğinin altına kBottomBarHeight kadar
+                      // boşluk ekle.
+                      kBottomBarHeight,
+                    ),
                     itemCount: entries.length,
                     separatorBuilder: (_, __) => const Divider(height: 1),
                     itemBuilder: (_, i) => ExpansionTile(
@@ -1025,45 +1172,75 @@ class _SettingsSection extends ConsumerWidget {
   void _showAbout(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Theme.of(ctx).colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      // Yüzen alt barın altında kalmaması için bottom padding'i
+      // kendi içermeyen sheet'lerde SafeArea(bottom) kullanmak
+      // yeterli değil — sheet tüm ekranı kaplar. Burada bottom
+      // padding'i `kBottomBarHeight + safe_area` kadar ekliyoruz.
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          bottom: kBottomBarHeight + MediaQuery.paddingOf(ctx).bottom,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColorsTextX.border(context),
-                  borderRadius: BorderRadius.circular(2),
-                ),
+        child: SafeArea(
+          top: false,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+            decoration: BoxDecoration(
+              color: Theme.of(ctx).colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+                bottom: Radius.circular(28),
               ),
             ),
-            const SizedBox(height: 20),
-            Text('Neuroup', style: Theme.of(context).textTheme.displaySmall),
-            const SizedBox(height: 8),
-            const Text(
-              'Eğitim, haber, sohbet ve oyunları bir araya getiren '
-              'çapraz platform öğrenme uygulaması.',
+            // SingleChildScrollView ile küçük pencerelerde olası
+            // RenderFlex overflow (textScale > 1.0 ile 3 px + hataları)
+            // önlendi.
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColorsTextX.border(context),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Neuroup',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.displaySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Eğitim, haber, sohbet ve oyunları bir araya getiren '
+                    'çapraz platform öğrenme uygulaması.',
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 20),
+                  const _AboutRow(label: 'Sürüm', value: '1.0.0'),
+                  const _AboutRow(
+                      label: 'Platform', value: 'iOS • Android • Linux'),
+                  const _AboutRow(
+                      label: 'Mimari', value: 'Riverpod + Clean Arch'),
+                  const _AboutRow(label: 'Paket', value: 'com.neuroup.app'),
+                  const SizedBox(height: 20),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Kapat'),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            const _AboutRow(label: 'Sürüm', value: '1.0.0'),
-            const _AboutRow(label: 'Platform', value: 'iOS • Android • Linux'),
-            const _AboutRow(label: 'Mimari', value: 'Riverpod + Clean Arch'),
-            const _AboutRow(label: 'Paket', value: 'com.neuroup.app'),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Kapat'),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -1096,32 +1273,163 @@ class _SettingsSection extends ConsumerWidget {
   }
 
   void _confirmResetProgress(BuildContext context, WidgetRef ref) {
+    // İki aşamalı onay: önce bilgilendirme + uyarı diyaloğu,
+    // ardından kullanıcının "SIFIRLA" yazmasını isteyen doğrulama
+    // adımı. Yanlışlıkla tıklamayı engelleyen en güvenli kalıptır.
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('İlerlemeyi Sıfırla'),
-        content: const Text(
-          'Tüm ada ve ders ilerlemeniz sıfırlanır. XP ve streak de sıfırlanır. '
-          'Devam etmek istiyor musun?',
+        icon: Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.error.withValues(alpha: 0.12),
+          ),
+          child: Icon(
+            Icons.warning_rounded,
+            color: AppColors.error,
+            size: 32,
+          ),
         ),
+        iconPadding: const EdgeInsets.only(top: 12),
+        title: const Text(
+          'İlerlemeyi Sıfırla',
+          textAlign: TextAlign.center,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Tüm öğrenme verileriniz kalıcı olarak silinecek. '
+              'Bu işlemi geri alamazsın.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.error.withValues(alpha: 0.25),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  _ResetConsequenceRow(
+                      icon: Icons.school_outlined, text: 'Tüm ada ilerlemen'),
+                  SizedBox(height: 6),
+                  _ResetConsequenceRow(
+                      icon: Icons.star_outline_rounded,
+                      text: 'XP ve seviye bilgilerin'),
+                  SizedBox(height: 6),
+                  _ResetConsequenceRow(
+                      icon: Icons.local_fire_department_outlined,
+                      text: 'Günlük streak sayacın'),
+                  SizedBox(height: 6),
+                  _ResetConsequenceRow(
+                      icon: Icons.emoji_events_outlined,
+                      text: 'Kazanılmış rozetler'),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
         actions: [
+          // İptal — sol (güvenli yol, görsel olarak ayrıştırılmış).
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('İptal'),
+            child: const Text('Vazgeç'),
           ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+          // Devam Et — sağ, dikkat çekici ama henüz tehlikeli değil.
+          FilledButton.tonal(
             onPressed: () {
               Navigator.of(ctx).pop();
-              ref.read(learningProgressProvider.notifier).resetProgress();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('İlerleme sıfırlandı')),
-              );
+              _showResetFinalConfirm(context, ref);
             },
-            child: const Text('Sıfırla'),
+            child: const Text('Devam Et'),
           ),
         ],
       ),
+    );
+  }
+
+  /// İkinci aşama: "SIFIRLA" yazma gerektiren sıkı onay.
+  void _showResetFinalConfirm(BuildContext context, WidgetRef ref) {
+    final ctl = TextEditingController();
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        bool matches = false;
+        return StatefulBuilder(builder: (ctx, setLocal) {
+          return AlertDialog(
+            icon: Icon(
+              Icons.lock_outline_rounded,
+              color: AppColors.error,
+              size: 32,
+            ),
+            title: const Text(
+              'Son Onay',
+              textAlign: TextAlign.center,
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Onaylamak için aşağıya büyük harfle '
+                  '"SIFIRLA" yaz:',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: ctl,
+                  autofocus: true,
+                  textCapitalization: TextCapitalization.characters,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'SIFIRLA',
+                  ),
+                  onChanged: (v) {
+                    setLocal(() => matches = v.trim() == 'SIFIRLA');
+                  },
+                ),
+              ],
+            ),
+            actionsAlignment: MainAxisAlignment.spaceBetween,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Vazgeç'),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.error,
+                ),
+                onPressed: matches
+                    ? () {
+                        Navigator.of(ctx).pop();
+                        ref
+                            .read(learningProgressProvider.notifier)
+                            .resetProgress();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('İlerleme sıfırlandı'),
+                          ),
+                        );
+                      }
+                    : null,
+                child: const Text('Sıfırla'),
+              ),
+            ],
+          );
+        });
+      },
     );
   }
 }
@@ -1223,10 +1531,55 @@ class _AboutRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: Theme.of(context).textTheme.bodyMedium),
-          Text(value, style: Theme.of(context).textTheme.titleSmall),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+          ),
         ],
       ),
+    );
+  }
+}
+
+/// Sıfırlama sonucu silinecek verileri tek satırda gösterir.
+class _ResetConsequenceRow extends StatelessWidget {
+  const _ResetConsequenceRow({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppColors.error.withValues(alpha: 0.85)),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.error.withValues(alpha: 0.9),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

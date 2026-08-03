@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:neuroup/app/router/home_shell.dart'
+    show kBottomBarHeight, LessonOverlayScope;
 
 import '../../../../app/theme/colors.dart';
 import '../../../../shared/utils/layout_helper.dart';
@@ -10,12 +12,34 @@ import '../../domain/entities/learning_island.dart';
 import '../providers/learning_providers.dart';
 import 'node_editor_page.dart';
 
-class IslandDetailPage extends ConsumerWidget {
+class IslandDetailPage extends ConsumerStatefulWidget {
   const IslandDetailPage({required this.islandId, super.key});
   final String islandId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<IslandDetailPage> createState() => _IslandDetailPageState();
+}
+
+class _IslandDetailPageState extends ConsumerState<IslandDetailPage> {
+  LessonOverlayScope? _overlayScope;
+
+  @override
+  void initState() {
+    super.initState();
+    // Shell altındaki floating tab bar'ı gizle: bu sayfa push'lı
+    // tam ekran ders detayıdır. Dispose'da sayacı geri al.
+    _overlayScope = LessonOverlayScope(context);
+  }
+
+  @override
+  void dispose() {
+    _overlayScope?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final islandId = widget.islandId;
     final islands = ref.watch(islandsProvider);
     final island = islands.firstWhereOrNull((i) => i.id == islandId);
     if (island == null) {
@@ -56,7 +80,13 @@ class IslandDetailPage extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 120)),
+              // Yüzen alt bar + güvenlik payı — node'lar barın altında
+              // kalmasın.
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: kBottomBarHeight + 36,
+                ),
+              ),
             ],
           ),
         ],
@@ -83,7 +113,7 @@ class IslandDetailPage extends ConsumerWidget {
     Navigator.of(context).push<Widget>(
       MaterialPageRoute<Widget>(
         builder: (_) => NodeEditorPage(
-          islandId: islandId,
+          islandId: widget.islandId,
           nodeId: node.id,
         ),
       ),

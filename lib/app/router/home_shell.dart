@@ -1,15 +1,55 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../shared/utils/layout_helper.dart';
 
 /// Bottom navigation bar için ayrılan toplam yükseklik
 /// (margin + bar içerik + alt safe area).
 const double kBottomBarHeight = 84;
 
-class HomeShell extends StatelessWidget {
+/// Shell'in altındaki floating tab bar'ın geçici olarak gizlenmesini
+/// gerektiren aktif "ders katmanı" sayacı.
+///
+/// `Navigator.push` ile açılan tam-sayfa ders ekranları
+/// (`IslandDetailPage`, `NodeEditorPage`) bu sayacı initState'de
+/// arttırıp dispose'da azaltır. Sayaç > 0 olduğunda `HomeShell` alt
+/// barı gizler — böylece alt sayfadaki "Devam Et" / "Çözüm" / "+70 XP"
+/// düğmeleri barın altında kalmaz.
+final lessonOverlayDepthProvider = StateProvider<int>((ref) => 0);
+
+/// Ders katmanı açıkken sayaçtaki yerini güvenle tutup bırakmak için
+/// yardımcı. Widget'ın `initState` ve `dispose`'unda kullanılır.
+///
+/// Riverpod provider'ı widget lifecycle içinde (initState/dispose)
+/// doğrudan değiştirmek yasak olduğu için arttırma/azaltma bir
+/// sonraki frame'e ertelenir. Container, `initState` sırasında
+/// bir kez alınır; `dispose` sırasında widget deactivated olacağı
+/// için context tekrar kullanılmaz.
+class LessonOverlayScope {
+  LessonOverlayScope(BuildContext context)
+      : _container = ProviderScope.containerOf(context, listen: false) {
+    final container = _container;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      container.read(lessonOverlayDepthProvider.notifier).state++;
+    });
+  }
+
+  final ProviderContainer _container;
+
+  void dispose() {
+    final container = _container;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final current = container.read(lessonOverlayDepthProvider);
+      if (current > 0) {
+        container.read(lessonOverlayDepthProvider.notifier).state =
+            current - 1;
+      }
+    });
+  }
+}
+
+class HomeShell extends ConsumerWidget {
   const HomeShell({required this.child, super.key});
   final Widget child;
 
@@ -57,14 +97,19 @@ class HomeShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).matchedLocation;
     final index = _indexFor(location);
 
+    // Aktif ders katmanı var mı? `lessonOverlayDepthProvider` sayaç
+    // mantığıyla çalışır: bir sayfa push edilirken +1, pop edilirken
+    // -1. Sayaç > 0 ise kullanıcı ders detayı / node editör gibi alt
+    // bir ekrana geçmiş demektir — floating tab bar'ı gizleyip
+    // "Devam Et" / "Çözüm" / "+70 XP" düğmelerini görünür bırakıyoruz.
+    final overlayDepth = ref.watch(lessonOverlayDepthProvider);
+    final hasLessonOverlay = overlayDepth > 0;
+
     return Scaffold(
-      // extendBody=true → child barın altına uzanır (orada
-      // padding ile biz korumaya alıyoruz). Stack'in konumlandırması
-      // böylece bar yüzer halde görünür.
       body: Stack(
         children: [
           Positioned.fill(child: child),
@@ -72,9 +117,17 @@ class HomeShell extends StatelessWidget {
             left: 0,
             right: 0,
             bottom: 0,
-            child: _FloatingBar(
-              items: _tabs,
-              currentIndex: index,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 220),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              child: hasLessonOverlay
+                  ? const SizedBox.shrink(key: ValueKey('bar-hidden'))
+                  : _FloatingBar(
+                      key: const ValueKey('bar-visible'),
+                      items: _tabs,
+                      currentIndex: index,
+                    ),
             ),
           ),
         ],
@@ -102,6 +155,7 @@ class _FloatingBar extends StatelessWidget {
   const _FloatingBar({
     required this.items,
     required this.currentIndex,
+    super.key,
   });
 
   final List<_TabItem> items;

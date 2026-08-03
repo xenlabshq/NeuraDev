@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:neuroup/app/router/home_shell.dart' show kBottomBarHeight;
 
 import '../widgets/ai_assistant_panel.dart';
 import '../widgets/support_chat_panel.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:neuroup/app/router/home_shell.dart' show kBottomBarHeight;
 
 import '../../../../app/theme/colors.dart';
 import '../../../../shared/models/user_profile.dart';
@@ -58,6 +59,7 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = AppColors.tokensOf(context);
     final user = ref.watch(currentAuthUserProvider);
     final asyncMessages =
         ref.watch(chatMessagesStreamProvider(widget.channelId));
@@ -130,9 +132,11 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
             ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
+          // Mesaj listesi — input bar yüksekliği + floating tab bar
+          // yüksekliği kadar alt boşluk bırak, son mesajlar gizlenmesin.
+          Positioned.fill(
             child: asyncMessages.when(
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
@@ -151,7 +155,12 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
                 }
                 return ListView.builder(
                   controller: _scroll,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(
+                    16,
+                    16,
+                    16,
+                    120 + kBottomBarHeight,
+                  ),
                   itemCount: messages.length,
                   itemBuilder: (_, i) {
                     final m = messages[i];
@@ -167,18 +176,24 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
               },
             ),
           ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                top: BorderSide(
-                  color: AppColors.border.withValues(alpha: 0.5),
+          // Input bar — ekranın altından kBottomBarHeight kadar yukarı
+          // sabitlenir, böylece hem klavye açıldığında hem de floating
+          // tab bar açıkken input her zaman tıklanabilir/erişilebilir
+          // kalır.
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: kBottomBarHeight,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+              decoration: BoxDecoration(
+                color: tokens.surfaceAlt,
+                border: Border(
+                  top: BorderSide(
+                    color: tokens.border.withValues(alpha: 0.6),
+                  ),
                 ),
               ),
-            ),
-            child: SafeArea(
-              top: false,
               child: Row(
                 children: [
                   Expanded(
@@ -188,12 +203,22 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
                       maxLines: 4,
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) => _send(user),
+                      style: TextStyle(
+                        color: tokens.textPrimary,
+                        fontSize: 14,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Mesaj yaz...',
+                        hintStyle: TextStyle(
+                          color: tokens.textTertiary,
+                          fontSize: 14,
+                        ),
                         filled: true,
-                        fillColor: AppColors.surfaceAlt,
+                        fillColor: tokens.surface,
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
                           borderSide: BorderSide.none,
