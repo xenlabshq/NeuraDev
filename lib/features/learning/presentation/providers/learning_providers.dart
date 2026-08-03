@@ -1,7 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 
+import '../../../../core/providers/core_providers.dart';
 import '../../data/seed_islands.dart';
 import '../../domain/entities/learning_island.dart';
 
@@ -55,11 +57,38 @@ class IslandsState extends Equatable {
 }
 
 class LearningProgressNotifier extends StateNotifier<IslandsState> {
-  LearningProgressNotifier()
-      : super(IslandsState(
-          islands: IslandSeed.all(),
-          progress: const UserLearningProgress(),
-        ));
+  LearningProgressNotifier(this._cache)
+      : super(_loadFromCache(_cache, IslandSeed.all()));
+
+  final Box _cache;
+
+  static const _kCompleted = 'completedNodeIds';
+  static const _kTotalXp = 'totalXp';
+  static const _kStreak = 'streak';
+
+  static IslandsState _loadFromCache(Box box, List<LearningIsland> islands) {
+    final completed = (box.get(_kCompleted) as List?)?.cast<String>().toSet();
+    if (completed == null) {
+      return IslandsState(
+        islands: islands,
+        progress: const UserLearningProgress(),
+      );
+    }
+    return IslandsState(
+      islands: islands,
+      progress: UserLearningProgress(
+        completedNodeIds: completed,
+        totalXp: (box.get(_kTotalXp) as int?) ?? 0,
+        streak: (box.get(_kStreak) as int?) ?? 0,
+      ),
+    );
+  }
+
+  void _saveToCache(UserLearningProgress progress) {
+    _cache.put(_kCompleted, progress.completedNodeIds.toList());
+    _cache.put(_kTotalXp, progress.totalXp);
+    _cache.put(_kStreak, progress.streak);
+  }
 
   /// Ada unlocked mi?
   bool isIslandUnlocked(int islandIndex) {
@@ -101,14 +130,13 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
       completedNodeId: nodeId,
     );
 
-    state = IslandsState(
-      islands: newIslands,
-      progress: UserLearningProgress(
-        completedNodeIds: newCompleted,
-        totalXp: state.progress.totalXp + xpEarned,
-        streak: state.progress.streak + 1,
-      ),
+    final nextProgress = UserLearningProgress(
+      completedNodeIds: newCompleted,
+      totalXp: state.progress.totalXp + xpEarned,
+      streak: state.progress.streak + 1,
     );
+    state = IslandsState(islands: newIslands, progress: nextProgress);
+    _saveToCache(nextProgress);
   }
 
   /// Tek bir node tamamlandığında etkilenen iki adayı (`prev`, `next`)
@@ -148,9 +176,9 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
   /// Streak sıfırlama (yanlış cevap).
   void resetStreak() {
     if (state.progress.streak == 0) return;
-    state = state.copyWith(
-      progress: state.progress.copyWith(streak: 0),
-    );
+    final nextProgress = state.progress.copyWith(streak: 0);
+    state = state.copyWith(progress: nextProgress);
+    _saveToCache(nextProgress);
   }
 
   /// Tüm ilerlemeyi sıfırla (debug için).
@@ -159,6 +187,7 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
       islands: IslandSeed.all(),
       progress: const UserLearningProgress(),
     );
+    _cache.clear();
   }
 
   /// Ada unlocked + completed durumlarıyla birlikte node'ları döndürür.
@@ -227,7 +256,7 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
 /// Progress provider — state'i IslandsState (adalar + progress içerir).
 final learningProgressProvider =
     StateNotifierProvider<LearningProgressNotifier, IslandsState>(
-  (ref) => LearningProgressNotifier(),
+  (ref) => LearningProgressNotifier(ref.watch(learningProgressBoxProvider)),
 );
 
 /// Progress-only provider (XP, streak, completedNodeIds) — UI'da kolay erişim.

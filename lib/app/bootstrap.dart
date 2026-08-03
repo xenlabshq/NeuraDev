@@ -3,10 +3,15 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 import 'package:neuroup/core/env/env.dart';
+import 'package:neuroup/core/providers/app_settings_provider.dart';
+import 'package:neuroup/core/providers/core_providers.dart';
 import 'package:neuroup/core/services/logger_service.dart';
 
 final Talker talker = TalkerFlutter.init(
@@ -80,6 +85,20 @@ Future<void> bootstrap(Widget Function() builder) async {
         return ErrorWidget(details.exception);
       };
 
+      // Hive başlat — path_provider üzerinden uygulama dizinini al,
+      // gerekli kutuları (app_settings, learning_progress, news_cache)
+      // aç. Kutular HiveBoxes registry'sinden geliyor.
+      await Hive.initFlutter();
+      await Future.wait<void>([
+        Hive.openBox(HiveBoxes.appSettings),
+        Hive.openBox(HiveBoxes.learningProgress),
+        Hive.openBox(HiveBoxes.newsCache),
+      ]);
+
+      // SharedPreferences — tema/dil/bildirim gibi küçük ayarları
+      // kalıcı saklamak için.
+      final prefs = await SharedPreferences.getInstance();
+
       // Firebase is optional in dev (no google-services.json). In production
       // it must succeed.
       if (Env.firebaseConfigured) {
@@ -101,9 +120,34 @@ Future<void> bootstrap(Widget Function() builder) async {
           opts.dsn = Env.sentryDsn;
           opts.tracesSampleRate = Env.isProduction ? 0.2 : 1.0;
           opts.environment = Env.isProduction ? 'production' : 'development';
-        }, appRunner: () => runApp(builder()));
+        }, appRunner: () {
+          // Sentry açıldıktan SONRA ProviderScope'u prefs ile
+          // override edip runApp çağırıyoruz; böylece AppSettings
+          // persistance'lı başlar.
+          runApp(
+            ProviderScope(
+              overrides: [
+                sharedPrefsProvider.overrideWith((_) => prefs),
+                appSettingsProvider.overrideWith(
+                  (ref) => AppSettingsNotifier(prefs),
+                ),
+              ],
+              child: builder(),
+            ),
+          );
+        });
       } else {
-        runApp(builder());
+        runApp(
+          ProviderScope(
+            overrides: [
+              sharedPrefsProvider.overrideWith((_) => prefs),
+              appSettingsProvider.overrideWith(
+                (ref) => AppSettingsNotifier(prefs),
+              ),
+            ],
+            child: builder(),
+          ),
+        );
       }
     },
     (error, stack) {

@@ -4,10 +4,23 @@ import 'package:mocktail/mocktail.dart';
 import 'package:neuroup/core/failures/failure.dart';
 import 'package:neuroup/core/utils/result.dart';
 import 'package:neuroup/features/auth/domain/repositories/auth_repository.dart';
+import 'package:neuroup/features/auth/domain/usecases/login_usecase.dart';
 import 'package:neuroup/features/auth/presentation/providers/auth_providers.dart';
 import 'package:neuroup/shared/models/user_profile.dart';
 
 class _MockAuthRepository extends Mock implements AuthRepository {}
+
+/// Test helper: doğrulama yapmadan doğrudan repo'yu çağıran use case.
+/// Böylece controller test'leri validation mantığından bağımsız çalışır.
+class _PassthroughLogin extends LoginUseCase {
+  _PassthroughLogin(super.repo);
+  @override
+  Future<Result<UserProfile>> call({
+    required String email,
+    required String password,
+  }) =>
+      repo.signInWithEmail(email, password);
+}
 
 void main() {
   late _MockAuthRepository repo;
@@ -16,7 +29,13 @@ void main() {
   setUp(() {
     repo = _MockAuthRepository();
     container = ProviderContainer(
-      overrides: [authRepositoryProvider.overrideWithValue(repo)],
+      overrides: [
+        authRepositoryProvider.overrideWithValue(repo),
+        // LoginUseCase validasyonu repository'yi bypass eder;
+        // test'lerde mock repo'ya doğrudan ulaşmak için use case'i
+        // de passthrough'a override ediyoruz.
+        loginUseCaseProvider.overrideWithValue(_PassthroughLogin(repo)),
+      ],
     );
   });
 
