@@ -1,4 +1,4 @@
-package com.eduplay.eduplay
+package com.neuroup.app
 
 import io.flutter.embedding.android.FlutterActivity
 
