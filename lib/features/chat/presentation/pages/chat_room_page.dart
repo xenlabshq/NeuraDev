@@ -183,8 +183,15 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
           Positioned(
             left: 0,
             right: 0,
-            bottom: kBottomBarHeight,
-            child: Container(
+            // kBottomBarHeight (floating tab bar) + cihaz gesture/system
+            // navigation bar inset'i. Emulator'de bu son değer 0'dır;
+            // gerçek cihazda (Pixel/Samsung gesture nav) 24-48 px döner.
+            // Hesaba katmadan `Positioned(bottom: 84)` cihazda input'u
+            // navigation bar'ın altına sıkıştırıyordu.
+            bottom: kBottomBarHeight + MediaQuery.viewPaddingOf(context).bottom,
+            child: SafeArea(
+              top: false,
+              child: Container(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
               decoration: BoxDecoration(
                 color: tokens.surfaceAlt,
@@ -254,6 +261,7 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
                   ),
                 ],
               ),
+            ),
             ),
           ),
         ],
