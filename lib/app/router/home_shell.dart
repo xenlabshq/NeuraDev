@@ -31,7 +31,11 @@ class LessonOverlayScope {
     : _container = ProviderScope.containerOf(context, listen: false) {
     final container = _container;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      container.read(lessonOverlayDepthProvider.notifier).state++;
+      try {
+        container.read(lessonOverlayDepthProvider.notifier).state++;
+      } on StateError {
+        // Container zaten dispose edilmiş — yapacak bir şey yok.
+      }
     });
   }
 
@@ -40,9 +44,18 @@ class LessonOverlayScope {
   void dispose() {
     final container = _container;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final current = container.read(lessonOverlayDepthProvider);
-      if (current > 0) {
-        container.read(lessonOverlayDepthProvider.notifier).state = current - 1;
+      // Callback bir sonraki frame'e ertelendiği için, o ana kadar
+      // container'ın kendisi (örn. widget testlerinde ağaç tamamen
+      // yıkıldıysa) dispose edilmiş olabilir. Gerçek uygulamada kök
+      // ProviderScope hiç dispose edilmez, bu sadece savunmacı bir kontrol.
+      try {
+        final current = container.read(lessonOverlayDepthProvider);
+        if (current > 0) {
+          container.read(lessonOverlayDepthProvider.notifier).state =
+              current - 1;
+        }
+      } on StateError {
+        // Container zaten dispose edilmiş — yapacak bir şey yok.
       }
     });
   }
