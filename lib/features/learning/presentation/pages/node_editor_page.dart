@@ -7,6 +7,7 @@ import 'package:neuroup/app/router/home_shell.dart' show LessonOverlayScope;
 import '../../../../app/theme/colors.dart';
 import '../../data/python_simulator.dart';
 import '../../domain/entities/error_hint.dart';
+import '../../domain/entities/execution_step.dart';
 import '../../domain/entities/learning_island.dart';
 import '../providers/adaptive_providers.dart';
 import '../providers/learning_providers.dart';
@@ -29,6 +30,7 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
   late final ScrollController _editorScroll;
   final _simulator = PythonSimulator();
   List<String> _output = const [];
+  List<ExecutionStep> _steps = const [];
   String? _error;
   bool _running = false;
   bool _success = false;
@@ -101,6 +103,7 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
 
       setState(() {
         _output = result.output;
+        _steps = result.steps;
         _error = result.errors.isEmpty ? null : result.errors.join('\n');
         _running = false;
         _success = isCorrect;
@@ -244,6 +247,7 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
                         flex: 2,
                         child: _OutputPanel(
                           output: _output,
+                          steps: _steps,
                           error: _error,
                           running: _running,
                           success: _success,
@@ -267,6 +271,7 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
                         flex: 2,
                         child: _OutputPanel(
                           output: _output,
+                          steps: _steps,
                           error: _error,
                           running: _running,
                           success: _success,
@@ -508,6 +513,7 @@ class _LineNumbers extends StatelessWidget {
 class _OutputPanel extends StatelessWidget {
   const _OutputPanel({
     required this.output,
+    required this.steps,
     required this.error,
     required this.running,
     required this.success,
@@ -516,6 +522,7 @@ class _OutputPanel extends StatelessWidget {
   });
 
   final List<String> output;
+  final List<ExecutionStep> steps;
   final String? error;
   final bool running;
   final bool success;
@@ -655,6 +662,13 @@ class _OutputPanel extends StatelessWidget {
                         height: 1.5,
                       ),
                     ),
+                  // Canlı değişken izleyici — kod başarıyla en az bir
+                  // satır çalıştırdıysa (hata olsa bile o ana kadarki
+                  // adımlar) değişkenlerin nasıl değiştiğini gösterir.
+                  if (!running && steps.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    _VariableTrackerCard(steps: steps),
+                  ],
                   // Akıllı öğretmen ipucu kartı — hata veya yanlış çıktı varsa.
                   if (hint != null) ...[
                     const SizedBox(height: 16),
@@ -709,6 +723,242 @@ class _OutputPanel extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Canlı değişken izleyici — kod satır satır çalıştırılırken değişkenlerin
+/// nasıl değiştiğini adım adım (geri/ileri) gösteren mini-debugger paneli.
+class _VariableTrackerCard extends StatefulWidget {
+  const _VariableTrackerCard({required this.steps});
+  final List<ExecutionStep> steps;
+
+  @override
+  State<_VariableTrackerCard> createState() => _VariableTrackerCardState();
+}
+
+class _VariableTrackerCardState extends State<_VariableTrackerCard> {
+  late int _index;
+
+  @override
+  void initState() {
+    super.initState();
+    _index = widget.steps.length - 1;
+  }
+
+  @override
+  void didUpdateWidget(_VariableTrackerCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.steps, widget.steps)) {
+      // Yeni bir çalıştırma sonucu geldi — en son adımdan başla, o en
+      // özetleyici olandır; kullanıcı isterse geriye doğru gezinir.
+      _index = widget.steps.length - 1;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final steps = widget.steps;
+    final step = steps[_index];
+    final previous = _index > 0
+        ? steps[_index - 1].variables
+        : const <String, dynamic>{};
+
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.visibility_rounded,
+                color: AppColors.gold,
+                size: 14,
+              ),
+              const SizedBox(width: 4),
+              const Flexible(
+                child: Text(
+                  'DEĞİŞKEN İZLEYİCİ',
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: AppColors.gold,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                'Adım ${_index + 1}/${steps.length}',
+                style: const TextStyle(
+                  color: Color(0xFFAAAAAA),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _StepButton(
+                icon: Icons.chevron_left_rounded,
+                tooltip: 'Önceki adım',
+                onTap: _index > 0 ? () => setState(() => _index--) : null,
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E1E),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'satır ${step.line}: ${step.sourceLine}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color(0xFFD4D4D4),
+                      fontFamily: 'monospace',
+                      fontSize: 11,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              _StepButton(
+                icon: Icons.chevron_right_rounded,
+                tooltip: 'Sonraki adım',
+                onTap: _index < steps.length - 1
+                    ? () => setState(() => _index++)
+                    : null,
+              ),
+            ],
+          ),
+          if (step.printedOutput != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              '→ ekrana yazdı: "${step.printedOutput}"',
+              style: const TextStyle(
+                color: AppColors.success,
+                fontFamily: 'monospace',
+                fontSize: 11,
+              ),
+            ),
+          ],
+          if (step.variables.isEmpty) ...[
+            const SizedBox(height: 6),
+            const Text(
+              'Henüz bir değişken tanımlanmadı.',
+              style: TextStyle(
+                color: Color(0xFF6A6A6A),
+                fontFamily: 'monospace',
+                fontSize: 11,
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: 8),
+            ...step.variables.entries.map((e) {
+              final changed = previous[e.key] != e.value;
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        e.key,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF9CDCFE),
+                          fontFamily: 'monospace',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const Text(
+                      '  =  ',
+                      style: TextStyle(
+                        color: Color(0xFF6A6A6A),
+                        fontFamily: 'monospace',
+                        fontSize: 12,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        '${e.value}',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: changed
+                              ? AppColors.gold
+                              : const Color(0xFFCE9178),
+                          fontFamily: 'monospace',
+                          fontSize: 12,
+                          fontWeight: changed
+                              ? FontWeight.w800
+                              : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    if (changed)
+                      const Icon(
+                        Icons.fiber_manual_record,
+                        color: AppColors.gold,
+                        size: 8,
+                      ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _StepButton extends StatelessWidget {
+  const _StepButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onTap != null;
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(4),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(4),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: Icon(
+              icon,
+              size: 18,
+              color: enabled ? Colors.white : const Color(0xFF4A4A4A),
+            ),
+          ),
+        ),
       ),
     );
   }

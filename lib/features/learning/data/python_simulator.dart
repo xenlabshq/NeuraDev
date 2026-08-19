@@ -1,4 +1,5 @@
 import '../domain/entities/error_hint.dart';
+import '../domain/entities/execution_step.dart';
 import 'python/py_line.dart';
 import 'python/python_expression_evaluator.dart';
 import 'python/python_statement_executor.dart';
@@ -15,6 +16,7 @@ class PythonSimulator {
   final List<String> _output = [];
   final Map<String, dynamic> _variables = {};
   final List<String> _errors = [];
+  final List<ExecutionStep> _steps = [];
 
   List<String> get output => List.unmodifiable(_output);
   List<String> get errors => List.unmodifiable(_errors);
@@ -27,6 +29,7 @@ class PythonSimulator {
     _output.clear();
     _errors.clear();
     _variables.clear();
+    _steps.clear();
 
     final evaluator = PyExpressionEvaluator(
       variables: _variables,
@@ -37,6 +40,7 @@ class PythonSimulator {
       output: _output,
       variables: _variables,
       errors: _errors,
+      steps: _steps,
     );
 
     try {
@@ -68,6 +72,7 @@ class PythonSimulator {
         errors: List.from(_errors),
         success: !hasError,
         hint: hint,
+        steps: List.of(_steps),
       );
     }
 
@@ -76,6 +81,7 @@ class PythonSimulator {
       errors: List.from(_errors),
       success: !hasError,
       hint: hint,
+      steps: List.of(_steps),
     );
   }
 }
@@ -85,6 +91,7 @@ class PythonSimulatorResult {
     required this.output,
     required this.errors,
     required this.success,
+    required this.steps,
     this.hint,
   });
   final List<String> output;
@@ -93,6 +100,10 @@ class PythonSimulatorResult {
 
   /// Akıllı hata analizi sonucu — kullanıcıya öğretmen gibi ipucu verir.
   final ErrorHint? hint;
+
+  /// Kod satır satır çalıştırılırken biriken değişken durumu anlık
+  /// görüntüleri — "canlı değişken izleyici" panelinde kullanılır.
+  final List<ExecutionStep> steps;
 
   /// Çıktıyı tek string olarak (her satır newline ile).
   String get combinedOutput => output.join('\n');

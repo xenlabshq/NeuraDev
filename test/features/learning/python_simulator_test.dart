@@ -154,4 +154,45 @@ while i < 1000000:
       expect(second.output, ['temiz']);
     });
   });
+
+  group('PythonSimulator execution steps (canlı değişken izleyici)', () {
+    test('records one step per assignment with a variable snapshot', () {
+      final result = sim.run('x = 1\ny = 2');
+      expect(result.steps.length, 2);
+      expect(result.steps[0].line, 1);
+      expect(result.steps[0].variables, {'x': 1});
+      expect(result.steps[1].line, 2);
+      expect(result.steps[1].variables, {'x': 1, 'y': 2});
+    });
+
+    test('a print step carries its printed output', () {
+      final result = sim.run('x = 5\nprint(x)');
+      expect(result.steps[1].printedOutput, '5');
+    });
+
+    test('earlier steps keep their own snapshot after later reassignment', () {
+      final result = sim.run('x = 1\nx = 2\nx = 3');
+      expect(result.steps[0].variables, {'x': 1});
+      expect(result.steps[1].variables, {'x': 2});
+      expect(result.steps[2].variables, {'x': 3});
+    });
+
+    test('a for loop records one step per body-line per iteration', () {
+      final result = sim.run('for i in range(3):\n    x = i');
+      // 3 iterasyon × 1 satır (x = i) = 3 adım.
+      expect(result.steps.length, 3);
+      expect(result.steps.map((s) => s.variables['x']), [0, 1, 2]);
+    });
+
+    test('steps are capped so a long loop cannot grow unbounded', () {
+      final result = sim.run('for i in range(1000):\n    x = i');
+      expect(result.steps.length, lessThanOrEqualTo(300));
+    });
+
+    test('a failed line is not recorded as a step', () {
+      final result = sim.run('x = 1\nbilinmeyen_ifade_@@@');
+      expect(result.steps.length, 1);
+      expect(result.steps.single.variables, {'x': 1});
+    });
+  });
 }

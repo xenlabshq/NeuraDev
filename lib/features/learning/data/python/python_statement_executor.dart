@@ -1,3 +1,4 @@
+import '../../domain/entities/execution_step.dart';
 import 'py_line.dart';
 import 'python_expression_evaluator.dart';
 
@@ -8,18 +9,24 @@ class PyStatementExecutor {
     required List<String> output,
     required Map<String, dynamic> variables,
     required List<String> errors,
+    required List<ExecutionStep> steps,
     int maxLoopIterations = 200,
+    int maxSteps = 300,
   }) : _evaluator = evaluator,
        _output = output,
        _variables = variables,
        _errors = errors,
-       _maxLoopIterations = maxLoopIterations;
+       _steps = steps,
+       _maxLoopIterations = maxLoopIterations,
+       _maxSteps = maxSteps;
 
   final PyExpressionEvaluator _evaluator;
   final List<String> _output;
   final Map<String, dynamic> _variables;
   final List<String> _errors;
+  final List<ExecutionStep> _steps;
   final int _maxLoopIterations;
+  final int _maxSteps;
   int _loopCount = 0;
 
   bool get _hasError => _errors.isNotEmpty;
@@ -64,9 +71,21 @@ class PyStatementExecutor {
       }
 
       // Tek satırlık ifade
-      _evalLine(c);
+      _evalLine(line);
       i++;
     }
+  }
+
+  void _recordStep(PyLine line, {String? printedOutput}) {
+    if (_steps.length >= _maxSteps) return;
+    _steps.add(
+      ExecutionStep(
+        line: line.number,
+        sourceLine: line.content,
+        variables: Map<String, dynamic>.of(_variables),
+        printedOutput: printedOutput,
+      ),
+    );
   }
 
   /// Bir blok gövdesini (for/while/if içeriği) yürütür.
@@ -251,7 +270,9 @@ class PyStatementExecutor {
     return endLine;
   }
 
-  void _evalLine(String c) {
+  void _evalLine(PyLine line) {
+    final c = line.content;
+
     // print(...)
     final printMatch = _matchPattern(
       c,
@@ -265,18 +286,22 @@ class PyStatementExecutor {
         final v = _evaluator.eval(arg.trim());
         parts.add(_evaluator.stringify(v));
       }
-      _output.add(parts.join(' '));
+      final printed = parts.join(' ');
+      _output.add(printed);
+      _recordStep(line, printedOutput: printed);
       return;
     }
 
     // open(...) (kullanıcı dosya yazma/okuma simüle ediyoruz)
     if (c.startsWith('open(')) {
       // Basitçe atla, çıktı üretmiyor
+      _recordStep(line);
       return;
     }
 
     // dosya.write(...) / dosya.close() — no-op
     if (RegExp(r'^\w+\.(write|close|read)\(').hasMatch(c)) {
+      _recordStep(line);
       return;
     }
 
@@ -286,6 +311,7 @@ class PyStatementExecutor {
       final name = assignMatch.group(1)!;
       final expr = assignMatch.group(2)!;
       _variables[name] = _evaluator.eval(expr);
+      _recordStep(line);
       return;
     }
 
