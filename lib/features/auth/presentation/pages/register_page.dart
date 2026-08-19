@@ -31,7 +31,9 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    await ref.read(authStateProvider.notifier).registerWithEmail(
+    await ref
+        .read(authStateProvider.notifier)
+        .registerWithEmail(
           email: _email.text.trim(),
           password: _password.text,
           displayName: _name.text.trim(),
@@ -50,8 +52,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading =
-        ref.watch(authStateProvider.select((s) => s.isLoading));
+    final isLoading = ref.watch(authStateProvider.select((s) => s.isLoading));
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -71,6 +72,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 children: [
                   IconButton(
                     onPressed: () => context.pop(),
+                    tooltip: 'Geri',
                     icon: const Icon(
                       Icons.arrow_back_rounded,
                       color: Colors.white,
@@ -118,8 +120,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       controller: _name,
                       decoration: const InputDecoration(
                         hintText: 'Adın Soyadın',
-                        prefixIcon: Icon(Icons.person_outline_rounded,
-                            size: 20),
+                        prefixIcon: Icon(
+                          Icons.person_outline_rounded,
+                          size: 20,
+                        ),
                       ),
                       validator: (v) =>
                           v == null || v.isEmpty ? 'Ad gerekli' : null,
@@ -135,8 +139,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         hintText: 'ornek@email.com',
-                        prefixIcon:
-                            Icon(Icons.alternate_email_rounded, size: 20),
+                        prefixIcon: Icon(
+                          Icons.alternate_email_rounded,
+                          size: 20,
+                        ),
                       ),
                       validator: (v) => (v == null || !v.contains('@'))
                           ? 'Geçersiz e-posta'
@@ -153,12 +159,10 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       obscureText: true,
                       decoration: const InputDecoration(
                         hintText: 'En az 6 karakter',
-                        prefixIcon:
-                            Icon(Icons.lock_outline_rounded, size: 20),
+                        prefixIcon: Icon(Icons.lock_outline_rounded, size: 20),
                       ),
-                      validator: (v) => v == null || v.length < 6
-                          ? 'En az 6 karakter'
-                          : null,
+                      validator: (v) =>
+                          v == null || v.length < 6 ? 'En az 6 karakter' : null,
                     ),
                     const SizedBox(height: 24),
                     Text(
@@ -246,8 +250,7 @@ class _RoleChip extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
             color: selected ? AppColors.primary : Colors.white,
             borderRadius: BorderRadius.circular(AppRadius.full),
@@ -271,8 +274,7 @@ class _RoleChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color:
-                      selected ? Colors.white : AppColors.textPrimary,
+                  color: selected ? Colors.white : AppColors.textPrimary,
                 ),
               ),
             ],

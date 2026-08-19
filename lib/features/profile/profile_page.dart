@@ -17,16 +17,13 @@ import 'package:neuroup/shared/widgets/level_frame.dart';
 /// Tema-aware erişim: context'ten scheme alarak hardcoded token
 /// yerine `Theme.of(context)` döndürür.
 extension AppColorsTextX on AppColors {
-  static Color textPrimary(BuildContext c) =>
-      Theme.of(c).colorScheme.onSurface;
+  static Color textPrimary(BuildContext c) => Theme.of(c).colorScheme.onSurface;
   static Color textSecondary(BuildContext c) =>
       Theme.of(c).colorScheme.onSurfaceVariant;
   static Color textTertiary(BuildContext c) =>
       Theme.of(c).colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
-  static Color border(BuildContext c) =>
-      Theme.of(c).colorScheme.outline;
-  static Color surface(BuildContext c) =>
-      Theme.of(c).colorScheme.surface;
+  static Color border(BuildContext c) => Theme.of(c).colorScheme.outline;
+  static Color surface(BuildContext c) => Theme.of(c).colorScheme.surface;
   static Color surfaceAlt(BuildContext c) =>
       Theme.of(c).colorScheme.surfaceContainerHigh;
 }
@@ -39,7 +36,8 @@ class ProfilePage extends ConsumerWidget {
     final user = ref.watch(currentAuthUserProvider);
     final progress = ref.watch(userProgressProvider);
 
-    final effectiveUser = user ??
+    final effectiveUser =
+        user ??
         UserProfile(
           id: 'demo',
           email: 'demo@neuroup.app',
@@ -74,8 +72,7 @@ class ProfilePage extends ConsumerWidget {
                         )
                       else
                         const SizedBox(height: 16),
-                      if (!isWide)
-                        _SettingsSection(user: effectiveUser),
+                      if (!isWide) _SettingsSection(user: effectiveUser),
                       const SizedBox(height: 96),
                     ],
                   ),
@@ -279,8 +276,7 @@ class _LevelCard extends ConsumerWidget {
               const Spacer(),
               // Mini seviye pill'i — kompakt: 'SEV. 1'.
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: level.tier.color.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(10),
@@ -450,9 +446,7 @@ class _BadgeMini extends StatelessWidget {
               style: TextStyle(
                 fontSize: 9,
                 fontWeight: FontWeight.w700,
-                color: isUnlocked
-                    ? tokens.textPrimary
-                    : tokens.textTertiary,
+                color: isUnlocked ? tokens.textPrimary : tokens.textTertiary,
               ),
             ),
           ],
@@ -604,17 +598,21 @@ class _SettingsSection extends ConsumerWidget {
 
   // ---- yardımcı etiketler ----
   String _themeLabel(AppThemeMode m) => switch (m) {
-        AppThemeMode.system => 'Sistem',
-        AppThemeMode.light => 'Açık',
-        AppThemeMode.dark => 'Koyu',
-      };
+    AppThemeMode.system => 'Sistem',
+    AppThemeMode.light => 'Açık',
+    AppThemeMode.dark => 'Koyu',
+  };
   String _langLabel(AppLanguage l) => switch (l) {
-        AppLanguage.tr => 'Türkçe',
-        AppLanguage.en => 'English',
-      };
+    AppLanguage.tr => 'Türkçe',
+    AppLanguage.en => 'English',
+  };
 
   // ---- Hesap Bilgileri sheet ----
-  void _showAccountSheet(BuildContext context, WidgetRef ref, UserProfile user) {
+  void _showAccountSheet(
+    BuildContext context,
+    WidgetRef ref,
+    UserProfile user,
+  ) {
     final nameCtl = TextEditingController(text: user.displayName);
     final emailCtl = TextEditingController(text: user.email);
     showModalBottomSheet<void>(
@@ -729,113 +727,114 @@ class _SettingsSection extends ConsumerWidget {
         var push = prefs.pushEnabled;
         var email = prefs.emailDigest;
         var sound = prefs.soundEnabled;
-        return StatefulBuilder(builder: (ctx, setLocal) {
-          return Padding(
-            // Klavyenin altında kalmamak için viewInsets, yüzen alt
-            // bar için kBottomBarHeight.
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(ctx).viewInsets.bottom > 0
-                  ? MediaQuery.of(ctx).viewInsets.bottom
-                  : kBottomBarHeight + 12,
-            ),
-            child: SafeArea(
-              top: false,
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(28),
-                    bottom: Radius.circular(28),
+        return StatefulBuilder(
+          builder: (ctx, setLocal) {
+            return Padding(
+              // Klavyenin altında kalmamak için viewInsets, yüzen alt
+              // bar için kBottomBarHeight.
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(ctx).viewInsets.bottom > 0
+                    ? MediaQuery.of(ctx).viewInsets.bottom
+                    : kBottomBarHeight + 12,
+              ),
+              child: SafeArea(
+                top: false,
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                      bottom: Radius.circular(28),
+                    ),
                   ),
-                ),
-                // SwitchListTile ink splashes — Material ile sarılmazsa
-                // Container'ın rengi splash'ı gizler. Bu yüzden tüm
-                // içeriği Material içine alıyoruz; aynı zamanda içeriği
-                // SingleChildScrollView ile sarıp olası RenderFlex
-                // overflow'u önlüyoruz.
-                child: Material(
-                  color: Colors.transparent,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(8, 16, 8, 12),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Bildirimler',
-                                style: Theme.of(ctx).textTheme.headlineSmall,
-                              ),
-                            ],
+                  // SwitchListTile ink splashes — Material ile sarılmazsa
+                  // Container'ın rengi splash'ı gizler. Bu yüzden tüm
+                  // içeriği Material içine alıyoruz; aynı zamanda içeriği
+                  // SingleChildScrollView ile sarıp olası RenderFlex
+                  // overflow'u önlüyoruz.
+                  child: Material(
+                    color: Colors.transparent,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(8, 16, 8, 12),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Row(
+                              children: [
+                                Text(
+                                  'Bildirimler',
+                                  style: Theme.of(ctx).textTheme.headlineSmall,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        SwitchListTile(
-                          title: const Text('Bildirimlere izin ver'),
-                          value: enabled,
-                          onChanged: (v) {
-                            setLocal(() => enabled = v);
-                            ref
-                                .read(appSettingsProvider.notifier)
-                                .setNotificationsEnabled(v);
-                          },
-                        ),
-                        SwitchListTile(
-                          title: const Text('Push bildirimler'),
-                          value: push,
-                          onChanged: !enabled
-                              ? null
-                              : (v) {
-                                  setLocal(() => push = v);
-                                  ref
-                                      .read(appSettingsProvider.notifier)
-                                      .setPushEnabled(v);
-                                },
-                        ),
-                        SwitchListTile(
-                          title: const Text('E-posta özeti'),
-                          value: email,
-                          onChanged: !enabled
-                              ? null
-                              : (v) {
-                                  setLocal(() => email = v);
-                                  ref
-                                      .read(appSettingsProvider.notifier)
-                                      .setEmailDigest(v);
-                                },
-                        ),
-                        SwitchListTile(
-                          title: const Text('Bildirim sesi'),
-                          value: sound,
-                          onChanged: !enabled
-                              ? null
-                              : (v) {
-                                  setLocal(() => sound = v);
-                                  ref
-                                      .read(appSettingsProvider.notifier)
-                                      .setSoundEnabled(v);
-                                },
-                        ),
-                        const SizedBox(height: 4),
-                        Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 8),
-                          child: FilledButton(
-                            onPressed: () => Navigator.of(ctx).pop(),
-                            child: const Text('Tamam'),
+                          const SizedBox(height: 4),
+                          SwitchListTile(
+                            title: const Text('Bildirimlere izin ver'),
+                            value: enabled,
+                            onChanged: (v) {
+                              setLocal(() => enabled = v);
+                              ref
+                                  .read(appSettingsProvider.notifier)
+                                  .setNotificationsEnabled(v);
+                            },
                           ),
-                        ),
-                      ],
+                          SwitchListTile(
+                            title: const Text('Push bildirimler'),
+                            value: push,
+                            onChanged: !enabled
+                                ? null
+                                : (v) {
+                                    setLocal(() => push = v);
+                                    ref
+                                        .read(appSettingsProvider.notifier)
+                                        .setPushEnabled(v);
+                                  },
+                          ),
+                          SwitchListTile(
+                            title: const Text('E-posta özeti'),
+                            value: email,
+                            onChanged: !enabled
+                                ? null
+                                : (v) {
+                                    setLocal(() => email = v);
+                                    ref
+                                        .read(appSettingsProvider.notifier)
+                                        .setEmailDigest(v);
+                                  },
+                          ),
+                          SwitchListTile(
+                            title: const Text('Bildirim sesi'),
+                            value: sound,
+                            onChanged: !enabled
+                                ? null
+                                : (v) {
+                                    setLocal(() => sound = v);
+                                    ref
+                                        .read(appSettingsProvider.notifier)
+                                        .setSoundEnabled(v);
+                                  },
+                          ),
+                          const SizedBox(height: 4),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: FilledButton(
+                              onPressed: () => Navigator.of(ctx).pop(),
+                              child: const Text('Tamam'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        });
+            );
+          },
+        );
       },
     );
   }
@@ -851,108 +850,116 @@ class _SettingsSection extends ConsumerWidget {
         var theme = prefs.themeMode;
         var lang = prefs.language;
         var scale = prefs.textScale;
-        return StatefulBuilder(builder: (ctx, setLocal) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(ctx).viewInsets.bottom > 0
-                  ? MediaQuery.of(ctx).viewInsets.bottom
-                  : kBottomBarHeight + 12,
-            ),
-            child: SafeArea(
-              top: false,
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(28),
-                    bottom: Radius.circular(28),
+        return StatefulBuilder(
+          builder: (ctx, setLocal) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(ctx).viewInsets.bottom > 0
+                    ? MediaQuery.of(ctx).viewInsets.bottom
+                    : kBottomBarHeight + 12,
+              ),
+              child: SafeArea(
+                top: false,
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                      bottom: Radius.circular(28),
+                    ),
                   ),
-                ),
-                // SingleChildScrollView ile olası RenderFlex overflow
-                // önlendi (küçük pencerede butonlar sığmazsa scroll).
-                child: Material(
-                  color: Colors.transparent,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Görünüm',
-                            style: Theme.of(ctx).textTheme.headlineSmall),
-                        const SizedBox(height: 12),
-                        const Text('Tema'),
-                        const SizedBox(height: 4),
-                        SegmentedButton<AppThemeMode>(
-                          segments: const [
-                            ButtonSegment(
+                  // SingleChildScrollView ile olası RenderFlex overflow
+                  // önlendi (küçük pencerede butonlar sığmazsa scroll).
+                  child: Material(
+                    color: Colors.transparent,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Görünüm',
+                            style: Theme.of(ctx).textTheme.headlineSmall,
+                          ),
+                          const SizedBox(height: 12),
+                          const Text('Tema'),
+                          const SizedBox(height: 4),
+                          SegmentedButton<AppThemeMode>(
+                            segments: const [
+                              ButtonSegment(
                                 value: AppThemeMode.system,
-                                label: Text('Sistem')),
-                            ButtonSegment(
+                                label: Text('Sistem'),
+                              ),
+                              ButtonSegment(
                                 value: AppThemeMode.light,
-                                label: Text('Açık')),
-                            ButtonSegment(
+                                label: Text('Açık'),
+                              ),
+                              ButtonSegment(
                                 value: AppThemeMode.dark,
-                                label: Text('Koyu')),
-                          ],
-                          selected: {theme},
-                          onSelectionChanged: (s) {
-                            setLocal(() => theme = s.first);
-                            ref
-                                .read(appSettingsProvider.notifier)
-                                .setThemeMode(s.first);
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        const Text('Dil'),
-                        const SizedBox(height: 4),
-                        SegmentedButton<AppLanguage>(
-                          segments: const [
-                            ButtonSegment(
+                                label: Text('Koyu'),
+                              ),
+                            ],
+                            selected: {theme},
+                            onSelectionChanged: (s) {
+                              setLocal(() => theme = s.first);
+                              ref
+                                  .read(appSettingsProvider.notifier)
+                                  .setThemeMode(s.first);
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          const Text('Dil'),
+                          const SizedBox(height: 4),
+                          SegmentedButton<AppLanguage>(
+                            segments: const [
+                              ButtonSegment(
                                 value: AppLanguage.tr,
-                                label: Text('Türkçe')),
-                            ButtonSegment(
+                                label: Text('Türkçe'),
+                              ),
+                              ButtonSegment(
                                 value: AppLanguage.en,
-                                label: Text('English')),
-                          ],
-                          selected: {lang},
-                          onSelectionChanged: (s) {
-                            setLocal(() => lang = s.first);
-                            ref
-                                .read(appSettingsProvider.notifier)
-                                .setLanguage(s.first);
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                            'Metin boyutu: ${(scale * 100).round()}%'),
-                        Slider(
-                          value: scale,
-                          min: 0.8,
-                          max: 1.4,
-                          divisions: 6,
-                          label: '${(scale * 100).round()}%',
-                          onChanged: (v) {
-                            setLocal(() => scale = v);
-                            ref
-                                .read(appSettingsProvider.notifier)
-                                .setTextScale(v);
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        FilledButton(
-                          onPressed: () => Navigator.of(ctx).pop(),
-                          child: const Text('Tamam'),
-                        ),
-                      ],
+                                label: Text('English'),
+                              ),
+                            ],
+                            selected: {lang},
+                            onSelectionChanged: (s) {
+                              setLocal(() => lang = s.first);
+                              ref
+                                  .read(appSettingsProvider.notifier)
+                                  .setLanguage(s.first);
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          Text('Metin boyutu: ${(scale * 100).round()}%'),
+                          Slider(
+                            value: scale,
+                            min: 0.8,
+                            max: 1.4,
+                            divisions: 6,
+                            label: '${(scale * 100).round()}%',
+                            onChanged: (v) {
+                              setLocal(() => scale = v);
+                              ref
+                                  .read(appSettingsProvider.notifier)
+                                  .setTextScale(v);
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          FilledButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text('Tamam'),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        });
+            );
+          },
+        );
       },
     );
   }
@@ -967,87 +974,87 @@ class _SettingsSection extends ConsumerWidget {
       builder: (ctx) {
         var analytics = prefs.analyticsEnabled;
         var crash = prefs.crashReportsEnabled;
-        return StatefulBuilder(builder: (ctx, setLocal) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(ctx).viewInsets.bottom > 0
-                  ? MediaQuery.of(ctx).viewInsets.bottom
-                  : kBottomBarHeight + 12,
-            ),
-            child: SafeArea(
-              top: false,
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(28),
-                    bottom: Radius.circular(28),
+        return StatefulBuilder(
+          builder: (ctx, setLocal) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(ctx).viewInsets.bottom > 0
+                    ? MediaQuery.of(ctx).viewInsets.bottom
+                    : kBottomBarHeight + 12,
+              ),
+              child: SafeArea(
+                top: false,
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                      bottom: Radius.circular(28),
+                    ),
                   ),
-                ),
-                // SwitchListTile ink splashes — Material ile sarılmazsa
-                // Container rengi splash'ı gizler. Aynı zamanda içerik
-                // SingleChildScrollView ile sarılarak olası RenderFlex
-                // overflow önlendi.
-                child: Material(
-                  color: Colors.transparent,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(8, 16, 8, 12),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 8),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Gizlilik',
-                                style: Theme.of(ctx).textTheme.headlineSmall,
-                              ),
-                            ],
+                  // SwitchListTile ink splashes — Material ile sarılmazsa
+                  // Container rengi splash'ı gizler. Aynı zamanda içerik
+                  // SingleChildScrollView ile sarılarak olası RenderFlex
+                  // overflow önlendi.
+                  child: Material(
+                    color: Colors.transparent,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(8, 16, 8, 12),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Row(
+                              children: [
+                                Text(
+                                  'Gizlilik',
+                                  style: Theme.of(ctx).textTheme.headlineSmall,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        SwitchListTile(
-                          title: const Text('Anonim analiz'),
-                          subtitle: const Text('Kullanım verilerini paylaş'),
-                          value: analytics,
-                          onChanged: (v) {
-                            setLocal(() => analytics = v);
-                            ref
-                                .read(appSettingsProvider.notifier)
-                                .setAnalyticsEnabled(v);
-                          },
-                        ),
-                        SwitchListTile(
-                          title: const Text('Çökme raporları'),
-                          subtitle: const Text('Hata loglarını gönder'),
-                          value: crash,
-                          onChanged: (v) {
-                            setLocal(() => crash = v);
-                            ref
-                                .read(appSettingsProvider.notifier)
-                                .setCrashReportsEnabled(v);
-                          },
-                        ),
-                        const SizedBox(height: 4),
-                        Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 8),
-                          child: FilledButton(
-                            onPressed: () => Navigator.of(ctx).pop(),
-                            child: const Text('Tamam'),
+                          const SizedBox(height: 4),
+                          SwitchListTile(
+                            title: const Text('Anonim analiz'),
+                            subtitle: const Text('Kullanım verilerini paylaş'),
+                            value: analytics,
+                            onChanged: (v) {
+                              setLocal(() => analytics = v);
+                              ref
+                                  .read(appSettingsProvider.notifier)
+                                  .setAnalyticsEnabled(v);
+                            },
                           ),
-                        ),
-                      ],
+                          SwitchListTile(
+                            title: const Text('Çökme raporları'),
+                            subtitle: const Text('Hata loglarını gönder'),
+                            value: crash,
+                            onChanged: (v) {
+                              setLocal(() => crash = v);
+                              ref
+                                  .read(appSettingsProvider.notifier)
+                                  .setCrashReportsEnabled(v);
+                            },
+                          ),
+                          const SizedBox(height: 4),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: FilledButton(
+                              onPressed: () => Navigator.of(ctx).pop(),
+                              child: const Text('Tamam'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        });
+            );
+          },
+        );
       },
     );
   }
@@ -1057,28 +1064,33 @@ class _SettingsSection extends ConsumerWidget {
     final entries = const [
       _FaqEntry(
         q: 'Nasıl ders tamamlarım?',
-        a: 'Bir adaya tıkla, ders kodunu yaz veya örnek çözümü uygula, '
+        a:
+            'Bir adaya tıkla, ders kodunu yaz veya örnek çözümü uygula, '
             'Çalıştır butonuna bas. Çıktı doğruysa DOĞRU rozeti görünür, '
             'ardından +XP butonu aktif olur.',
       ),
       _FaqEntry(
         q: 'Bir sonraki ada nasıl açılır?',
-        a: 'Bir önceki adanın tüm derslerini tamamla. Ada tamamen '
+        a:
+            'Bir önceki adanın tüm derslerini tamamla. Ada tamamen '
             'tamamlanınca bir sonraki ada otomatik açılır.',
       ),
       _FaqEntry(
         q: 'XP ve seviye nasıl çalışır?',
-        a: 'Her ders belirli XP verir. Her 100 XP 1 level atlatır. '
+        a:
+            'Her ders belirli XP verir. Her 100 XP 1 level atlatır. '
             'Bronze → Silver → Gold → Diamond → Master tierları var.',
       ),
       _FaqEntry(
         q: 'Reels vitrin nedir?',
-        a: 'Geliştirici topluluğunun oyun demosu paylaştığı kısa video '
+        a:
+            'Geliştirici topluluğunun oyun demosu paylaştığı kısa video '
             'akışıdır. Beğeni, yorum ve CTA butonları içerir.',
       ),
       _FaqEntry(
         q: 'Demo modda veriler kaydedilir mi?',
-        a: 'Hayır. Demo modda tüm veriler in-memory çalışır. Firebase '
+        a:
+            'Hayır. Demo modda tüm veriler in-memory çalışır. Firebase '
             'bağlantısı gerçek kayıt için gereklidir.',
       ),
     ];
@@ -1094,7 +1106,9 @@ class _SettingsSection extends ConsumerWidget {
           builder: (_, scrollCtrl) => Container(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(28),
+              ),
             ),
             child: Column(
               children: [
@@ -1115,6 +1129,7 @@ class _SettingsSection extends ConsumerWidget {
                       Text('SSS', style: Theme.of(ctx).textTheme.headlineSmall),
                       const Spacer(),
                       IconButton(
+                        tooltip: 'Kapat',
                         icon: const Icon(Icons.close_rounded),
                         onPressed: () => Navigator.of(ctx).pop(),
                       ),
@@ -1141,8 +1156,7 @@ class _SettingsSection extends ConsumerWidget {
                         entries[i].q,
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
-                      childrenPadding:
-                          const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       children: [
                         Align(
                           alignment: Alignment.centerLeft,
@@ -1220,9 +1234,13 @@ class _SettingsSection extends ConsumerWidget {
                   const SizedBox(height: 20),
                   const _AboutRow(label: 'Sürüm', value: '1.0.0'),
                   const _AboutRow(
-                      label: 'Platform', value: 'iOS • Android • Linux'),
+                    label: 'Platform',
+                    value: 'iOS • Android • Linux',
+                  ),
                   const _AboutRow(
-                      label: 'Mimari', value: 'Riverpod + Clean Arch'),
+                    label: 'Mimari',
+                    value: 'Riverpod + Clean Arch',
+                  ),
                   const _AboutRow(label: 'Paket', value: 'com.neuroup.app'),
                   const SizedBox(height: 20),
                   FilledButton(
@@ -1312,19 +1330,24 @@ class _SettingsSection extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
                   _ResetConsequenceRow(
-                      icon: Icons.school_outlined, text: 'Tüm ada ilerlemen'),
+                    icon: Icons.school_outlined,
+                    text: 'Tüm ada ilerlemen',
+                  ),
                   SizedBox(height: 6),
                   _ResetConsequenceRow(
-                      icon: Icons.star_outline_rounded,
-                      text: 'XP ve seviye bilgilerin'),
+                    icon: Icons.star_outline_rounded,
+                    text: 'XP ve seviye bilgilerin',
+                  ),
                   SizedBox(height: 6),
                   _ResetConsequenceRow(
-                      icon: Icons.local_fire_department_outlined,
-                      text: 'Günlük streak sayacın'),
+                    icon: Icons.local_fire_department_outlined,
+                    text: 'Günlük streak sayacın',
+                  ),
                   SizedBox(height: 6),
                   _ResetConsequenceRow(
-                      icon: Icons.emoji_events_outlined,
-                      text: 'Kazanılmış rozetler'),
+                    icon: Icons.emoji_events_outlined,
+                    text: 'Kazanılmış rozetler',
+                  ),
                 ],
               ),
             ),
@@ -1358,69 +1381,71 @@ class _SettingsSection extends ConsumerWidget {
       barrierDismissible: false,
       builder: (ctx) {
         bool matches = false;
-        return StatefulBuilder(builder: (ctx, setLocal) {
-          return AlertDialog(
-            icon: Icon(
-              Icons.lock_outline_rounded,
-              color: AppColors.error,
-              size: 32,
-            ),
-            title: const Text(
-              'Son Onay',
-              textAlign: TextAlign.center,
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'Onaylamak için aşağıya büyük harfle '
-                  '"SIFIRLA" yaz:',
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: ctl,
-                  autofocus: true,
-                  textCapitalization: TextCapitalization.characters,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'SIFIRLA',
+        return StatefulBuilder(
+          builder: (ctx, setLocal) {
+            return AlertDialog(
+              icon: Icon(
+                Icons.lock_outline_rounded,
+                color: AppColors.error,
+                size: 32,
+              ),
+              title: const Text(
+                'Son Onay',
+                textAlign: TextAlign.center,
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Onaylamak için aşağıya büyük harfle '
+                    '"SIFIRLA" yaz:',
+                    textAlign: TextAlign.center,
                   ),
-                  onChanged: (v) {
-                    setLocal(() => matches = v.trim() == 'SIFIRLA');
-                  },
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: ctl,
+                    autofocus: true,
+                    textCapitalization: TextCapitalization.characters,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'SIFIRLA',
+                    ),
+                    onChanged: (v) {
+                      setLocal(() => matches = v.trim() == 'SIFIRLA');
+                    },
+                  ),
+                ],
+              ),
+              actionsAlignment: MainAxisAlignment.spaceBetween,
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Vazgeç'),
+                ),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.error,
+                  ),
+                  onPressed: matches
+                      ? () {
+                          Navigator.of(ctx).pop();
+                          ref
+                              .read(learningProgressProvider.notifier)
+                              .resetProgress();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('İlerleme sıfırlandı'),
+                            ),
+                          );
+                        }
+                      : null,
+                  child: const Text('Sıfırla'),
                 ),
               ],
-            ),
-            actionsAlignment: MainAxisAlignment.spaceBetween,
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Vazgeç'),
-              ),
-              FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.error,
-                ),
-                onPressed: matches
-                    ? () {
-                        Navigator.of(ctx).pop();
-                        ref
-                            .read(learningProgressProvider.notifier)
-                            .resetProgress();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('İlerleme sıfırlandı'),
-                          ),
-                        );
-                      }
-                    : null,
-                child: const Text('Sıfırla'),
-              ),
-            ],
-          );
-        });
+            );
+          },
+        );
       },
     );
   }

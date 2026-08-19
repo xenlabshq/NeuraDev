@@ -42,8 +42,7 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
     final island = ref
         .read(islandsProvider)
         .firstWhereOrNull((i) => i.id == widget.islandId);
-    final node = island?.nodes
-        .firstWhereOrNull((n) => n.id == widget.nodeId);
+    final node = island?.nodes.firstWhereOrNull((n) => n.id == widget.nodeId);
     return (island, node);
   }
 
@@ -96,7 +95,8 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
           ? DateTime.now().difference(_runStartTime!).inMilliseconds
           : 0;
 
-      final isCorrect = result.success &&
+      final isCorrect =
+          result.success &&
           result.combinedOutput.trim() == node.expectedOutput.trim();
 
       setState(() {
@@ -108,7 +108,9 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
       });
 
       // Adaptive engine'e deneme kaydı.
-      ref.read(adaptiveMemoryProvider.notifier).recordAttempt(
+      ref
+          .read(adaptiveMemoryProvider.notifier)
+          .recordAttempt(
             widget.nodeId,
             success: result.success && isCorrect,
             attemptsInSession: _sessionAttempts,
@@ -145,7 +147,9 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
     }
     final (island, node) = _findActive();
     if (island == null || node == null) return;
-    ref.read(learningProgressProvider.notifier).markNodeCompleted(
+    ref
+        .read(learningProgressProvider.notifier)
+        .markNodeCompleted(
           widget.nodeId,
           xpEarned: node.points,
         );
@@ -165,8 +169,6 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
       Navigator.of(context).pop(); // editor'ı kapat → detail_page'e dön
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -206,9 +208,11 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(_showTutorial
-                ? Icons.menu_book_rounded
-                : Icons.menu_book_outlined),
+            icon: Icon(
+              _showTutorial
+                  ? Icons.menu_book_rounded
+                  : Icons.menu_book_outlined,
+            ),
             tooltip: 'Eğitimi göster',
             onPressed: () => setState(() => _showTutorial = !_showTutorial),
           ),
@@ -219,8 +223,7 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
           // Klavye açıldığında (viewInsets.bottom > 0) tutorial'i gizle.
           // Küçük ekranda aynı anda tutorial + minLines:8 editor + klavye
           // olamaz; tutorial RenderFlex overflow'a neden olur.
-          if (_showTutorial &&
-              MediaQuery.viewInsetsOf(context).bottom == 0)
+          if (_showTutorial && MediaQuery.viewInsetsOf(context).bottom == 0)
             _TutorialPanel(
               tutorial: node.tutorial,
               onClose: () => setState(() => _showTutorial = false),
@@ -319,7 +322,11 @@ class _TutorialPanel extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
             child: Row(
               children: [
-                const Icon(Icons.lightbulb_rounded, color: AppColors.gold, size: 18),
+                const Icon(
+                  Icons.lightbulb_rounded,
+                  color: AppColors.gold,
+                  size: 18,
+                ),
                 const SizedBox(width: 6),
                 const Text(
                   'EĞİTİM',
@@ -332,8 +339,12 @@ class _TutorialPanel extends StatelessWidget {
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded,
-                      color: Colors.white70, size: 18),
+                  tooltip: 'Eğitimi kapat',
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    color: Colors.white70,
+                    size: 18,
+                  ),
                   onPressed: onClose,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -430,8 +441,7 @@ class _CodeEditor extends StatelessWidget {
             top: 8,
             right: 12,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 8, vertical: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
                 color: islandColor.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(4),
@@ -538,10 +548,10 @@ class _OutputPanel extends StatelessWidget {
                     color: success
                         ? AppColors.success
                         : (error != null
-                            ? AppColors.error
-                            : (running
-                                ? AppColors.warning
-                                : AppColors.textTertiary)),
+                              ? AppColors.error
+                              : (running
+                                    ? AppColors.warning
+                                    : AppColors.textTertiary)),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -558,7 +568,9 @@ class _OutputPanel extends StatelessWidget {
                 if (success)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.success.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
@@ -566,8 +578,11 @@ class _OutputPanel extends StatelessWidget {
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_rounded,
-                            color: AppColors.success, size: 14),
+                        Icon(
+                          Icons.check_rounded,
+                          color: AppColors.success,
+                          size: 14,
+                        ),
                         SizedBox(width: 4),
                         Text(
                           'DOĞRU',
@@ -658,8 +673,11 @@ class _OutputPanel extends StatelessWidget {
                         children: [
                           const Row(
                             children: [
-                              Icon(Icons.flag_rounded,
-                                  color: AppColors.info, size: 14),
+                              Icon(
+                                Icons.flag_rounded,
+                                color: AppColors.info,
+                                size: 14,
+                              ),
                               SizedBox(width: 4),
                               Text(
                                 'BEKLENEN ÇIKTI',
@@ -777,8 +795,9 @@ class _ActionBar extends StatelessWidget {
                   backgroundColor: success
                       ? AppColors.gold
                       : Colors.grey.shade700,
-                  foregroundColor:
-                      success ? Colors.white : Colors.grey.shade400,
+                  foregroundColor: success
+                      ? Colors.white
+                      : Colors.grey.shade400,
                   minimumSize: const Size.fromHeight(44),
                   padding: const EdgeInsets.symmetric(horizontal: 6),
                   textStyle: const TextStyle(
@@ -824,8 +843,11 @@ class _SuccessDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.celebration_rounded,
-                color: Colors.white, size: 64),
+            const Icon(
+              Icons.celebration_rounded,
+              color: Colors.white,
+              size: 64,
+            ),
             const SizedBox(height: 12),
             const Text(
               'Tebrikler!',
@@ -875,28 +897,28 @@ class _ErrorHintCardState extends State<_ErrorHintCard> {
   bool _expanded = true;
 
   Color _bgFor(ErrorKind k) => switch (k) {
-        ErrorKind.syntax => const Color(0xFF3A1A1F),
-        ErrorKind.name => const Color(0xFF3A2A1A),
-        ErrorKind.type => const Color(0xFF2A1A3A),
-        ErrorKind.outOfBounds => const Color(0xFF3A2A1F),
-        ErrorKind.logic => const Color(0xFF3A361A),
-        ErrorKind.timeout => const Color(0xFF1A2A3A),
-        ErrorKind.zeroDivision => const Color(0xFF3A1A2A),
-        ErrorKind.empty => const Color(0xFF2A2A2A),
-        ErrorKind.unknown => const Color(0xFF2A2A2A),
-      };
+    ErrorKind.syntax => const Color(0xFF3A1A1F),
+    ErrorKind.name => const Color(0xFF3A2A1A),
+    ErrorKind.type => const Color(0xFF2A1A3A),
+    ErrorKind.outOfBounds => const Color(0xFF3A2A1F),
+    ErrorKind.logic => const Color(0xFF3A361A),
+    ErrorKind.timeout => const Color(0xFF1A2A3A),
+    ErrorKind.zeroDivision => const Color(0xFF3A1A2A),
+    ErrorKind.empty => const Color(0xFF2A2A2A),
+    ErrorKind.unknown => const Color(0xFF2A2A2A),
+  };
 
   Color _borderFor(ErrorKind k) => switch (k) {
-        ErrorKind.syntax => const Color(0xFFEF4444),
-        ErrorKind.name => const Color(0xFFF59E0B),
-        ErrorKind.type => const Color(0xFFA855F7),
-        ErrorKind.outOfBounds => const Color(0xFFB45309),
-        ErrorKind.logic => const Color(0xFFEAB308),
-        ErrorKind.timeout => const Color(0xFF3B82F6),
-        ErrorKind.zeroDivision => const Color(0xFFEC4899),
-        ErrorKind.empty => const Color(0xFF6B7280),
-        ErrorKind.unknown => const Color(0xFF6B7280),
-      };
+    ErrorKind.syntax => const Color(0xFFEF4444),
+    ErrorKind.name => const Color(0xFFF59E0B),
+    ErrorKind.type => const Color(0xFFA855F7),
+    ErrorKind.outOfBounds => const Color(0xFFB45309),
+    ErrorKind.logic => const Color(0xFFEAB308),
+    ErrorKind.timeout => const Color(0xFF3B82F6),
+    ErrorKind.zeroDivision => const Color(0xFFEC4899),
+    ErrorKind.empty => const Color(0xFF6B7280),
+    ErrorKind.unknown => const Color(0xFF6B7280),
+  };
 
   @override
   Widget build(BuildContext context) {

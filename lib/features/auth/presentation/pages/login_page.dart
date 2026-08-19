@@ -43,8 +43,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading =
-        ref.watch(authStateProvider.select((s) => s.isLoading));
+    final isLoading = ref.watch(authStateProvider.select((s) => s.isLoading));
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -116,8 +115,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         hintText: 'ornek@email.com',
-                        prefixIcon:
-                            Icon(Icons.alternate_email_rounded, size: 20),
+                        prefixIcon: Icon(
+                          Icons.alternate_email_rounded,
+                          size: 20,
+                        ),
                       ),
                       validator: (v) {
                         if (v == null || v.isEmpty) return 'E-posta gerekli';
@@ -136,19 +137,24 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       obscureText: _obscure,
                       decoration: InputDecoration(
                         hintText: '••••••••',
-                        prefixIcon:
-                            const Icon(Icons.lock_outline_rounded, size: 20),
+                        prefixIcon: const Icon(
+                          Icons.lock_outline_rounded,
+                          size: 20,
+                        ),
                         suffixIcon: IconButton(
-                          icon: Icon(_obscure
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined),
-                          onPressed: () =>
-                              setState(() => _obscure = !_obscure),
+                          tooltip: _obscure
+                              ? 'Şifreyi göster'
+                              : 'Şifreyi gizle',
+                          icon: Icon(
+                            _obscure
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                          ),
+                          onPressed: () => setState(() => _obscure = !_obscure),
                         ),
                       ),
-                      validator: (v) => v == null || v.length < 6
-                          ? 'En az 6 karakter'
-                          : null,
+                      validator: (v) =>
+                          v == null || v.length < 6 ? 'En az 6 karakter' : null,
                     ),
                     const SizedBox(height: 8),
                     Align(

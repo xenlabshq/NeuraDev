@@ -43,8 +43,11 @@ class ReelBackgroundPainter extends CustomPainter {
       ..color = Colors.white.withValues(alpha: 0.025)
       ..strokeWidth = 1;
     for (var y = 0; y < size.height; y += 3) {
-      canvas.drawLine(Offset(0, y.toDouble()),
-          Offset(size.width, y.toDouble()), scanPaint);
+      canvas.drawLine(
+        Offset(0, y.toDouble()),
+        Offset(size.width, y.toDouble()),
+        scanPaint,
+      );
     }
 
     final vignette = LinearGradient(
@@ -188,9 +191,7 @@ class _TabButton extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: active
-                ? const Color(0xFFFFC145)
-                : Colors.transparent,
+            color: active ? const Color(0xFFFFC145) : Colors.transparent,
             width: 2,
           ),
         ),
@@ -268,22 +269,26 @@ class _ActionRail extends ConsumerWidget {
               Positioned(
                 bottom: -4,
                 left: 13,
-                child: GestureDetector(
-                  onTap: () => notifier.toggleFollow(reel.id),
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFFFFC145),
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      '+',
-                      style: TextStyle(
-                        color: Color(0xFF14101F),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                child: Semantics(
+                  label: 'Takip et',
+                  button: true,
+                  child: GestureDetector(
+                    onTap: () => notifier.toggleFollow(reel.id),
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFFFFC145),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        '+',
+                        style: TextStyle(
+                          color: Color(0xFF14101F),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),
@@ -296,18 +301,21 @@ class _ActionRail extends ConsumerWidget {
           active: reel.liked,
           icon: _HeartIcon(active: reel.liked),
           count: _formatCount(reel.likes),
+          label: reel.liked ? 'Beğenildi' : 'Beğen',
           onTap: () => notifier.toggleLike(reel.id),
         ),
         const SizedBox(height: 18),
         _RailButton(
           icon: const _CommentIcon(),
           count: '${reel.comments.length}',
+          label: 'Yorumlar',
           onTap: onOpenComments,
         ),
         const SizedBox(height: 18),
         _RailButton(
           icon: const _ShareIcon(),
           count: 'Paylaş',
+          label: 'Paylaş',
           onTap: () {},
         ),
         const SizedBox(height: 18),
@@ -333,33 +341,40 @@ class _RailButton extends StatelessWidget {
     required this.icon,
     required this.count,
     required this.onTap,
+    required this.label,
     this.active = false,
   });
   final Widget icon;
   final String count;
   final VoidCallback onTap;
+  final String label;
   final bool active;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(width: 30, height: 30, child: icon),
-            const SizedBox(height: 4),
-            Text(
-              count,
-              style: const TextStyle(
-                color: Color(0xFFA99FC4),
-                fontFamily: 'monospace',
-                fontSize: 11,
+    return Semantics(
+      label: label,
+      button: true,
+      selected: active,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(width: 30, height: 30, child: icon),
+              const SizedBox(height: 4),
+              Text(
+                count,
+                style: const TextStyle(
+                  color: Color(0xFFA99FC4),
+                  fontFamily: 'monospace',
+                  fontSize: 11,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -376,6 +391,7 @@ class _SaveButton extends StatelessWidget {
     return _RailButton(
       icon: _BookmarkIcon(active: active),
       count: '',
+      label: active ? 'Kaydedildi' : 'Kaydet',
       onTap: onTap,
       active: active,
     );
@@ -478,12 +494,21 @@ class _SharePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.8
       ..strokeCap = StrokeCap.round;
-    canvas.drawCircle(Offset(size.width * 0.22, size.height * 0.5),
-        size.width * 0.12, paint);
-    canvas.drawCircle(Offset(size.width * 0.78, size.height * 0.18),
-        size.width * 0.12, paint);
-    canvas.drawCircle(Offset(size.width * 0.78, size.height * 0.82),
-        size.width * 0.12, paint);
+    canvas.drawCircle(
+      Offset(size.width * 0.22, size.height * 0.5),
+      size.width * 0.12,
+      paint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.78, size.height * 0.18),
+      size.width * 0.12,
+      paint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.78, size.height * 0.82),
+      size.width * 0.12,
+      paint,
+    );
     canvas.drawLine(
       Offset(size.width * 0.32, size.height * 0.45),
       Offset(size.width * 0.68, size.height * 0.24),
