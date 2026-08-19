@@ -55,12 +55,12 @@ class HiveBoxes {
 
 /// Açılmış Hive kutularına erişim. `bootstrap.dart`'ta
 /// `Hive.initFlutter()` ve ilgili kutular `openBox` ile açılır.
-final appSettingsBoxProvider = Provider<Box>(
-  (ref) => Hive.box(HiveBoxes.appSettings),
+final appSettingsBoxProvider = Provider<Box<dynamic>>(
+  (ref) => Hive.box<dynamic>(HiveBoxes.appSettings),
 );
-final learningProgressBoxProvider = Provider<Box>(
-  (ref) => Hive.box(HiveBoxes.learningProgress),
+final learningProgressBoxProvider = Provider<Box<dynamic>>(
+  (ref) => Hive.box<dynamic>(HiveBoxes.learningProgress),
 );
-final newsCacheBoxProvider = Provider<Box>(
-  (ref) => Hive.box(HiveBoxes.newsCache),
+final newsCacheBoxProvider = Provider<Box<dynamic>>(
+  (ref) => Hive.box<dynamic>(HiveBoxes.newsCache),
 );

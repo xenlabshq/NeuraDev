@@ -388,7 +388,6 @@ class _NodeCircle extends StatefulWidget {
 class _NodeCircleState extends State<_NodeCircle>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
-  late final Animation<double> _bounce;
   late final Animation<double> _pulse;
   late final Animation<double> _rotate;
 
@@ -398,9 +397,6 @@ class _NodeCircleState extends State<_NodeCircle>
     _ctrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
-    );
-    _bounce = Tween<double>(begin: 0, end: -6).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
     );
     _pulse = Tween<double>(begin: 1.0, end: 1.22).animate(
       CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),

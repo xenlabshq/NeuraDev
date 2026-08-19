@@ -34,13 +34,6 @@ extension AppColorsTextX on AppColors {
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
-  /// Demo unlocked rozetler.
-  static const _unlockedBadgeIds = {
-    'first_step',
-    'streak_7',
-    'helper',
-  };
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentAuthUserProvider);
@@ -231,7 +224,6 @@ class _LevelCard extends ConsumerWidget {
     final totalNodes = islands.fold<int>(0, (s, i) => s + i.totalNodes);
     final completedNodes = progress.completedNodeIds.length;
     final unlocks = ref.watch(badgeUnlocksProvider);
-    final unlockedCount = unlocks.length;
 
     final level = UserLevel(
       level: user.level,

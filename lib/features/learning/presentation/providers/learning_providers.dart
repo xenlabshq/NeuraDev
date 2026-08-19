@@ -60,13 +60,16 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
   LearningProgressNotifier(this._cache)
       : super(_loadFromCache(_cache, IslandSeed.all()));
 
-  final Box _cache;
+  final Box<dynamic> _cache;
 
   static const _kCompleted = 'completedNodeIds';
   static const _kTotalXp = 'totalXp';
   static const _kStreak = 'streak';
 
-  static IslandsState _loadFromCache(Box box, List<LearningIsland> islands) {
+  static IslandsState _loadFromCache(
+    Box<dynamic> box,
+    List<LearningIsland> islands,
+  ) {
     final completed = (box.get(_kCompleted) as List?)?.cast<String>().toSet();
     if (completed == null) {
       return IslandsState(

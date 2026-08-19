@@ -33,34 +33,6 @@ Widget _wrap(Widget child, {Size? size}) => ProviderScope(
       ),
     );
 
-Future<List<String>> _renderAndCapture(
-  WidgetTester tester,
-  Widget widget,
-) async {
-  final errors = <String>[];
-  final origOnError = FlutterError.onError;
-  FlutterError.onError = (details) {
-    errors.add(details.exceptionAsString());
-  };
-  try {
-    await tester.pumpWidget(_wrap(widget));
-    await tester.pump(const Duration(milliseconds: 50));
-  } catch (e) {
-    errors.add('PUMP_EX: $e');
-  } finally {
-    FlutterError.onError = origOnError;
-  }
-  return errors;
-}
-
-List<String> _filterOverflows(List<String> errors) {
-  return errors
-      .where((e) => e.contains('RenderFlex overflowed') ||
-          e.contains('A RenderFlex overflowed') ||
-          (e.contains('overflowed by') && e.contains('pixels')))
-      .toList();
-}
-
 Future<void> _overflowTest(
   WidgetTester tester,
   String name,

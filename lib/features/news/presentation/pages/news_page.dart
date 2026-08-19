@@ -138,7 +138,7 @@ class _NewsPageState extends ConsumerState<NewsPage> {
     if (_selected != null) {
       ref.invalidate(newsByCategoryProvider(_selected!));
     }
-    await Future.delayed(const Duration(milliseconds: 600));
+    await Future<void>.delayed(const Duration(milliseconds: 600));
   }
 
   Widget _buildScrollable(

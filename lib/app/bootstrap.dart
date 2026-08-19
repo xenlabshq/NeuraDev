@@ -90,9 +90,9 @@ Future<void> bootstrap(Widget Function() builder) async {
       // aç. Kutular HiveBoxes registry'sinden geliyor.
       await Hive.initFlutter();
       await Future.wait<void>([
-        Hive.openBox(HiveBoxes.appSettings),
-        Hive.openBox(HiveBoxes.learningProgress),
-        Hive.openBox(HiveBoxes.newsCache),
+        Hive.openBox<dynamic>(HiveBoxes.appSettings),
+        Hive.openBox<dynamic>(HiveBoxes.learningProgress),
+        Hive.openBox<dynamic>(HiveBoxes.newsCache),
       ]);
 
       // SharedPreferences — tema/dil/bildirim gibi küçük ayarları

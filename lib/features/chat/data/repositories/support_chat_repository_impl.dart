@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:neuroup/core/failures/failure.dart';
 import 'package:neuroup/core/services/logger_service.dart';
-import 'package:neuroup/core/utils/result.dart';
 import 'package:neuroup/features/chat/domain/entities/support_chat.dart';
 import 'package:neuroup/features/chat/domain/entities/support_message.dart';
 import 'package:neuroup/features/chat/domain/repositories/support_chat_repository.dart';
