@@ -64,8 +64,10 @@ class SpacedRepetition {
           : _initialInterval;
       // SM-2 ease: ardışık başarıya göre büyür, 1.3–2.5 arası
       final ease = 1.3 + (newConsecutive * 0.15);
-      final newMinutes =
-          (prevInterval.inMinutes * ease).clamp(60.0, double.infinity);
+      final newMinutes = (prevInterval.inMinutes * ease).clamp(
+        60.0,
+        _maxInterval.inMinutes.toDouble(),
+      );
       nextInterval = Duration(minutes: newMinutes.toInt());
     }
 
