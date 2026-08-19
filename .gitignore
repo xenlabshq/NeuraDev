@@ -23,6 +23,7 @@ build/
 pubspec.lock
 **/*.g.dart
 **/*.freezed.dart
+lib/l10n/gen/
 
 # Coverage
 coverage/

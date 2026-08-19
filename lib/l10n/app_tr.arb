@@ -1,0 +1,11 @@
+{
+  "@@locale": "tr",
+  "appTitle": "Neuroup",
+  "@appTitle": {
+    "description": "Uygulamanın görüntülenen adı (işletim sistemi görev değiştirici, pencere başlığı vb.)"
+  },
+  "welcomeMessage": "Neuroup'a hoş geldin!",
+  "@welcomeMessage": {
+    "description": "Genel karşılama mesajı örneği — l10n altyapısının çalıştığını doğrulamak için."
+  }
+}
