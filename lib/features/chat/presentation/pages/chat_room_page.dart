@@ -33,7 +33,9 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
     if (text.isEmpty || _sending) return;
     setState(() => _sending = true);
     try {
-      await ref.read(supportChatControllerProvider).send(
+      await ref
+          .read(supportChatControllerProvider)
+          .send(
             chatId: widget.channelId,
             sender: user,
             text: text,
@@ -61,8 +63,9 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
   Widget build(BuildContext context) {
     final tokens = AppColors.tokensOf(context);
     final user = ref.watch(currentAuthUserProvider);
-    final asyncMessages =
-        ref.watch(chatMessagesStreamProvider(widget.channelId));
+    final asyncMessages = ref.watch(
+      chatMessagesStreamProvider(widget.channelId),
+    );
 
     ref.listen(chatMessagesStreamProvider(widget.channelId), (_, __) {
       _scrollToBottom();
@@ -105,9 +108,7 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
                   ),
                   const SizedBox(height: 1),
                   Text(
-                    user.role.isSupportStaff
-                        ? 'Yanıtlanmadı'
-                        : 'Çevrimiçi',
+                    user.role.isSupportStaff ? 'Yanıtlanmadı' : 'Çevrimiçi',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
@@ -138,8 +139,7 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
           // yüksekliği kadar alt boşluk bırak, son mesajlar gizlenmesin.
           Positioned.fill(
             child: asyncMessages.when(
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(child: Text('Hata: $e')),
               data: (messages) {
                 if (messages.isEmpty) {
@@ -192,76 +192,76 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
             child: SafeArea(
               top: false,
               child: Container(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-              decoration: BoxDecoration(
-                color: tokens.surfaceAlt,
-                border: Border(
-                  top: BorderSide(
-                    color: tokens.border.withValues(alpha: 0.6),
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                decoration: BoxDecoration(
+                  color: tokens.surfaceAlt,
+                  border: Border(
+                    top: BorderSide(
+                      color: tokens.border.withValues(alpha: 0.6),
+                    ),
                   ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _input,
-                      minLines: 1,
-                      maxLines: 4,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _send(user),
-                      style: TextStyle(
-                        color: tokens.textPrimary,
-                        fontSize: 14,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Mesaj yaz...',
-                        hintStyle: TextStyle(
-                          color: tokens.textTertiary,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _input,
+                        minLines: 1,
+                        maxLines: 4,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) => _send(user),
+                        style: TextStyle(
+                          color: tokens.textPrimary,
                           fontSize: 14,
                         ),
-                        filled: true,
-                        fillColor: tokens.surface,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
+                        decoration: InputDecoration(
+                          hintText: 'Mesaj yaz...',
+                          hintStyle: TextStyle(
+                            color: tokens.textTertiary,
+                            fontSize: 14,
+                          ),
+                          filled: true,
+                          fillColor: tokens.surface,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide.none,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Material(
-                    color: AppColors.primary,
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: _sending ? null : () => _send(user),
-                      child: SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: _sending
-                            ? const Padding(
-                                padding: EdgeInsets.all(14),
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                    const SizedBox(width: 8),
+                    Material(
+                      color: AppColors.primary,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: _sending ? null : () => _send(user),
+                        child: SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: _sending
+                              ? const Padding(
+                                  padding: EdgeInsets.all(14),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.send_rounded,
                                   color: Colors.white,
+                                  size: 20,
                                 ),
-                              )
-                            : const Icon(
-                                Icons.send_rounded,
-                                color: Colors.white,
-                                size: 20,
-                              ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
             ),
           ),
         ],
@@ -288,21 +288,19 @@ class _Bubble extends StatelessWidget {
     final bg = isMe
         ? AppColors.primary
         : (isModerator
-            ? AppColors.success.withValues(alpha: 0.95)
-            : Colors.white);
+              ? AppColors.success.withValues(alpha: 0.95)
+              : Colors.white);
     final fg = isMe
         ? Colors.white
-        : (isModerator
-            ? Colors.white
-            : AppColors.textPrimary);
+        : (isModerator ? Colors.white : AppColors.textPrimary);
     final border = isMe
         ? null
         : (isModerator
-            ? Border.all(
-                color: AppColors.success,
-                width: 1.5,
-              )
-            : Border.all(color: AppColors.border.withValues(alpha: 0.5)));
+              ? Border.all(
+                  color: AppColors.success,
+                  width: 1.5,
+                )
+              : Border.all(color: AppColors.border.withValues(alpha: 0.5)));
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -332,8 +330,9 @@ class _Bubble extends StatelessWidget {
               : null,
         ),
         child: Column(
-          crossAxisAlignment:
-              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isMe
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             if (isModerator && !isMe)
               Padding(
@@ -343,7 +342,9 @@ class _Bubble extends StatelessWidget {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.success,
                         borderRadius: BorderRadius.circular(4),

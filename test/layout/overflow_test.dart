@@ -20,18 +20,18 @@ const Size kTabletSize = Size(768, 1024);
 const Size kWideSize = Size(916, 1440);
 
 Widget _wrap(Widget child, {Size? size}) => ProviderScope(
-      child: MaterialApp(
-        home: MediaQuery(
-          data: MediaQueryData(
-            size: size ?? kPhoneSize,
-            platformBrightness: Brightness.dark,
-            devicePixelRatio: 1.0,
-          ),
-          child: child,
-        ),
-        debugShowCheckedModeBanner: false,
+  child: MaterialApp(
+    home: MediaQuery(
+      data: MediaQueryData(
+        size: size ?? kPhoneSize,
+        platformBrightness: Brightness.dark,
+        devicePixelRatio: 1.0,
       ),
-    );
+      child: child,
+    ),
+    debugShowCheckedModeBanner: false,
+  ),
+);
 
 Future<void> _overflowTest(
   WidgetTester tester,
@@ -53,27 +53,50 @@ Future<void> _overflowTest(
     FlutterError.onError = origOnError;
   }
   final ov = errors
-      .where((e) => e.contains('RenderFlex overflowed') ||
-          e.contains('A RenderFlex overflowed') ||
-          (e.contains('overflowed by') && e.contains('pixels')))
+      .where(
+        (e) =>
+            e.contains('RenderFlex overflowed') ||
+            e.contains('A RenderFlex overflowed') ||
+            (e.contains('overflowed by') && e.contains('pixels')),
+      )
       .toList();
   expect(ov, isEmpty, reason: '$name overflow errors:\n${ov.join("\n")}');
 }
 
 void main() {
   // iPhone SE gibi çok küçük telefon — kompakt.
-  testWidgets('DemoLandingNoOverflow_Compact', (tester) async =>
-      _overflowTest(tester, 'DemoLandingPage', const DemoLandingPage(),
-          size: kCompactSize));
-  testWidgets('ProfileNoOverflow_Compact', (tester) async =>
-      _overflowTest(tester, 'ProfilePage', const ProfilePage(),
-          size: kCompactSize));
-  testWidgets('ReelsNoOverflow_Compact', (tester) async =>
-      _overflowTest(tester, 'ReelsPage', const ReelsPage(),
-          size: kCompactSize));
-  testWidgets('NewsNoOverflow_Compact', (tester) async =>
-      _overflowTest(tester, 'NewsPage', const NewsPage(),
-          size: kCompactSize));
+  testWidgets(
+    'DemoLandingNoOverflow_Compact',
+    (tester) async => _overflowTest(
+      tester,
+      'DemoLandingPage',
+      const DemoLandingPage(),
+      size: kCompactSize,
+    ),
+  );
+  testWidgets(
+    'ProfileNoOverflow_Compact',
+    (tester) async => _overflowTest(
+      tester,
+      'ProfilePage',
+      const ProfilePage(),
+      size: kCompactSize,
+    ),
+  );
+  testWidgets(
+    'ReelsNoOverflow_Compact',
+    (tester) async => _overflowTest(
+      tester,
+      'ReelsPage',
+      const ReelsPage(),
+      size: kCompactSize,
+    ),
+  );
+  testWidgets(
+    'NewsNoOverflow_Compact',
+    (tester) async =>
+        _overflowTest(tester, 'NewsPage', const NewsPage(), size: kCompactSize),
+  );
   testWidgets('NewsNoOverflow_Compact_TextScale15', (tester) async {
     final errors = <String>[];
     final origOnError = FlutterError.onError;
@@ -104,8 +127,11 @@ void main() {
     final ov = errors
         .where((e) => e.contains('overflowed') && e.contains('pixels'))
         .toList();
-    expect(ov, isEmpty,
-        reason: 'NewsPage compact+1.5x overflow:\n${ov.join("\n")}');
+    expect(
+      ov,
+      isEmpty,
+      reason: 'NewsPage compact+1.5x overflow:\n${ov.join("\n")}',
+    );
   });
   testWidgets('NewsHeader_FlexibleLongTitle_Compact', (tester) async {
     // "Haberler" başlığı artık Flexible(loose) + pill container içinde;
@@ -139,55 +165,122 @@ void main() {
     final ov = errors
         .where((e) => e.contains('overflowed') && e.contains('pixels'))
         .toList();
-    expect(ov, isEmpty,
-        reason: 'NewsPage compact+2.0x header overflow:\n${ov.join("\n")}');
+    expect(
+      ov,
+      isEmpty,
+      reason: 'NewsPage compact+2.0x header overflow:\n${ov.join("\n")}',
+    );
   });
-  testWidgets('IslandMapNoOverflow_Compact', (tester) async =>
-      _overflowTest(tester, 'IslandMapPage', const IslandMapPage(),
-          size: kCompactSize));
+  testWidgets(
+    'IslandMapNoOverflow_Compact',
+    (tester) async => _overflowTest(
+      tester,
+      'IslandMapPage',
+      const IslandMapPage(),
+      size: kCompactSize,
+    ),
+  );
 
   // Pixel 5 — standart modern telefon.
-  testWidgets('ProfileNoOverflow_Phone', (tester) async =>
-      _overflowTest(tester, 'ProfilePage', const ProfilePage(),
-          size: kPhoneSize));
-  testWidgets('ReelsNoOverflow_Phone', (tester) async =>
-      _overflowTest(tester, 'ReelsPage', const ReelsPage(),
-          size: kPhoneSize));
-  testWidgets('NewsNoOverflow_Phone', (tester) async =>
-      _overflowTest(tester, 'NewsPage', const NewsPage(),
-          size: kPhoneSize));
-  testWidgets('IslandMapNoOverflow_Phone', (tester) async =>
-      _overflowTest(tester, 'IslandMapPage', const IslandMapPage(),
-          size: kPhoneSize));
+  testWidgets(
+    'ProfileNoOverflow_Phone',
+    (tester) async => _overflowTest(
+      tester,
+      'ProfilePage',
+      const ProfilePage(),
+      size: kPhoneSize,
+    ),
+  );
+  testWidgets(
+    'ReelsNoOverflow_Phone',
+    (tester) async =>
+        _overflowTest(tester, 'ReelsPage', const ReelsPage(), size: kPhoneSize),
+  );
+  testWidgets(
+    'NewsNoOverflow_Phone',
+    (tester) async =>
+        _overflowTest(tester, 'NewsPage', const NewsPage(), size: kPhoneSize),
+  );
+  testWidgets(
+    'IslandMapNoOverflow_Phone',
+    (tester) async => _overflowTest(
+      tester,
+      'IslandMapPage',
+      const IslandMapPage(),
+      size: kPhoneSize,
+    ),
+  );
 
   // Tablet portrait — iPad benzeri
-  testWidgets('DemoLandingNoOverflow_Tablet', (tester) async =>
-      _overflowTest(tester, 'DemoLandingPage', const DemoLandingPage(),
-          size: kTabletSize));
-  testWidgets('ProfileNoOverflow_Tablet', (tester) async =>
-      _overflowTest(tester, 'ProfilePage', const ProfilePage(),
-          size: kTabletSize));
-  testWidgets('ReelsNoOverflow_Tablet', (tester) async =>
-      _overflowTest(tester, 'ReelsPage', const ReelsPage(),
-          size: kTabletSize));
-  testWidgets('NewsNoOverflow_Tablet', (tester) async =>
-      _overflowTest(tester, 'NewsPage', const NewsPage(),
-          size: kTabletSize));
-  testWidgets('IslandMapNoOverflow_Tablet', (tester) async =>
-      _overflowTest(tester, 'IslandMapPage', const IslandMapPage(),
-          size: kTabletSize));
+  testWidgets(
+    'DemoLandingNoOverflow_Tablet',
+    (tester) async => _overflowTest(
+      tester,
+      'DemoLandingPage',
+      const DemoLandingPage(),
+      size: kTabletSize,
+    ),
+  );
+  testWidgets(
+    'ProfileNoOverflow_Tablet',
+    (tester) async => _overflowTest(
+      tester,
+      'ProfilePage',
+      const ProfilePage(),
+      size: kTabletSize,
+    ),
+  );
+  testWidgets(
+    'ReelsNoOverflow_Tablet',
+    (tester) async => _overflowTest(
+      tester,
+      'ReelsPage',
+      const ReelsPage(),
+      size: kTabletSize,
+    ),
+  );
+  testWidgets(
+    'NewsNoOverflow_Tablet',
+    (tester) async =>
+        _overflowTest(tester, 'NewsPage', const NewsPage(), size: kTabletSize),
+  );
+  testWidgets(
+    'IslandMapNoOverflow_Tablet',
+    (tester) async => _overflowTest(
+      tester,
+      'IslandMapPage',
+      const IslandMapPage(),
+      size: kTabletSize,
+    ),
+  );
 
   // Wide — kullanıcının gerçek masaüstü penceresi
-  testWidgets('ProfileNoOverflow_Wide', (tester) async =>
-      _overflowTest(tester, 'ProfilePage', const ProfilePage(),
-          size: kWideSize));
-  testWidgets('ReelsNoOverflow_Wide', (tester) async =>
-      _overflowTest(tester, 'ReelsPage', const ReelsPage(),
-          size: kWideSize));
-  testWidgets('NewsNoOverflow_Wide', (tester) async =>
-      _overflowTest(tester, 'NewsPage', const NewsPage(),
-          size: kWideSize));
-  testWidgets('IslandMapNoOverflow_Wide', (tester) async =>
-      _overflowTest(tester, 'IslandMapPage', const IslandMapPage(),
-          size: kWideSize));
+  testWidgets(
+    'ProfileNoOverflow_Wide',
+    (tester) async => _overflowTest(
+      tester,
+      'ProfilePage',
+      const ProfilePage(),
+      size: kWideSize,
+    ),
+  );
+  testWidgets(
+    'ReelsNoOverflow_Wide',
+    (tester) async =>
+        _overflowTest(tester, 'ReelsPage', const ReelsPage(), size: kWideSize),
+  );
+  testWidgets(
+    'NewsNoOverflow_Wide',
+    (tester) async =>
+        _overflowTest(tester, 'NewsPage', const NewsPage(), size: kWideSize),
+  );
+  testWidgets(
+    'IslandMapNoOverflow_Wide',
+    (tester) async => _overflowTest(
+      tester,
+      'IslandMapPage',
+      const IslandMapPage(),
+      size: kWideSize,
+    ),
+  );
 }

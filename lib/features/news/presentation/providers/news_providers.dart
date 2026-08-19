@@ -27,15 +27,17 @@ final newsStreamProvider = StreamProvider<List<NewsArticle>>((ref) async* {
   yield* ref.read(newsRepositoryProvider).watchAll();
 });
 
-final StreamProviderFamily<List<NewsArticle>, NewsCategory> newsByCategoryProvider =
-    StreamProvider.family<List<NewsArticle>, NewsCategory>((ref, category) {
-  return ref.read(newsRepositoryProvider).watchByCategory(category);
-});
+final StreamProviderFamily<List<NewsArticle>, NewsCategory>
+newsByCategoryProvider = StreamProvider.family<List<NewsArticle>, NewsCategory>(
+  (ref, category) {
+    return ref.read(newsRepositoryProvider).watchByCategory(category);
+  },
+);
 
 final FutureProviderFamily<NewsArticle?, String> newsArticleProvider =
     FutureProvider.family<NewsArticle?, String>((ref, id) {
-  return ref.read(newsRepositoryProvider).getById(id);
-});
+      return ref.read(newsRepositoryProvider).getById(id);
+    });
 
 final newsRefreshControllerProvider = Provider<NewsRefreshController>(
   NewsRefreshController.new,

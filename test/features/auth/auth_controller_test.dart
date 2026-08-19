@@ -18,8 +18,7 @@ class _PassthroughLogin extends LoginUseCase {
   Future<Result<UserProfile>> call({
     required String email,
     required String password,
-  }) =>
-      repo.signInWithEmail(email, password);
+  }) => repo.signInWithEmail(email, password);
 }
 
 void main() {

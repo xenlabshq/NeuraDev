@@ -8,12 +8,12 @@ enum UserRole {
   admin;
 
   String get label => switch (this) {
-        UserRole.student => 'Öğrenci',
-        UserRole.teacher => 'Öğretmen',
-        UserRole.parent => 'Veli',
-        UserRole.moderator => 'Moderatör',
-        UserRole.admin => 'Yönetici',
-      };
+    UserRole.student => 'Öğrenci',
+    UserRole.teacher => 'Öğretmen',
+    UserRole.parent => 'Veli',
+    UserRole.moderator => 'Moderatör',
+    UserRole.admin => 'Yönetici',
+  };
 
   bool get isSupportStaff =>
       this == UserRole.moderator || this == UserRole.admin;

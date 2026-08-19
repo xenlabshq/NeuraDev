@@ -91,8 +91,7 @@ class _StudentView extends ConsumerWidget {
       color: tokens.surface,
       child: asyncChats.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) =>
-            _CenteredMessage(text: 'Hata: $e'),
+        error: (e, _) => _CenteredMessage(text: 'Hata: $e'),
         data: (chats) {
           if (chats.isEmpty && activeChat == null) {
             return _EmptySupport(
@@ -147,7 +146,11 @@ class _StudentView extends ConsumerWidget {
   }
 
   Future<void> _sendQuickMessage(
-      BuildContext context, WidgetRef ref, UserProfile user, String text) async {
+    BuildContext context,
+    WidgetRef ref,
+    UserProfile user,
+    String text,
+  ) async {
     final chat = await ref.read(supportChatControllerProvider).openChat(user);
     if (context.mounted) {
       context.push('/support/${chat.id}?initial=$text');

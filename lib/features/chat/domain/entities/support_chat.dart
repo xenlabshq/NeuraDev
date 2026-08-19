@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 enum SupportChatStatus { open, assigned, closed }
 
 class SupportChat extends Equatable {
-
   factory SupportChat.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? <String, dynamic>{};
     return SupportChat(
@@ -47,7 +46,8 @@ class SupportChat extends Equatable {
   final String? lastMessageSenderId;
   final String? moderatorId;
 
-  bool get hasUnread => lastMessageSenderId != userId && status == SupportChatStatus.open;
+  bool get hasUnread =>
+      lastMessageSenderId != userId && status == SupportChatStatus.open;
 
   SupportChat copyWith({
     SupportChatStatus? status,
@@ -55,44 +55,42 @@ class SupportChat extends Equatable {
     DateTime? lastMessageAt,
     String? lastMessageSenderId,
     String? moderatorId,
-  }) =>
-      SupportChat(
-        id: id,
-        userId: userId,
-        userName: userName,
-        userRole: userRole,
-        status: status ?? this.status,
-        createdAt: createdAt,
-        lastMessage: lastMessage ?? this.lastMessage,
-        lastMessageAt: lastMessageAt ?? this.lastMessageAt,
-        lastMessageSenderId:
-            lastMessageSenderId ?? this.lastMessageSenderId,
-        moderatorId: moderatorId ?? this.moderatorId,
-      );
+  }) => SupportChat(
+    id: id,
+    userId: userId,
+    userName: userName,
+    userRole: userRole,
+    status: status ?? this.status,
+    createdAt: createdAt,
+    lastMessage: lastMessage ?? this.lastMessage,
+    lastMessageAt: lastMessageAt ?? this.lastMessageAt,
+    lastMessageSenderId: lastMessageSenderId ?? this.lastMessageSenderId,
+    moderatorId: moderatorId ?? this.moderatorId,
+  );
 
   Map<String, dynamic> toMap() => {
-        'userId': userId,
-        'userName': userName,
-        'userRole': userRole,
-        'status': status.name,
-        'createdAt': createdAt,
-        'lastMessage': lastMessage,
-        'lastMessageAt': lastMessageAt,
-        'lastMessageSenderId': lastMessageSenderId,
-        'moderatorId': moderatorId,
-      };
+    'userId': userId,
+    'userName': userName,
+    'userRole': userRole,
+    'status': status.name,
+    'createdAt': createdAt,
+    'lastMessage': lastMessage,
+    'lastMessageAt': lastMessageAt,
+    'lastMessageSenderId': lastMessageSenderId,
+    'moderatorId': moderatorId,
+  };
 
   @override
   List<Object?> get props => [
-        id,
-        userId,
-        userName,
-        userRole,
-        status,
-        createdAt,
-        lastMessage,
-        lastMessageAt,
-        lastMessageSenderId,
-        moderatorId,
-      ];
+    id,
+    userId,
+    userName,
+    userRole,
+    status,
+    createdAt,
+    lastMessage,
+    lastMessageAt,
+    lastMessageSenderId,
+    moderatorId,
+  ];
 }

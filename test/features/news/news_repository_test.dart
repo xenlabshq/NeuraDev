@@ -27,7 +27,9 @@ void main() {
     for (var i = 0; i < articles.length - 1; i++) {
       expect(
         articles[i].publishedAt.isAfter(articles[i + 1].publishedAt) ||
-            articles[i].publishedAt.isAtSameMomentAs(articles[i + 1].publishedAt),
+            articles[i].publishedAt.isAtSameMomentAs(
+              articles[i + 1].publishedAt,
+            ),
         isTrue,
       );
     }

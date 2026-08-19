@@ -9,11 +9,11 @@ class PyStatementExecutor {
     required Map<String, dynamic> variables,
     required List<String> errors,
     int maxLoopIterations = 200,
-  })  : _evaluator = evaluator,
-        _output = output,
-        _variables = variables,
-        _errors = errors,
-        _maxLoopIterations = maxLoopIterations;
+  }) : _evaluator = evaluator,
+       _output = output,
+       _variables = variables,
+       _errors = errors,
+       _maxLoopIterations = maxLoopIterations;
 
   final PyExpressionEvaluator _evaluator;
   final List<String> _output;

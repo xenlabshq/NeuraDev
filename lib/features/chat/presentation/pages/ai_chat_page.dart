@@ -43,11 +43,13 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
     Future<void>.delayed(const Duration(milliseconds: 1200), () {
       if (!mounted) return;
       setState(() {
-        _messages.add(_AiMessage(
-          text: _generateResponse(text),
-          isMe: false,
-          timestamp: DateTime.now(),
-        ));
+        _messages.add(
+          _AiMessage(
+            text: _generateResponse(text),
+            isMe: false,
+            timestamp: DateTime.now(),
+          ),
+        );
       });
       _scrollToBottom();
     });
@@ -67,7 +69,9 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
 
   String _generateResponse(String input) {
     final lower = input.toLowerCase();
-    if (lower.contains('merhaba') || lower.contains('selam') || lower.contains('hi')) {
+    if (lower.contains('merhaba') ||
+        lower.contains('selam') ||
+        lower.contains('hi')) {
       return 'Merhaba! Sana nasıl yardımcı olabilirim? '
           'Dersler, oyunlar veya seviye sistemi hakkında soru sorabilirsin.';
     }
@@ -86,12 +90,16 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
           '7 gün üst üste giriş yaparsan "7 Gün Seri" rozeti gelir. '
           'Profil sekmesinden tüm rozetlerini görebilirsin.';
     }
-    if (lower.contains('harita') || lower.contains('lesson') || lower.contains('ders')) {
+    if (lower.contains('harita') ||
+        lower.contains('lesson') ||
+        lower.contains('ders')) {
       return 'Dersler sekmesinde Fancade tarzı bir harita var. '
           'Her ders bir node. Önceki dersi tamamlayınca sonraki açılıyor. '
           "Node'a tıklayınca quiz başlıyor!";
     }
-    if (lower.contains('chat') || lower.contains('destek') || lower.contains('moderatör')) {
+    if (lower.contains('chat') ||
+        lower.contains('destek') ||
+        lower.contains('moderatör')) {
       return '"Sohbet" sekmesinde gerçek moderatörlerle görüşebilirsin. '
           'Demo modunda ise AI cevap veriyor.';
     }
@@ -107,7 +115,9 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
           '• "Nasıl rozet kazanırım?"\n\n'
           'Birini seç veya kendi sorunu yaz!';
     }
-    if (lower.contains('teşekkür') || lower.contains('sağol') || lower.contains('tşk')) {
+    if (lower.contains('teşekkür') ||
+        lower.contains('sağol') ||
+        lower.contains('tşk')) {
       return 'Rica ederim! İyi öğrenmeler 🚀';
     }
     return 'İlginç bir soru! Demo modunda olduğum için sınırlı bilgiye sahibim. '
@@ -198,7 +208,9 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
@@ -235,17 +247,21 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
                     runSpacing: 8,
                     children: [
                       _QuickPrompt(
-                          text: 'Dersler nasıl çalışır?',
-                          onTap: () => _askQuestion('Dersler nasıl çalışır?')),
+                        text: 'Dersler nasıl çalışır?',
+                        onTap: () => _askQuestion('Dersler nasıl çalışır?'),
+                      ),
                       _QuickPrompt(
-                          text: 'Oyunları nasıl oynarım?',
-                          onTap: () => _askQuestion('Oyunları nasıl oynarım?')),
+                        text: 'Oyunları nasıl oynarım?',
+                        onTap: () => _askQuestion('Oyunları nasıl oynarım?'),
+                      ),
                       _QuickPrompt(
-                          text: 'Seviye sistemi nedir?',
-                          onTap: () => _askQuestion('Seviye sistemi nedir?')),
+                        text: 'Seviye sistemi nedir?',
+                        onTap: () => _askQuestion('Seviye sistemi nedir?'),
+                      ),
                       _QuickPrompt(
-                          text: 'Nasıl rozet kazanırım?',
-                          onTap: () => _askQuestion('Nasıl rozet kazanırım?')),
+                        text: 'Nasıl rozet kazanırım?',
+                        onTap: () => _askQuestion('Nasıl rozet kazanırım?'),
+                      ),
                     ],
                   ),
                 ],
@@ -290,7 +306,9 @@ class _AiChatPageState extends ConsumerState<AiChatPage> {
                         filled: true,
                         fillColor: AppColors.surfaceAlt,
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
                           borderSide: BorderSide.none,
@@ -382,8 +400,9 @@ class _AiBubble extends StatelessWidget {
               : null,
         ),
         child: Column(
-          crossAxisAlignment:
-              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isMe
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             if (!isMe)
               Padding(

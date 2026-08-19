@@ -21,7 +21,11 @@ extension ReelAccentColors on ReelAccent {
 
 /// Reel için tek bir yorum.
 class ReelComment extends Equatable {
-  const ReelComment({required this.user, required this.text, this.isMe = false});
+  const ReelComment({
+    required this.user,
+    required this.text,
+    this.isMe = false,
+  });
   final String user;
   final String text;
   final bool isMe;
@@ -72,44 +76,43 @@ class GameReel extends Equatable {
     bool? saved,
     bool? following,
     List<ReelComment>? comments,
-  }) =>
-      GameReel(
-        id: id,
-        devName: devName,
-        devTag: devTag,
-        title: title,
-        caption: caption,
-        tags: tags,
-        accent: accent,
-        symbols: symbols,
-        hud: hud,
-        likes: likes ?? this.likes,
-        liked: liked ?? this.liked,
-        saved: saved ?? this.saved,
-        following: following ?? this.following,
-        comments: comments ?? this.comments,
-        gameUrl: gameUrl,
-      );
+  }) => GameReel(
+    id: id,
+    devName: devName,
+    devTag: devTag,
+    title: title,
+    caption: caption,
+    tags: tags,
+    accent: accent,
+    symbols: symbols,
+    hud: hud,
+    likes: likes ?? this.likes,
+    liked: liked ?? this.liked,
+    saved: saved ?? this.saved,
+    following: following ?? this.following,
+    comments: comments ?? this.comments,
+    gameUrl: gameUrl,
+  );
 
   String get avatarText =>
       devName.replaceAll('@', '').substring(0, 2).toUpperCase();
 
   @override
   List<Object?> get props => [
-        id,
-        devName,
-        devTag,
-        title,
-        caption,
-        tags,
-        accent,
-        symbols,
-        hud,
-        likes,
-        liked,
-        saved,
-        following,
-        comments,
-        gameUrl,
-      ];
+    id,
+    devName,
+    devTag,
+    title,
+    caption,
+    tags,
+    accent,
+    symbols,
+    hud,
+    likes,
+    liked,
+    saved,
+    following,
+    comments,
+    gameUrl,
+  ];
 }

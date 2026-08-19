@@ -54,7 +54,8 @@ class NewsSeed {
       NewsArticle(
         id: 'n_flutter_4',
         title: 'Flutter 4.0 Duyuruldu',
-        summary: 'Yeni sürümde performans iyileştirmeleri ve yeni widgetlar var.',
+        summary:
+            'Yeni sürümde performans iyileştirmeleri ve yeni widgetlar var.',
         body:
             "Google, Flutter 4.0'ı duyurdu. Yeni sürümde Material 3 iyileştirmeleri, "
             'daha hızlı render motoru ve gelişmiş erişilebilirlik destekleri yer '
@@ -254,8 +255,7 @@ class NewsSeed {
       NewsArticle(
         id: 'n_basketball_final',
         title: 'Basketbol Süper Kupa Finalinde Sürpriz',
-        summary:
-            "Darüşşafaka, Anadolu Efes'i 78-76 yenerek kupayı kazandı.",
+        summary: "Darüşşafaka, Anadolu Efes'i 78-76 yenerek kupayı kazandı.",
         body:
             'Basketbol Süper Kupa finalinde sürpriz sonuç. Normal sezonda orta sıralarda '
             "yer alan Darüşşafaka, son çeyrekteki muhteşem geri dönüşle Anadolu Efes'i 78-76 "

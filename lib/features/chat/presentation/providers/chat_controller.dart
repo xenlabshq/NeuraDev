@@ -10,8 +10,7 @@ class SupportChatController {
   SupportChatController(this._ref);
   final Ref _ref;
 
-  SupportChatRepository get _repo =>
-      _ref.read(supportChatRepositoryProvider);
+  SupportChatRepository get _repo => _ref.read(supportChatRepositoryProvider);
 
   Future<SupportChat> openChat(UserProfile user) async {
     final chat = await _repo.openOrGetChat(

@@ -112,8 +112,9 @@ class BadgeUnlockNotifier extends StateNotifier<BadgeState> {
     final now = DateTime.now();
     final map = <String, DateTime>{};
     for (var i = 0; i < Badges.all.length; i++) {
-      map[Badges.all[i].id] =
-          now.subtract(Duration(days: Badges.all.length - i));
+      map[Badges.all[i].id] = now.subtract(
+        Duration(days: Badges.all.length - i),
+      );
     }
     state = state.copyWith(unlocks: map);
   }
@@ -126,12 +127,11 @@ class BadgeUnlockNotifier extends StateNotifier<BadgeState> {
 
 final badgeUnlockProvider =
     StateNotifierProvider<BadgeUnlockNotifier, BadgeState>(
-  (ref) => BadgeUnlockNotifier(ref),
-);
+      (ref) => BadgeUnlockNotifier(ref),
+    );
 
 /// Tek bir rozet için unlock durumu.
-final badgeIsUnlockedProvider =
-    Provider.family<bool, String>((ref, badgeId) {
+final badgeIsUnlockedProvider = Provider.family<bool, String>((ref, badgeId) {
   return ref.watch(
     badgeUnlockProvider.select((s) => s.unlocks.containsKey(badgeId)),
   );

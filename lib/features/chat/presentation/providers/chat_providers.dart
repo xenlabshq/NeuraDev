@@ -59,8 +59,8 @@ final currentAuthUserProvider = Provider<UserProfile?>((ref) {
         : UserProfile(
             id: u.uid,
             email: u.email ?? '',
-            displayName: u.displayName ??
-                (u.email?.split('@').first ?? 'Kullanıcı'),
+            displayName:
+                u.displayName ?? (u.email?.split('@').first ?? 'Kullanıcı'),
             role: UserRole.student,
             avatarUrl: u.photoURL,
           ),
@@ -75,17 +75,16 @@ final mySupportChatStreamProvider = StreamProvider<List<SupportChat>>((ref) {
   return repo.watchChatsForUser(user.id);
 });
 
-final openChatsForModeratorsProvider =
-    StreamProvider<List<SupportChat>>((ref) {
+final openChatsForModeratorsProvider = StreamProvider<List<SupportChat>>((ref) {
   final repo = ref.watch(supportChatRepositoryProvider);
   return repo.watchOpenChatsForModerators();
 });
 
 final chatMessagesStreamProvider =
     StreamProvider.family<List<SupportMessage>, String>((ref, chatId) {
-  final repo = ref.watch(supportChatRepositoryProvider);
-  return repo.watchMessages(chatId);
-});
+      final repo = ref.watch(supportChatRepositoryProvider);
+      return repo.watchMessages(chatId);
+    });
 
 /// In-memory sohbet repository — demo mod için.
 /// Firestore olmadan çalışır, gerçek backend bağlandığında otomatik değişir.
@@ -97,7 +96,8 @@ class _InMemorySupportChatRepository implements SupportChatRepository {
   /// F-02: Her chat için event-driven broadcast controller.
   /// Polling (200ms) yerine sadece mesaj geldiğinde emit edilir → CPU %5-10
   /// tasarruf, gerçek anında UI güncellemesi.
-  final Map<String, StreamController<List<SupportMessage>>> _msgControllers = {};
+  final Map<String, StreamController<List<SupportMessage>>> _msgControllers =
+      {};
 
   StreamController<List<SupportMessage>> _controllerFor(String chatId) {
     return _msgControllers.putIfAbsent(
@@ -257,9 +257,11 @@ class _InMemorySupportChatRepository implements SupportChatRepository {
   @override
   Stream<List<SupportChat>> watchOpenChatsForModerators() async* {
     yield _chats.values
-        .where((c) =>
-            c.status == SupportChatStatus.open ||
-            c.status == SupportChatStatus.assigned)
+        .where(
+          (c) =>
+              c.status == SupportChatStatus.open ||
+              c.status == SupportChatStatus.assigned,
+        )
         .toList();
   }
 

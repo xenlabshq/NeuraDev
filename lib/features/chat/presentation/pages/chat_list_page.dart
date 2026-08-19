@@ -30,9 +30,7 @@ class _ChatListPageState extends ConsumerState<ChatListPage> {
     final user = ref.read(currentAuthUserProvider);
     if (user == null) return;
     if (user.role.isSupportStaff) return;
-    final chat = await ref
-        .read(supportChatControllerProvider)
-        .openChat(user);
+    final chat = await ref.read(supportChatControllerProvider).openChat(user);
     if (!mounted) return;
     setState(() => _openingChat = chat);
   }
@@ -147,10 +145,10 @@ class _ModeratorListView extends ConsumerWidget {
   }
 
   Color _statusColor(SupportChatStatus s) => switch (s) {
-        SupportChatStatus.open => AppColors.warning,
-        SupportChatStatus.assigned => AppColors.info,
-        SupportChatStatus.closed => AppColors.textTertiary,
-      };
+    SupportChatStatus.open => AppColors.warning,
+    SupportChatStatus.assigned => AppColors.info,
+    SupportChatStatus.closed => AppColors.textTertiary,
+  };
 }
 
 class _ChatTile extends StatelessWidget {
@@ -237,9 +235,7 @@ class _ChatTile extends StatelessWidget {
 
   String _formatTime(DateTime dt) {
     final now = DateTime.now();
-    if (dt.year == now.year &&
-        dt.month == now.month &&
-        dt.day == now.day) {
+    if (dt.year == now.year && dt.month == now.month && dt.day == now.day) {
       return DateFormat.Hm().format(dt);
     }
     return DateFormat('d MMM').format(dt);

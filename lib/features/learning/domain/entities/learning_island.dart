@@ -39,8 +39,7 @@ class LearningIsland extends Equatable {
 
   int get totalNodes => nodes.length;
   int get completedNodes => nodes.where((n) => n.isCompleted).length;
-  bool get allCompleted =>
-      totalNodes > 0 && completedNodes == totalNodes;
+  bool get allCompleted => totalNodes > 0 && completedNodes == totalNodes;
   double get progress {
     if (totalNodes == 0) return 0;
     return completedNodes / totalNodes;
@@ -52,23 +51,22 @@ class LearningIsland extends Equatable {
     double? x,
     double? y,
     double? z,
-  }) =>
-      LearningIsland(
-        id: id,
-        title: title,
-        subtitle: subtitle,
-        description: description,
-        emoji: emoji,
-        color: color,
-        gradient: gradient,
-        order: order,
-        nodes: nodes,
-        size: size ?? this.size,
-        unlocked: unlocked ?? this.unlocked,
-        x: x ?? this.x,
-        y: y ?? this.y,
-        z: z ?? this.z,
-      );
+  }) => LearningIsland(
+    id: id,
+    title: title,
+    subtitle: subtitle,
+    description: description,
+    emoji: emoji,
+    color: color,
+    gradient: gradient,
+    order: order,
+    nodes: nodes,
+    size: size ?? this.size,
+    unlocked: unlocked ?? this.unlocked,
+    x: x ?? this.x,
+    y: y ?? this.y,
+    z: z ?? this.z,
+  );
 
   @override
   List<Object?> get props => [id, title, nodes, x, y, z, size, unlocked];
@@ -122,8 +120,8 @@ class LearningNode extends Equatable {
     required this.emoji,
     required this.order,
     required this.bestScore,
-  })  : isCompleted = true,
-        isLocked = false;
+  }) : isCompleted = true,
+       isLocked = false;
 
   const LearningNode.locked({
     required this.id,
@@ -136,9 +134,9 @@ class LearningNode extends Equatable {
     required this.points,
     required this.emoji,
     required this.order,
-  })  : isCompleted = false,
-        isLocked = true,
-        bestScore = null;
+  }) : isCompleted = false,
+       isLocked = true,
+       bestScore = null;
 
   const LearningNode.available({
     required this.id,
@@ -151,11 +149,17 @@ class LearningNode extends Equatable {
     required this.points,
     required this.emoji,
     required this.order,
-  })  : isCompleted = false,
-        isLocked = false,
-        bestScore = null;
+  }) : isCompleted = false,
+       isLocked = false,
+       bestScore = null;
 
   @override
-  List<Object?> get props =>
-      [id, title, description, isCompleted, isLocked, bestScore];
+  List<Object?> get props => [
+    id,
+    title,
+    description,
+    isCompleted,
+    isLocked,
+    bestScore,
+  ];
 }

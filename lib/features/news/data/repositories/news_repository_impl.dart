@@ -9,8 +9,7 @@ class NewsRepositoryImpl implements NewsRepository {
   NewsRepositoryImpl(this._db);
   final FirebaseFirestore _db;
 
-  CollectionReference<Map<String, dynamic>> get _news =>
-      _db.collection('news');
+  CollectionReference<Map<String, dynamic>> get _news => _db.collection('news');
 
   @override
   Stream<List<NewsArticle>> watchAll() {
@@ -76,22 +75,22 @@ class NewsRepositoryImpl implements NewsRepository {
         (c) => c.name == data['category'],
         orElse: () => NewsCategory.world,
       ),
-      publishedAt: (data['publishedAt'] as Timestamp?)?.toDate() ??
-          DateTime.now(),
+      publishedAt:
+          (data['publishedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       imageUrl: data['imageUrl'] as String?,
       isBreaking: data['isBreaking'] as bool? ?? false,
     );
   }
 
   Map<String, dynamic> _toMap(NewsArticle a) => {
-        'title': a.title,
-        'summary': a.summary,
-        'body': a.body,
-        'source': a.source,
-        'sourceUrl': a.sourceUrl,
-        'category': a.category.name,
-        'publishedAt': a.publishedAt,
-        'imageUrl': a.imageUrl,
-        'isBreaking': a.isBreaking,
-      };
+    'title': a.title,
+    'summary': a.summary,
+    'body': a.body,
+    'source': a.source,
+    'sourceUrl': a.sourceUrl,
+    'category': a.category.name,
+    'publishedAt': a.publishedAt,
+    'imageUrl': a.imageUrl,
+    'isBreaking': a.isBreaking,
+  };
 }

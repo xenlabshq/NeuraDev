@@ -53,8 +53,8 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
         maxHeight: MediaQuery.sizeOf(context).height * 0.7,
       ),
       builder: (sheetCtx) {
-        final bottomClearance = MediaQuery.viewPaddingOf(sheetCtx).bottom +
-            kBottomBarHeight;
+        final bottomClearance =
+            MediaQuery.viewPaddingOf(sheetCtx).bottom + kBottomBarHeight;
         return Padding(
           padding: EdgeInsets.only(bottom: bottomClearance - 16),
           child: _MapIntroSheet(
@@ -162,135 +162,114 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
         // Alt navigation bar 84 px + safe area (gesture indicator).
         // toplamını alt marj olarak ekleyerek sheet floating bar'ın
         // altına sızmasını engelle.
-        final bottomClearance = MediaQuery.viewPaddingOf(sheetCtx).bottom +
-            kBottomBarHeight;
+        final bottomClearance =
+            MediaQuery.viewPaddingOf(sheetCtx).bottom + kBottomBarHeight;
         return SafeArea(
           child: SingleChildScrollView(
             child: Container(
               margin: EdgeInsets.fromLTRB(12, 0, 12, bottomClearance),
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 22),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF1A1330), Color(0xFF221F3D)],
-              ),
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF1A1330), Color(0xFF221F3D)],
                 ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 44,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [AppColors.warning, AppColors.error],
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppColors.warning, AppColors.error],
+                          ),
+                          borderRadius: BorderRadius.circular(14),
                         ),
-                        borderRadius: BorderRadius.circular(14),
+                        alignment: Alignment.center,
+                        child: const Text('🎯', style: TextStyle(fontSize: 24)),
                       ),
-                      alignment: Alignment.center,
-                      child: const Text('🎯', style: TextStyle(fontSize: 24)),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Odaklanman Gereken Dersler',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                          Text(
-                            island.title,
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                if (focused.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      'Tüm dersler öğrenilmiş görünüyor!',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                  )
-                else
-                  ...focused.take(5).map((m) {
-                    final node = island.nodes
-                        .firstWhereOrNull((n) => n.id == m.nodeId);
-                    if (node == null) return const SizedBox.shrink();
-                    final isTop = m.nodeId == recommendedId;
-                    return _FocusTile(
-                      node: node,
-                      memory: m,
-                      isRecommended: isTop,
-                    );
-                  }),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.white24),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(sheetCtx).pop();
-                          Navigator.of(context).push<Widget>(
-                            MaterialPageRoute<Widget>(
-                              builder: (_) => IslandDetailPage(islandId: islandId),
-                            ),
-                          );
-                        },
-                        child: const Text('Tüm Dersleri Gör'),
-                      ),
-                    ),
-                    if (recommendedId != null) ...[
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
                       Expanded(
-                        child: FilledButton.icon(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Odaklanman Gereken Dersler',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            Text(
+                              island.title,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  if (focused.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        'Tüm dersler öğrenilmiş görünüyor!',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    )
+                  else
+                    ...focused.take(5).map((m) {
+                      final node = island.nodes.firstWhereOrNull(
+                        (n) => n.id == m.nodeId,
+                      );
+                      if (node == null) return const SizedBox.shrink();
+                      final isTop = m.nodeId == recommendedId;
+                      return _FocusTile(
+                        node: node,
+                        memory: m,
+                        isRecommended: isTop,
+                      );
+                    }),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.white24),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
@@ -300,20 +279,47 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
                             Navigator.of(sheetCtx).pop();
                             Navigator.of(context).push<Widget>(
                               MaterialPageRoute<Widget>(
-                                builder: (_) => IslandDetailPage(islandId: islandId),
+                                builder: (_) =>
+                                    IslandDetailPage(islandId: islandId),
                               ),
                             );
                           },
-                          icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                          label: const Text('Önerilenle Başla'),
+                          child: const Text('Tüm Dersleri Gör'),
                         ),
                       ),
+                      if (recommendedId != null) ...[
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.of(sheetCtx).pop();
+                              Navigator.of(context).push<Widget>(
+                                MaterialPageRoute<Widget>(
+                                  builder: (_) =>
+                                      IslandDetailPage(islandId: islandId),
+                                ),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.play_arrow_rounded,
+                              size: 18,
+                            ),
+                            label: const Text('Önerilenle Başla'),
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
-          ),
           ),
         );
       },
@@ -442,18 +448,21 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
       positions.add(_PosIsland(island: sorted[i], x: x, y: y, z: z));
     }
     return positions
-        .map((p) => _PosIsland(
-              island: p.island,
-              x: p.x,
-              y: p.y,
-              z: p.z,
-            ).islandWithPos)
+        .map(
+          (p) => _PosIsland(
+            island: p.island,
+            x: p.x,
+            y: p.y,
+            z: p.z,
+          ).islandWithPos,
+        )
         .toList();
   }
 
   List<Widget> _renderDepthOrdered(List<LearningIsland> islands) {
     // y + z'ye göre sırala (arkadan öne)
-    final sorted = [...islands]..sort((a, b) => (a.y + a.z).compareTo(b.y + b.z));
+    final sorted = [...islands]
+      ..sort((a, b) => (a.y + a.z).compareTo(b.y + b.z));
     final widgets = <Widget>[];
     // Adaptive engine'den zayıf ada verilerini al.
     // F-08: artık pre-computed map'ten okuyoruz (O(1) lookup).
@@ -508,27 +517,32 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
 }
 
 class _PosIsland {
-  _PosIsland({required this.island, required this.x, required this.y, required this.z});
+  _PosIsland({
+    required this.island,
+    required this.x,
+    required this.y,
+    required this.z,
+  });
   final LearningIsland island;
   final double x;
   final double y;
   final double z;
   LearningIsland get islandWithPos => LearningIsland(
-        id: island.id,
-        title: island.title,
-        subtitle: island.subtitle,
-        description: island.description,
-        emoji: island.emoji,
-        color: island.color,
-        gradient: island.gradient,
-        order: island.order,
-        nodes: island.nodes,
-        size: island.size,
-        unlocked: island.unlocked,
-        x: x,
-        y: y,
-        z: z,
-      );
+    id: island.id,
+    title: island.title,
+    subtitle: island.subtitle,
+    description: island.description,
+    emoji: island.emoji,
+    color: island.color,
+    gradient: island.gradient,
+    order: island.order,
+    nodes: island.nodes,
+    size: island.size,
+    unlocked: island.unlocked,
+    x: x,
+    y: y,
+    z: z,
+  );
 }
 
 class _IsometricBackgroundPainter extends CustomPainter {
@@ -599,8 +613,7 @@ class _TopHud extends StatelessWidget {
     final completed = islands.where((i) => i.allCompleted).length;
     final total = islands.length;
     final totalNodes = islands.fold<int>(0, (s, i) => s + i.totalNodes);
-    final completedNodes =
-        islands.fold<int>(0, (s, i) => s + i.completedNodes);
+    final completedNodes = islands.fold<int>(0, (s, i) => s + i.completedNodes);
 
     return Positioned(
       top: 0,
@@ -635,8 +648,11 @@ class _TopHud extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(Icons.explore_rounded,
-                    color: Colors.white, size: 22),
+                child: const Icon(
+                  Icons.explore_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -764,113 +780,112 @@ class _MapIntroSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-              child: Container(
-                width: 44,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
+                child: Container(
+                  width: 44,
+                  height: 4,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primary, AppColors.violet],
-                    ),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    '🏝️',
-                    style: TextStyle(fontSize: 24),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Python Adaları',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.4,
-                        ),
-                      ),
-                      Text(
-                        '10 ada · 50+ interaktif ders',
-                        style: TextStyle(
-                          color: AppColors.textTertiary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            _IntroStep(
-              emoji: '🗺️',
-              title: 'Sürükle & Yakınlaştır',
-              desc:
-                  'Haritayı parmağınla kaydır, iki parmakla yakınlaştır.',
-              color: AppColors.primary,
-            ),
-            _IntroStep(
-              emoji: '🔓',
-              title: 'Kilidi Açmak İçin Sırayla Git',
-              desc:
-                  'Her ada bir öncekinin tüm derslerini tamamlayınca açılır.',
-              color: AppColors.success,
-            ),
-            _IntroStep(
-              emoji: '💎',
-              title: 'Kristalleri Yakala',
-              desc:
-                  'Her ders bir hex kristal. Tamamladıkça altına döner ve ⭐ alırsın.',
-              color: AppColors.gold,
-            ),
-            const SizedBox(height: 18),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                onPressed: () {
-                  // onDismiss zaten modal sheet'i pop ediyor;
-                  // burada ekstra Navigator.of(context).pop() çağrısı
-                  // go_router'ın son route'unu da kapatıp
-                  // 'popped the last page off of the stack' hatasına
-                  // yol açıyordu.
-                  onDismiss();
-                },
-                child: const Text(
-                  'Keşfe Başla',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
+                    color: Colors.white.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [AppColors.primary, AppColors.violet],
+                      ),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      '🏝️',
+                      style: TextStyle(fontSize: 24),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Python Adaları',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.4,
+                          ),
+                        ),
+                        Text(
+                          '10 ada · 50+ interaktif ders',
+                          style: TextStyle(
+                            color: AppColors.textTertiary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              _IntroStep(
+                emoji: '🗺️',
+                title: 'Sürükle & Yakınlaştır',
+                desc: 'Haritayı parmağınla kaydır, iki parmakla yakınlaştır.',
+                color: AppColors.primary,
+              ),
+              _IntroStep(
+                emoji: '🔓',
+                title: 'Kilidi Açmak İçin Sırayla Git',
+                desc:
+                    'Her ada bir öncekinin tüm derslerini tamamlayınca açılır.',
+                color: AppColors.success,
+              ),
+              _IntroStep(
+                emoji: '💎',
+                title: 'Kristalleri Yakala',
+                desc:
+                    'Her ders bir hex kristal. Tamamladıkça altına döner ve ⭐ alırsın.',
+                color: AppColors.gold,
+              ),
+              const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  onPressed: () {
+                    // onDismiss zaten modal sheet'i pop ediyor;
+                    // burada ekstra Navigator.of(context).pop() çağrısı
+                    // go_router'ın son route'unu da kapatıp
+                    // 'popped the last page off of the stack' hatasına
+                    // yol açıyordu.
+                    onDismiss();
+                  },
+                  child: const Text(
+                    'Keşfe Başla',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -974,8 +989,10 @@ class _FocusTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             alignment: Alignment.center,
-            child: Text(node.emoji as String,
-                style: const TextStyle(fontSize: 18)),
+            child: Text(
+              node.emoji as String,
+              style: const TextStyle(fontSize: 18),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(

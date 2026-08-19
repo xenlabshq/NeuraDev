@@ -25,11 +25,13 @@ class _AiTutorPageState extends ConsumerState<AiTutorPage> {
     if (text.isEmpty) return;
     setState(() {
       _messages.add(_LocalMessage(text: text, isMe: true));
-      _messages.add(const _LocalMessage(
-        text:
-            'AI entegrasyonu henüz aktif değil. Yakında gerçek cevaplar alabileceksin.',
-        isMe: false,
-      ));
+      _messages.add(
+        const _LocalMessage(
+          text:
+              'AI entegrasyonu henüz aktif değil. Yakında gerçek cevaplar alabileceksin.',
+          isMe: false,
+        ),
+      );
       _input.clear();
     });
   }
@@ -102,7 +104,9 @@ class _AiTutorPageState extends ConsumerState<AiTutorPage> {
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
@@ -154,7 +158,9 @@ class _AiTutorPageState extends ConsumerState<AiTutorPage> {
                         filled: true,
                         fillColor: AppColors.surfaceAlt,
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(24),
                           borderSide: BorderSide.none,

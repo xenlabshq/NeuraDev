@@ -60,18 +60,21 @@ class IslandBlockPainter extends CustomPainter {
     canvas.drawPath(
       basePath,
       Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            baseColor,
-            Color.lerp(baseColor, Colors.black, 0.55)!,
-          ],
-        ).createShader(Rect.fromCenter(
-          center: pos,
-          width: s * 1.4,
-          height: s * 0.7,
-        )),
+        ..shader =
+            LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                baseColor,
+                Color.lerp(baseColor, Colors.black, 0.55)!,
+              ],
+            ).createShader(
+              Rect.fromCenter(
+                center: pos,
+                width: s * 1.4,
+                height: s * 0.7,
+              ),
+            ),
     );
 
     // ----- ÜST YÜZ (yukarı bakan) -----
@@ -95,15 +98,18 @@ class IslandBlockPainter extends CustomPainter {
       canvas.drawPath(
         topPath,
         Paint()
-          ..shader = LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [topColor, color],
-          ).createShader(Rect.fromCenter(
-            center: pos,
-            width: s * 1.4,
-            height: s * 0.6,
-          )),
+          ..shader =
+              LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [topColor, color],
+              ).createShader(
+                Rect.fromCenter(
+                  center: pos,
+                  width: s * 1.4,
+                  height: s * 0.6,
+                ),
+              ),
       );
     }
 
@@ -131,8 +137,8 @@ class IslandBlockPainter extends CustomPainter {
       ..color = completed
           ? const Color(0xFFFFC145).withValues(alpha: 0.7)
           : (locked
-              ? Colors.black.withValues(alpha: 0.35)
-              : Colors.black.withValues(alpha: 0.2))
+                ? Colors.black.withValues(alpha: 0.35)
+                : Colors.black.withValues(alpha: 0.2))
       ..style = PaintingStyle.stroke
       ..strokeWidth = completed ? 2.5 : 1.5;
     canvas.drawPath(topPath, edgePaint);
@@ -314,9 +320,7 @@ class IslandPathPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = active
-          ? const Color(0xFFCD853F)
-          : Colors.grey.shade400
+      ..color = active ? const Color(0xFFCD853F) : Colors.grey.shade400
       ..strokeWidth = 3
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(from, to, paint);

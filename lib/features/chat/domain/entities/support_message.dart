@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 class SupportMessage extends Equatable {
-
   factory SupportMessage.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? <String, dynamic>{};
     return SupportMessage(
@@ -34,15 +33,22 @@ class SupportMessage extends Equatable {
   final DateTime createdAt;
 
   Map<String, dynamic> toMap() => {
-        'chatId': chatId,
-        'senderId': senderId,
-        'senderName': senderName,
-        'isModerator': isModerator,
-        'text': text,
-        'createdAt': createdAt,
-      };
+    'chatId': chatId,
+    'senderId': senderId,
+    'senderName': senderName,
+    'isModerator': isModerator,
+    'text': text,
+    'createdAt': createdAt,
+  };
 
   @override
-  List<Object?> get props =>
-      [id, chatId, senderId, senderName, isModerator, text, createdAt];
+  List<Object?> get props => [
+    id,
+    chatId,
+    senderId,
+    senderName,
+    isModerator,
+    text,
+    createdAt,
+  ];
 }

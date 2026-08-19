@@ -93,8 +93,11 @@ class _NewsPageState extends ConsumerState<NewsPage> {
                         color: AppColors.accent,
                         backgroundColor: const Color(0xFF1A1428),
                         onRefresh: _onRefresh,
-                        child: _buildScrollable(context, asyncNews,
-                            showCategoryStrip: false),
+                        child: _buildScrollable(
+                          context,
+                          asyncNews,
+                          showCategoryStrip: false,
+                        ),
                       ),
                     ),
                   ],
@@ -103,31 +106,34 @@ class _NewsPageState extends ConsumerState<NewsPage> {
             );
           }
           return Stack(
-        children: [
-          // Arka plan gradient (koyu)
-          const Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.topCenter,
-                  radius: 1.2,
-                  colors: [
-                    Color(0xFF1A1428),
-                    Color(0xFF0A0812),
-                  ],
+            children: [
+              // Arka plan gradient (koyu)
+              const Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      center: Alignment.topCenter,
+                      radius: 1.2,
+                      colors: [
+                        Color(0xFF1A1428),
+                        Color(0xFF0A0812),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          RefreshIndicator(
-            color: AppColors.accent,
-            backgroundColor: const Color(0xFF1A1428),
-            onRefresh: _onRefresh,
-            child: _buildScrollable(context, asyncNews,
-                showCategoryStrip: true),
-          ),
-        ],
-      );
+              RefreshIndicator(
+                color: AppColors.accent,
+                backgroundColor: const Color(0xFF1A1428),
+                onRefresh: _onRefresh,
+                child: _buildScrollable(
+                  context,
+                  asyncNews,
+                  showCategoryStrip: true,
+                ),
+              ),
+            ],
+          );
         },
       ),
     );
@@ -162,7 +168,9 @@ class _NewsPageState extends ConsumerState<NewsPage> {
               height: 56,
               child: ListView(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
+                  horizontal: 16,
+                  vertical: 10,
+                ),
                 scrollDirection: Axis.horizontal,
                 children: [
                   _CategoryChip(
@@ -171,12 +179,14 @@ class _NewsPageState extends ConsumerState<NewsPage> {
                     color: AppColors.accent,
                     onTap: () => setState(() => _selected = null),
                   ),
-                  ...NewsCategory.values.map((c) => _CategoryChip(
-                        label: '${c.emoji} ${c.label}',
-                        selected: _selected == c,
-                        color: _colorForCategory(c),
-                        onTap: () => setState(() => _selected = c),
-                      )),
+                  ...NewsCategory.values.map(
+                    (c) => _CategoryChip(
+                      label: '${c.emoji} ${c.label}',
+                      selected: _selected == c,
+                      color: _colorForCategory(c),
+                      onTap: () => setState(() => _selected = c),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -223,7 +233,8 @@ class _NewsPageState extends ConsumerState<NewsPage> {
               NewsPriority.info: 3,
               NewsPriority.positive: 4,
             };
-            final sorted = [...articles]..sort((a, b) {
+            final sorted = [...articles]
+              ..sort((a, b) {
                 final pa = priorityOrder[a.priority] ?? 5;
                 final pb = priorityOrder[b.priority] ?? 5;
                 if (pa != pb) return pa.compareTo(pb);
@@ -239,22 +250,28 @@ class _NewsPageState extends ConsumerState<NewsPage> {
               items.add(_BreakingBanner(articles: breaking));
               items.add(const SizedBox(height: 14));
             }
-            items.add(_FeaturedArticle(
-              article: featured,
-              onTap: () => context.push('/news/${featured.id}'),
-            ));
+            items.add(
+              _FeaturedArticle(
+                article: featured,
+                onTap: () => context.push('/news/${featured.id}'),
+              ),
+            );
             if (rest.length > 1) {
               items.add(const SizedBox(height: 20));
-              items.add(_SectionHeader(
-                title: 'Diğer Haberler',
-                count: rest.length - 1,
-              ));
+              items.add(
+                _SectionHeader(
+                  title: 'Diğer Haberler',
+                  count: rest.length - 1,
+                ),
+              );
               items.add(const SizedBox(height: 4));
               for (var i = 1; i < rest.length; i++) {
-                items.add(_NewsCard(
-                  article: rest[i],
-                  onTap: () => context.push('/news/${rest[i].id}'),
-                ));
+                items.add(
+                  _NewsCard(
+                    article: rest[i],
+                    onTap: () => context.push('/news/${rest[i].id}'),
+                  ),
+                );
                 if (i < rest.length - 1) {
                   items.add(const SizedBox(height: 10));
                 }
@@ -274,12 +291,12 @@ class _NewsPageState extends ConsumerState<NewsPage> {
   }
 
   Color _colorForCategory(NewsCategory c) => switch (c) {
-        NewsCategory.education => AppColors.violet,
-        NewsCategory.technology => AppColors.info,
-        NewsCategory.science => AppColors.success,
-        NewsCategory.world => AppColors.warning,
-        NewsCategory.sports => AppColors.orange,
-      };
+    NewsCategory.education => AppColors.violet,
+    NewsCategory.technology => AppColors.info,
+    NewsCategory.science => AppColors.success,
+    NewsCategory.world => AppColors.warning,
+    NewsCategory.sports => AppColors.orange,
+  };
 }
 
 /// Geniş ekran (>= 900px) için sol sidebar: dikey kategori listesi
@@ -635,7 +652,9 @@ class _NewsHeader extends StatelessWidget {
               const SizedBox(width: 10),
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 4),
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
@@ -789,19 +808,17 @@ class _CategoryChip extends StatelessWidget {
           onTap: onTap,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
             decoration: BoxDecoration(
               gradient: selected
                   ? LinearGradient(
-                      colors: [color, color.withValues(alpha: 0.7)])
+                      colors: [color, color.withValues(alpha: 0.7)],
+                    )
                   : null,
               color: selected ? null : Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: selected
-                    ? color
-                    : Colors.white.withValues(alpha: 0.15),
+                color: selected ? color : Colors.white.withValues(alpha: 0.15),
                 width: selected ? 1.5 : 1,
               ),
               boxShadow: selected
@@ -860,8 +877,11 @@ class _BreakingBanner extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.25),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.flash_on_rounded,
-                color: Colors.white, size: 20),
+            child: const Icon(
+              Icons.flash_on_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1028,7 +1048,9 @@ class _FeaturedArticle extends StatelessWidget {
                         bottom: 10,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.95),
                             borderRadius: BorderRadius.circular(10),
@@ -1036,8 +1058,7 @@ class _FeaturedArticle extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.star_rounded,
-                                  color: color, size: 14),
+                              Icon(Icons.star_rounded, color: color, size: 14),
                               const SizedBox(width: 4),
                               Text(
                                 'ÖNE ÇIKAN',
@@ -1100,9 +1121,11 @@ class _FeaturedArticle extends StatelessWidget {
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        Icon(Icons.schedule_rounded,
-                            size: 12,
-                            color: Colors.white.withValues(alpha: 0.5)),
+                        Icon(
+                          Icons.schedule_rounded,
+                          size: 12,
+                          color: Colors.white.withValues(alpha: 0.5),
+                        ),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
@@ -1126,9 +1149,11 @@ class _FeaturedArticle extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Icon(Icons.access_time_rounded,
-                            size: 12,
-                            color: Colors.white.withValues(alpha: 0.5)),
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 12,
+                          color: Colors.white.withValues(alpha: 0.5),
+                        ),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
@@ -1155,12 +1180,12 @@ class _FeaturedArticle extends StatelessWidget {
   }
 
   Color _colorForCategory(NewsCategory c) => switch (c) {
-        NewsCategory.education => AppColors.violet,
-        NewsCategory.technology => AppColors.info,
-        NewsCategory.science => AppColors.success,
-        NewsCategory.world => AppColors.warning,
-        NewsCategory.sports => AppColors.orange,
-      };
+    NewsCategory.education => AppColors.violet,
+    NewsCategory.technology => AppColors.info,
+    NewsCategory.science => AppColors.success,
+    NewsCategory.world => AppColors.warning,
+    NewsCategory.sports => AppColors.orange,
+  };
 }
 
 class _FeaturedEmoji extends StatelessWidget {
@@ -1223,8 +1248,10 @@ class _NewsCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
                 alignment: Alignment.center,
-                child: Text(article.category.emoji,
-                    style: const TextStyle(fontSize: 28)),
+                child: Text(
+                  article.category.emoji,
+                  style: const TextStyle(fontSize: 28),
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -1236,8 +1263,7 @@ class _NewsCard extends StatelessWidget {
                       spacing: 4,
                       runSpacing: 4,
                       children: [
-                        _SmallChip(
-                            label: article.category.label, color: color),
+                        _SmallChip(label: article.category.label, color: color),
                         _PriorityBadgeInline(priority: article.priority),
                       ],
                     ),
@@ -1256,9 +1282,11 @@ class _NewsCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.schedule_rounded,
-                            size: 11,
-                            color: Colors.white.withValues(alpha: 0.5)),
+                        Icon(
+                          Icons.schedule_rounded,
+                          size: 11,
+                          color: Colors.white.withValues(alpha: 0.5),
+                        ),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
@@ -1452,8 +1480,7 @@ class _CategoryRevealBubble extends StatelessWidget {
     return '${selected!.emoji} ${selected!.label}';
   }
 
-  Color _accent() =>
-      selected == null ? AppColors.accent : colorFor(selected!);
+  Color _accent() => selected == null ? AppColors.accent : colorFor(selected!);
 
   Future<void> _open(BuildContext context) async {
     final picked = await showModalBottomSheet<NewsCategory?>(
@@ -1621,8 +1648,7 @@ class _CategoryMenuSheet extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
               color: isSelected
                   ? color.withValues(alpha: 0.22)
@@ -1646,10 +1672,13 @@ class _CategoryMenuSheet extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: isSelected ? Colors.white : const Color(0xFFD9D2EC),
+                      color: isSelected
+                          ? Colors.white
+                          : const Color(0xFFD9D2EC),
                       fontSize: 14,
-                      fontWeight:
-                          isSelected ? FontWeight.w800 : FontWeight.w600,
+                      fontWeight: isSelected
+                          ? FontWeight.w800
+                          : FontWeight.w600,
                     ),
                   ),
                 ),

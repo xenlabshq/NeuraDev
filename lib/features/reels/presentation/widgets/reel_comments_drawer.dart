@@ -17,8 +17,7 @@ class ReelCommentsDrawer extends ConsumerStatefulWidget {
   final VoidCallback onClose;
 
   @override
-  ConsumerState<ReelCommentsDrawer> createState() =>
-      _ReelCommentsDrawerState();
+  ConsumerState<ReelCommentsDrawer> createState() => _ReelCommentsDrawerState();
 }
 
 class _ReelCommentsDrawerState extends ConsumerState<ReelCommentsDrawer> {
@@ -39,9 +38,11 @@ class _ReelCommentsDrawerState extends ConsumerState<ReelCommentsDrawer> {
     _input.clear();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scroll.hasClients) {
-        _scroll.animateTo(0,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut);
+        _scroll.animateTo(
+          0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
       }
     });
   }
@@ -70,8 +71,7 @@ class _ReelCommentsDrawerState extends ConsumerState<ReelCommentsDrawer> {
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 18, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               decoration: const BoxDecoration(
                 border: Border(bottom: BorderSide(color: Color(0xFF382C52))),
               ),
@@ -88,9 +88,10 @@ class _ReelCommentsDrawerState extends ConsumerState<ReelCommentsDrawer> {
                   ),
                   InkWell(
                     onTap: widget.onClose,
-                    child: const Text('×',
-                        style: TextStyle(
-                            color: Color(0xFFA99FC4), fontSize: 20)),
+                    child: const Text(
+                      '×',
+                      style: TextStyle(color: Color(0xFFA99FC4), fontSize: 20),
+                    ),
                   ),
                 ],
               ),
@@ -99,7 +100,9 @@ class _ReelCommentsDrawerState extends ConsumerState<ReelCommentsDrawer> {
               child: ListView.builder(
                 controller: _scroll,
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 18, vertical: 12),
+                  horizontal: 18,
+                  vertical: 12,
+                ),
                 itemCount: current.comments.length,
                 itemBuilder: (_, i) {
                   final c = current.comments[i];
@@ -114,8 +117,7 @@ class _ReelCommentsDrawerState extends ConsumerState<ReelCommentsDrawer> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: const Color(0xFF1A1428),
-                            border:
-                                Border.all(color: const Color(0xFF4A3A6B)),
+                            border: Border.all(color: const Color(0xFF4A3A6B)),
                           ),
                           alignment: Alignment.center,
                           child: Text(
@@ -171,21 +173,26 @@ class _ReelCommentsDrawerState extends ConsumerState<ReelCommentsDrawer> {
                   Expanded(
                     child: TextField(
                       controller: _input,
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 13),
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
                       decoration: InputDecoration(
                         hintText: 'Yorum yaz...',
                         hintStyle: const TextStyle(
-                            color: Color(0xFF6E6390), fontSize: 13),
+                          color: Color(0xFF6E6390),
+                          fontSize: 13,
+                        ),
                         filled: true,
                         fillColor: const Color(0xFF1A1428),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: const BorderSide(
-                              color: Color(0xFF4A3A6B), width: 1.5),
+                            color: Color(0xFF4A3A6B),
+                            width: 1.5,
+                          ),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 10),
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
                       ),
                       onSubmitted: (_) => _send(),
                     ),
@@ -197,7 +204,9 @@ class _ReelCommentsDrawerState extends ConsumerState<ReelCommentsDrawer> {
                       onTap: _send,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 18, vertical: 12),
+                          horizontal: 18,
+                          vertical: 12,
+                        ),
                         child: const Text(
                           'Gönder',
                           style: TextStyle(

@@ -9,50 +9,54 @@ class AppTheme {
 
   /// Light ThemeData — bir kez hesaplanır, sonra reuse edilir.
   /// F-04: Her MaterialApp rebuild'inde yeniden ThemeData üretimini önler.
-  static final ThemeData light = _build(const ColorScheme.light(
-    primary: AppColors.primary,
-    onPrimary: Colors.white,
-    primaryContainer: Color(0xFFE0E7FF),
-    onPrimaryContainer: AppColors.primaryDark,
-    secondary: AppColors.accent,
-    onSecondary: Colors.white,
-    tertiary: AppColors.gold,
-    surface: Colors.white,
-    onSurface: AppColors.textPrimaryLight,
-    surfaceContainerHighest: Color(0xFFF1F5F9),
-    surfaceContainerHigh: Color(0xFFF8FAFC),
-    surfaceContainerLow: Color(0xFFF8FAFC),
-    surfaceContainer: Color(0xFFEEF0F3),
-    onSurfaceVariant: AppColors.textSecondaryLight,
-    outline: AppColors.borderLight,
-    error: AppColors.error,
-    onError: Colors.white,
-  ));
+  static final ThemeData light = _build(
+    const ColorScheme.light(
+      primary: AppColors.primary,
+      onPrimary: Colors.white,
+      primaryContainer: Color(0xFFE0E7FF),
+      onPrimaryContainer: AppColors.primaryDark,
+      secondary: AppColors.accent,
+      onSecondary: Colors.white,
+      tertiary: AppColors.gold,
+      surface: Colors.white,
+      onSurface: AppColors.textPrimaryLight,
+      surfaceContainerHighest: Color(0xFFF1F5F9),
+      surfaceContainerHigh: Color(0xFFF8FAFC),
+      surfaceContainerLow: Color(0xFFF8FAFC),
+      surfaceContainer: Color(0xFFEEF0F3),
+      onSurfaceVariant: AppColors.textSecondaryLight,
+      outline: AppColors.borderLight,
+      error: AppColors.error,
+      onError: Colors.white,
+    ),
+  );
 
   /// Dark ThemeData — bir kez hesaplanır, sonra reuse edilir.
   /// Tüm renkler koyu temaya göre optimize edildi: surface zengin siyah
   /// (göz yormaz), text neredeyse beyaz (okunabilir), border subtle.
-  static final ThemeData dark = _build(const ColorScheme.dark(
-    primary: AppColors.primaryLight,
-    onPrimary: Color(0xFF0F172A),
-    primaryContainer: Color(0xFF312E81),
-    onPrimaryContainer: Color(0xFFC7D2FE),
-    secondary: AppColors.accentLight,
-    onSecondary: Color(0xFF0F172A),
-    tertiary: AppColors.gold,
-    onTertiary: Color(0xFF1A1A1A),
-    surface: AppColors.surfaceDark,
-    onSurface: AppColors.textPrimaryDark,
-    surfaceContainerHighest: AppColors.surfaceContainerDark,
-    surfaceContainerHigh: AppColors.surfaceAltDark,
-    surfaceContainerLow: Color(0xFF14171F),
-    surfaceContainer: AppColors.surfaceAltDark,
-    onSurfaceVariant: AppColors.textSecondaryDark,
-    outline: AppColors.borderDark,
-    outlineVariant: Color(0xFF222631),
-    error: Color(0xFFF87171), // koyu temada daha açık hata
-    onError: Color(0xFF0F172A),
-  ));
+  static final ThemeData dark = _build(
+    const ColorScheme.dark(
+      primary: AppColors.primaryLight,
+      onPrimary: Color(0xFF0F172A),
+      primaryContainer: Color(0xFF312E81),
+      onPrimaryContainer: Color(0xFFC7D2FE),
+      secondary: AppColors.accentLight,
+      onSecondary: Color(0xFF0F172A),
+      tertiary: AppColors.gold,
+      onTertiary: Color(0xFF1A1A1A),
+      surface: AppColors.surfaceDark,
+      onSurface: AppColors.textPrimaryDark,
+      surfaceContainerHighest: AppColors.surfaceContainerDark,
+      surfaceContainerHigh: AppColors.surfaceAltDark,
+      surfaceContainerLow: Color(0xFF14171F),
+      surfaceContainer: AppColors.surfaceAltDark,
+      onSurfaceVariant: AppColors.textSecondaryDark,
+      outline: AppColors.borderDark,
+      outlineVariant: Color(0xFF222631),
+      error: Color(0xFFF87171), // koyu temada daha açık hata
+      onError: Color(0xFF0F172A),
+    ),
+  );
 
   static ThemeData _build(ColorScheme scheme) {
     final base = ThemeData(
@@ -132,8 +136,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: scheme.surfaceContainerHigh,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,

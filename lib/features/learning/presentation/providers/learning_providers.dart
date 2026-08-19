@@ -22,12 +22,11 @@ class UserLearningProgress extends Equatable {
     Set<String>? completedNodeIds,
     int? totalXp,
     int? streak,
-  }) =>
-      UserLearningProgress(
-        completedNodeIds: completedNodeIds ?? this.completedNodeIds,
-        totalXp: totalXp ?? this.totalXp,
-        streak: streak ?? this.streak,
-      );
+  }) => UserLearningProgress(
+    completedNodeIds: completedNodeIds ?? this.completedNodeIds,
+    totalXp: totalXp ?? this.totalXp,
+    streak: streak ?? this.streak,
+  );
 
   @override
   List<Object?> get props => [completedNodeIds, totalXp, streak];
@@ -46,11 +45,10 @@ class IslandsState extends Equatable {
   IslandsState copyWith({
     List<LearningIsland>? islands,
     UserLearningProgress? progress,
-  }) =>
-      IslandsState(
-        islands: islands ?? this.islands,
-        progress: progress ?? this.progress,
-      );
+  }) => IslandsState(
+    islands: islands ?? this.islands,
+    progress: progress ?? this.progress,
+  );
 
   @override
   List<Object?> get props => [islands, progress];
@@ -58,7 +56,7 @@ class IslandsState extends Equatable {
 
 class LearningProgressNotifier extends StateNotifier<IslandsState> {
   LearningProgressNotifier(this._cache)
-      : super(_loadFromCache(_cache, IslandSeed.all()));
+    : super(_loadFromCache(_cache, IslandSeed.all()));
 
   final Box<dynamic> _cache;
 
@@ -97,13 +95,13 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
   bool isIslandUnlocked(int islandIndex) {
     if (islandIndex == 0) return true;
     final prev = state.islands[islandIndex - 1];
-    return prev.nodes
-        .every((n) => state.progress.completedNodeIds.contains(n.id));
+    return prev.nodes.every(
+      (n) => state.progress.completedNodeIds.contains(n.id),
+    );
   }
 
   /// Ada index'ini verilen id'ye göre bul.
-  int islandIndexOf(String id) =>
-      state.islands.indexWhere((i) => i.id == id);
+  int islandIndexOf(String id) => state.islands.indexWhere((i) => i.id == id);
 
   /// Node unlocked mi?
   bool isNodeUnlocked(String islandId, int nodeIndex) {
@@ -196,47 +194,49 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
   /// Ada unlocked + completed durumlarıyla birlikte node'ları döndürür.
   List<LearningNode> nodesWithState(LearningIsland island) {
     final completed = state.progress.completedNodeIds;
-    final prevAllCompleted = island.nodes.every((n) => completed.contains(n.id));
+    final prevAllCompleted = island.nodes.every(
+      (n) => completed.contains(n.id),
+    );
 
     LearningNode completedNode(LearningNode n) => LearningNode.completed(
-          id: n.id,
-          title: n.title,
-          description: n.description,
-          tutorial: n.tutorial,
-          starterCode: n.starterCode,
-          solution: n.solution,
-          expectedOutput: n.expectedOutput,
-          points: n.points,
-          emoji: n.emoji,
-          order: n.order,
-          bestScore: 100,
-        );
+      id: n.id,
+      title: n.title,
+      description: n.description,
+      tutorial: n.tutorial,
+      starterCode: n.starterCode,
+      solution: n.solution,
+      expectedOutput: n.expectedOutput,
+      points: n.points,
+      emoji: n.emoji,
+      order: n.order,
+      bestScore: 100,
+    );
 
     LearningNode lockedNode(LearningNode n) => LearningNode.locked(
-          id: n.id,
-          title: n.title,
-          description: n.description,
-          tutorial: n.tutorial,
-          starterCode: n.starterCode,
-          solution: n.solution,
-          expectedOutput: n.expectedOutput,
-          points: n.points,
-          emoji: n.emoji,
-          order: n.order,
-        );
+      id: n.id,
+      title: n.title,
+      description: n.description,
+      tutorial: n.tutorial,
+      starterCode: n.starterCode,
+      solution: n.solution,
+      expectedOutput: n.expectedOutput,
+      points: n.points,
+      emoji: n.emoji,
+      order: n.order,
+    );
 
     LearningNode availableNode(LearningNode n) => LearningNode.available(
-          id: n.id,
-          title: n.title,
-          description: n.description,
-          tutorial: n.tutorial,
-          starterCode: n.starterCode,
-          solution: n.solution,
-          expectedOutput: n.expectedOutput,
-          points: n.points,
-          emoji: n.emoji,
-          order: n.order,
-        );
+      id: n.id,
+      title: n.title,
+      description: n.description,
+      tutorial: n.tutorial,
+      starterCode: n.starterCode,
+      solution: n.solution,
+      expectedOutput: n.expectedOutput,
+      points: n.points,
+      emoji: n.emoji,
+      order: n.order,
+    );
 
     if (prevAllCompleted) {
       return island.nodes
@@ -251,7 +251,7 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
         else if (i == 0 || completed.contains(island.nodes[i - 1].id))
           availableNode(island.nodes[i])
         else
-          lockedNode(island.nodes[i])
+          lockedNode(island.nodes[i]),
     ];
   }
 }
@@ -259,8 +259,8 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
 /// Progress provider — state'i IslandsState (adalar + progress içerir).
 final learningProgressProvider =
     StateNotifierProvider<LearningProgressNotifier, IslandsState>(
-  (ref) => LearningProgressNotifier(ref.watch(learningProgressBoxProvider)),
-);
+      (ref) => LearningProgressNotifier(ref.watch(learningProgressBoxProvider)),
+    );
 
 /// Progress-only provider (XP, streak, completedNodeIds) — UI'da kolay erişim.
 final userProgressProvider = Provider<UserLearningProgress>(
@@ -276,7 +276,8 @@ final islandsProvider = Provider<List<LearningIsland>>(
     final completed = state.progress.completedNodeIds;
     for (var i = 0; i < state.islands.length; i++) {
       final island = state.islands[i];
-      final isUnlocked = i == 0 ||
+      final isUnlocked =
+          i == 0 ||
           state.islands[i - 1].nodes.every((n) => completed.contains(n.id));
       result.add(island.copyWith(unlocked: isUnlocked));
     }

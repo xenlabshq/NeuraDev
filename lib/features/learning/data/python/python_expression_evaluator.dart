@@ -12,8 +12,8 @@ class PyExpressionEvaluator {
   PyExpressionEvaluator({
     required Map<String, dynamic> variables,
     required List<String> errors,
-  })  : _variables = variables,
-        _errors = errors;
+  }) : _variables = variables,
+       _errors = errors;
 
   final Map<String, dynamic> _variables;
   final List<String> _errors;

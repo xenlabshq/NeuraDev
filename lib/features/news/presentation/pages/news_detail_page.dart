@@ -59,28 +59,27 @@ class NewsDetailPage extends ConsumerWidget {
                             ),
                           ),
                         ),
-SafeArea(
-              child: Padding(
-                padding:
-                    const EdgeInsets.fromLTRB(20, 12, 20, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      article.category.emoji,
-                      style: const TextStyle(fontSize: 40),
-                    ),
-                    const SizedBox(height: 6),
-                    GradientPill(
-                      label: article.category.label,
-                      color: Colors.white,
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                        SafeArea(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  article.category.emoji,
+                                  style: const TextStyle(fontSize: 40),
+                                ),
+                                const SizedBox(height: 6),
+                                GradientPill(
+                                  label: article.category.label,
+                                  color: Colors.white,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -92,19 +91,23 @@ SafeArea(
                   sliver: SliverToBoxAdapter(
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           colors: [AppColors.error, AppColors.orange],
                         ),
-                        borderRadius:
-                            BorderRadius.circular(AppRadius.full),
+                        borderRadius: BorderRadius.circular(AppRadius.full),
                       ),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.flash_on_rounded,
-                              color: Colors.white, size: 16),
+                          Icon(
+                            Icons.flash_on_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
                           SizedBox(width: 4),
                           Text(
                             'SON DAKİKA',
@@ -151,8 +154,7 @@ SafeArea(
                           color: AppColors.primary,
                         ),
                       ),
-                      Text('•',
-                          style: TextStyle(color: tokens.textTertiary)),
+                      Text('•', style: TextStyle(color: tokens.textTertiary)),
                       Text(
                         article.ageLabel,
                         style: TextStyle(
@@ -210,9 +212,9 @@ SafeArea(
                           onPressed: article.sourceUrl.isEmpty
                               ? null
                               : () => launchUrl(
-                                    Uri.parse(article.sourceUrl),
-                                    mode: LaunchMode.externalApplication,
-                                  ),
+                                  Uri.parse(article.sourceUrl),
+                                  mode: LaunchMode.externalApplication,
+                                ),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -222,10 +224,10 @@ SafeArea(
                           label: const Text('Paylaş'),
                           onPressed: () =>
                               ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Paylaşım yakında'),
-                            ),
-                          ),
+                                const SnackBar(
+                                  content: Text('Paylaşım yakında'),
+                                ),
+                              ),
                         ),
                       ),
                     ],

@@ -86,23 +86,21 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   UserProfile _map(User u) => UserProfile(
-        id: u.uid,
-        email: u.email ?? '',
-        displayName:
-            u.displayName ?? (u.email?.split('@').first ?? 'Kullanıcı'),
-        role: UserRole.student,
-        avatarUrl: u.photoURL,
-      );
+    id: u.uid,
+    email: u.email ?? '',
+    displayName: u.displayName ?? (u.email?.split('@').first ?? 'Kullanıcı'),
+    role: UserRole.student,
+    avatarUrl: u.photoURL,
+  );
 
   String _mapAuthError(FirebaseAuthException e) => switch (e.code) {
-        'invalid-email' => 'Geçersiz e-posta adresi',
-        'user-disabled' => 'Bu hesap devre dışı',
-        'user-not-found' ||
-        'wrong-password' ||
-        'invalid-credential' =>
-          'E-posta veya şifre hatalı',
-        'email-already-in-use' => 'Bu e-posta zaten kullanılıyor',
-        'weak-password' => 'Şifre çok zayıf',
-        _ => e.message ?? 'Kimlik doğrulama hatası',
-      };
+    'invalid-email' => 'Geçersiz e-posta adresi',
+    'user-disabled' => 'Bu hesap devre dışı',
+    'user-not-found' ||
+    'wrong-password' ||
+    'invalid-credential' => 'E-posta veya şifre hatalı',
+    'email-already-in-use' => 'Bu e-posta zaten kullanılıyor',
+    'weak-password' => 'Şifre çok zayıf',
+    _ => e.message ?? 'Kimlik doğrulama hatası',
+  };
 }

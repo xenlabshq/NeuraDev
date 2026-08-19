@@ -117,10 +117,10 @@ class UserLevel extends Equatable {
   static const empty = UserLevel(level: 1, currentXp: 0, totalXp: 0);
 
   UserLevel copyWith({int? level, int? currentXp, int? totalXp}) => UserLevel(
-        level: level ?? this.level,
-        currentXp: currentXp ?? this.currentXp,
-        totalXp: totalXp ?? this.totalXp,
-      );
+    level: level ?? this.level,
+    currentXp: currentXp ?? this.currentXp,
+    totalXp: totalXp ?? this.totalXp,
+  );
 
   @override
   List<Object?> get props => [level, currentXp, totalXp];
@@ -149,8 +149,15 @@ class Badge extends Equatable {
   bool get isUnlocked => unlockedAt != null;
 
   @override
-  List<Object?> get props =>
-      [id, name, description, icon, emoji, color, unlockedAt];
+  List<Object?> get props => [
+    id,
+    name,
+    description,
+    icon,
+    emoji,
+    color,
+    unlockedAt,
+  ];
 }
 
 /// Hazır rozetler.

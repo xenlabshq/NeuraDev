@@ -96,34 +96,32 @@ class NodeMemory extends Equatable {
     DateTime? nextReview,
     double? lastDifficulty,
     int? averageTimeMs,
-  }) =>
-      NodeMemory(
-        nodeId: nodeId,
-        attempts: attempts ?? this.attempts,
-        successes: successes ?? this.successes,
-        mistakes: mistakes ?? this.mistakes,
-        consecutiveSuccesses:
-            consecutiveSuccesses ?? this.consecutiveSuccesses,
-        confidence: confidence ?? this.confidence,
-        lastReview: lastReview ?? this.lastReview,
-        nextReview: nextReview ?? this.nextReview,
-        lastDifficulty: lastDifficulty ?? this.lastDifficulty,
-        averageTimeMs: averageTimeMs ?? this.averageTimeMs,
-      );
+  }) => NodeMemory(
+    nodeId: nodeId,
+    attempts: attempts ?? this.attempts,
+    successes: successes ?? this.successes,
+    mistakes: mistakes ?? this.mistakes,
+    consecutiveSuccesses: consecutiveSuccesses ?? this.consecutiveSuccesses,
+    confidence: confidence ?? this.confidence,
+    lastReview: lastReview ?? this.lastReview,
+    nextReview: nextReview ?? this.nextReview,
+    lastDifficulty: lastDifficulty ?? this.lastDifficulty,
+    averageTimeMs: averageTimeMs ?? this.averageTimeMs,
+  );
 
   @override
   List<Object?> get props => [
-        nodeId,
-        attempts,
-        successes,
-        mistakes,
-        consecutiveSuccesses,
-        confidence,
-        lastReview,
-        nextReview,
-        lastDifficulty,
-        averageTimeMs,
-      ];
+    nodeId,
+    attempts,
+    successes,
+    mistakes,
+    consecutiveSuccesses,
+    confidence,
+    lastReview,
+    nextReview,
+    lastDifficulty,
+    averageTimeMs,
+  ];
 }
 
 /// Bir adanın tüm öğrenme istatistikleri.

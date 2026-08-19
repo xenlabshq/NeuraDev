@@ -29,8 +29,8 @@ Future<void> bootstrap(Widget Function() builder) async {
   debugPrint = (String? message, {int? wrapWidth}) {
     if (message != null &&
         (message.contains('core/no-app') ||
-         message.contains('has been created') ||
-         message.contains('Call Firebase.initializeApp()'))) {
+            message.contains('has been created') ||
+            message.contains('Call Firebase.initializeApp()'))) {
       return;
     }
     originalPrint(message, wrapWidth: wrapWidth);
@@ -41,7 +41,8 @@ Future<void> bootstrap(Widget Function() builder) async {
       WidgetsFlutterBinding.ensureInitialized();
       FlutterError.onError = (details) {
         final msg = details.exceptionAsString();
-        final isOverflow = msg.contains('overflowed by') ||
+        final isOverflow =
+            msg.contains('overflowed by') ||
             msg.contains('RenderFlex overflowed') ||
             msg.contains('A RenderFlex overflowed');
         if (isOverflow) {
@@ -116,26 +117,29 @@ Future<void> bootstrap(Widget Function() builder) async {
       }
 
       if (Env.sentryDsn.isNotEmpty) {
-        await SentryFlutter.init((opts) {
-          opts.dsn = Env.sentryDsn;
-          opts.tracesSampleRate = Env.isProduction ? 0.2 : 1.0;
-          opts.environment = Env.isProduction ? 'production' : 'development';
-        }, appRunner: () {
-          // Sentry açıldıktan SONRA ProviderScope'u prefs ile
-          // override edip runApp çağırıyoruz; böylece AppSettings
-          // persistance'lı başlar.
-          runApp(
-            ProviderScope(
-              overrides: [
-                sharedPrefsProvider.overrideWith((_) => prefs),
-                appSettingsProvider.overrideWith(
-                  (ref) => AppSettingsNotifier(prefs),
-                ),
-              ],
-              child: builder(),
-            ),
-          );
-        });
+        await SentryFlutter.init(
+          (opts) {
+            opts.dsn = Env.sentryDsn;
+            opts.tracesSampleRate = Env.isProduction ? 0.2 : 1.0;
+            opts.environment = Env.isProduction ? 'production' : 'development';
+          },
+          appRunner: () {
+            // Sentry açıldıktan SONRA ProviderScope'u prefs ile
+            // override edip runApp çağırıyoruz; böylece AppSettings
+            // persistance'lı başlar.
+            runApp(
+              ProviderScope(
+                overrides: [
+                  sharedPrefsProvider.overrideWith((_) => prefs),
+                  appSettingsProvider.overrideWith(
+                    (ref) => AppSettingsNotifier(prefs),
+                  ),
+                ],
+                child: builder(),
+              ),
+            );
+          },
+        );
       } else {
         runApp(
           ProviderScope(

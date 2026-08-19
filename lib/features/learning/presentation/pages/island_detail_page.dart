@@ -106,7 +106,9 @@ class _IslandDetailPageState extends ConsumerState<IslandDetailPage> {
     if (node.isCompleted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Bu dersi zaten tamamladın! Tekrar denemek için tıkla.'),
+          content: Text(
+            'Bu dersi zaten tamamladın! Tekrar denemek için tıkla.',
+          ),
         ),
       );
     }
@@ -205,11 +207,12 @@ class _IslandHeader extends StatelessWidget {
                               child: LinearProgressIndicator(
                                 value: progress,
                                 minHeight: 8,
-                                backgroundColor:
-                                    Colors.white.withValues(alpha: 0.3),
-                                valueColor:
-                                    const AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
+                                backgroundColor: Colors.white.withValues(
+                                  alpha: 0.3,
+                                ),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             ),
                           ),
@@ -264,14 +267,14 @@ class _SnakeNodesMap extends StatelessWidget {
     for (var i = 0; i < nodes.length; i++) {
       final y = nodeSize / 2 + 30 + i * rowHeight;
       final isRight = i.isEven;
-      final x = isRight
-          ? canvasWidth * 0.72
-          : canvasWidth * 0.28;
-      positions.add(_NodePosition(
-        index: i,
-        x: x,
-        y: y,
-      ));
+      final x = isRight ? canvasWidth * 0.72 : canvasWidth * 0.28;
+      positions.add(
+        _NodePosition(
+          index: i,
+          x: x,
+          y: y,
+        ),
+      );
     }
 
     return Padding(
@@ -349,14 +352,15 @@ class _SnakeNodesPathPainter extends CustomPainter {
       // Burada her node'un durumuna göre çizgi rengi değişebilir,
       // basit tutmak için varsayılan yeşil
       final paint = Paint()
-        ..shader = const LinearGradient(
-          colors: [AppColors.success, Color(0xFF66BB6A)],
-        ).createShader(
-          Rect.fromPoints(
-            Offset(p1.x, p1.y),
-            Offset(p2.x, p2.y),
-          ),
-        )
+        ..shader =
+            const LinearGradient(
+              colors: [AppColors.success, Color(0xFF66BB6A)],
+            ).createShader(
+              Rect.fromPoints(
+                Offset(p1.x, p1.y),
+                Offset(p2.x, p2.y),
+              ),
+            )
         ..strokeWidth = 5
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round;
@@ -512,8 +516,7 @@ class _NodeCircleState extends State<_NodeCircle>
             Positioned(
               bottom: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: locked
@@ -587,9 +590,7 @@ class _HexCrystal extends StatelessWidget {
               fillColor: fillColor,
               borderColor: completed
                   ? AppColors.gold
-                  : (locked
-                      ? const Color(0xFF6B6480)
-                      : Colors.white),
+                  : (locked ? const Color(0xFF6B6480) : Colors.white),
               borderWidth: completed ? 3 : 2.5,
               shadow: !locked,
               islandColor: islandColor,

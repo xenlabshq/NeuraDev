@@ -38,8 +38,7 @@ class SpacedRepetition {
     final newAttempts = memory.attempts + 1;
     final newSuccesses = success ? memory.successes + 1 : memory.successes;
     final newMistakes = success ? memory.mistakes : memory.mistakes + 1;
-    final newConsecutive =
-        success ? memory.consecutiveSuccesses + 1 : 0;
+    final newConsecutive = success ? memory.consecutiveSuccesses + 1 : 0;
 
     // Confidence güncelleme: başarı oranı * ardışık başarı bonus * zorluk
     final baseRate = newSuccesses / newAttempts;

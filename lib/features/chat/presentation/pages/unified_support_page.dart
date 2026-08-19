@@ -11,14 +11,15 @@ class UnifiedSupportPage extends ConsumerStatefulWidget {
   const UnifiedSupportPage({super.key});
 
   @override
-  ConsumerState<UnifiedSupportPage> createState() =>
-      _UnifiedSupportPageState();
+  ConsumerState<UnifiedSupportPage> createState() => _UnifiedSupportPageState();
 }
 
 class _UnifiedSupportPageState extends ConsumerState<UnifiedSupportPage>
     with SingleTickerProviderStateMixin {
-  late final TabController _tabController =
-      TabController(length: 2, vsync: this);
+  late final TabController _tabController = TabController(
+    length: 2,
+    vsync: this,
+  );
 
   @override
   void dispose() {

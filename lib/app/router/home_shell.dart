@@ -28,7 +28,7 @@ final lessonOverlayDepthProvider = StateProvider<int>((ref) => 0);
 /// için context tekrar kullanılmaz.
 class LessonOverlayScope {
   LessonOverlayScope(BuildContext context)
-      : _container = ProviderScope.containerOf(context, listen: false) {
+    : _container = ProviderScope.containerOf(context, listen: false) {
     final container = _container;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       container.read(lessonOverlayDepthProvider.notifier).state++;
@@ -42,8 +42,7 @@ class LessonOverlayScope {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final current = container.read(lessonOverlayDepthProvider);
       if (current > 0) {
-        container.read(lessonOverlayDepthProvider.notifier).state =
-            current - 1;
+        container.read(lessonOverlayDepthProvider.notifier).state = current - 1;
       }
     });
   }

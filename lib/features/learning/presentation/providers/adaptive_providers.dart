@@ -72,28 +72,33 @@ class AdaptiveMemoryState extends Equatable {
     Map<String, String>? recommendations,
     Map<String, List<NodeMemory>>? weakByIsland,
     Map<String, IslandMemoryStats>? islandStatsMap,
-  }) =>
-      AdaptiveMemoryState(
-        records: records ?? this.records,
-        recommendations: recommendations ?? this.recommendations,
-        weakByIsland: weakByIsland ?? this.weakByIsland,
-        islandStatsMap: islandStatsMap ?? this.islandStatsMap,
-      );
+  }) => AdaptiveMemoryState(
+    records: records ?? this.records,
+    recommendations: recommendations ?? this.recommendations,
+    weakByIsland: weakByIsland ?? this.weakByIsland,
+    islandStatsMap: islandStatsMap ?? this.islandStatsMap,
+  );
 
   @override
-  List<Object?> get props =>
-      [records, recommendations, weakByIsland, islandStatsMap];
+  List<Object?> get props => [
+    records,
+    recommendations,
+    weakByIsland,
+    islandStatsMap,
+  ];
 }
 
 /// Adaptive memory notifier — spaced repetition motorunu yönetir.
 class AdaptiveMemoryNotifier extends StateNotifier<AdaptiveMemoryState> {
   AdaptiveMemoryNotifier()
-      : super(AdaptiveMemoryState(
+    : super(
+        AdaptiveMemoryState(
           records: const {},
           recommendations: const {},
           weakByIsland: const {},
           islandStatsMap: const {},
-        )) {
+        ),
+      ) {
     // F-08: İlk açılışta tüm node'lar zayıf görünür (hiç denenmemiş =
     // potansiyel zayıf). Bu da pre-computed.
     _rebuildDerivedMaps(records: const {});
@@ -151,20 +156,23 @@ class AdaptiveMemoryNotifier extends StateNotifier<AdaptiveMemoryState> {
   /// F-08: weakByIsland + islandStatsMap + recommendations pre-compute.
   /// targetIslandId verildiğinde sadece o ada için incremental update yapar;
   /// null ise tüm adalar.
-  ({Map<String, List<NodeMemory>> weak, Map<String, IslandMemoryStats> stats, Map<String, String> recs})
-      _rebuildDerivedMaps({
+  ({
+    Map<String, List<NodeMemory>> weak,
+    Map<String, IslandMemoryStats> stats,
+    Map<String, String> recs,
+  })
+  _rebuildDerivedMaps({
     required Map<String, NodeMemory> records,
     String? targetIslandId,
   }) {
     final islands = _index.islands;
 
     // Mevcut map'leri kopyala; sadece hedef ada (veya tümü) yeniden hesaplanır.
-    final weakByIsland =
-        Map<String, List<NodeMemory>>.from(state.weakByIsland);
-    final islandStatsMap =
-        Map<String, IslandMemoryStats>.from(state.islandStatsMap);
-    final recommendations =
-        Map<String, String>.from(state.recommendations);
+    final weakByIsland = Map<String, List<NodeMemory>>.from(state.weakByIsland);
+    final islandStatsMap = Map<String, IslandMemoryStats>.from(
+      state.islandStatsMap,
+    );
+    final recommendations = Map<String, String>.from(state.recommendations);
 
     final islandsToProcess = targetIslandId == null
         ? islands
@@ -234,40 +242,50 @@ class AdaptiveMemoryNotifier extends StateNotifier<AdaptiveMemoryState> {
 
 final adaptiveMemoryProvider =
     StateNotifierProvider<AdaptiveMemoryNotifier, AdaptiveMemoryState>(
-  (ref) => AdaptiveMemoryNotifier(),
-);
+      (ref) => AdaptiveMemoryNotifier(),
+    );
 
 /// Bir ada için memory istatistikleri provider'ı.
 /// F-08: doğrudan pre-computed map'ten okur, tek O(1) lookup.
-final islandMemoryStatsProvider =
-    Provider.family<IslandMemoryStats?, String>((ref, islandId) {
-  return ref.watch(adaptiveMemoryProvider.select(
-    (s) => s.islandStatsMap[islandId],
-  ));
+final islandMemoryStatsProvider = Provider.family<IslandMemoryStats?, String>((
+  ref,
+  islandId,
+) {
+  return ref.watch(
+    adaptiveMemoryProvider.select(
+      (s) => s.islandStatsMap[islandId],
+    ),
+  );
 });
 
 /// Bir node için memory provider'ı.
-final nodeMemoryProvider =
-    Provider.family<NodeMemory?, String>((ref, nodeId) {
-  return ref.watch(adaptiveMemoryProvider.select(
-    (s) => s.records[nodeId],
-  ));
+final nodeMemoryProvider = Provider.family<NodeMemory?, String>((ref, nodeId) {
+  return ref.watch(
+    adaptiveMemoryProvider.select(
+      (s) => s.records[nodeId],
+    ),
+  );
 });
 
 /// Tüm zayıf node'lar — ada haritası için.
 /// F-08: pre-computed olduğundan O(records.length), eskiden
 /// O(records × islands × nodes).
-final weakNodesByIslandProvider =
-    Provider<Map<String, List<NodeMemory>>>((ref) {
+final weakNodesByIslandProvider = Provider<Map<String, List<NodeMemory>>>((
+  ref,
+) {
   return ref.watch(adaptiveMemoryProvider.select((s) => s.weakByIsland));
 });
 
 /// Bir ada için önerilen sonraki node ID.
-final recommendedNodeProvider =
-    Provider.family<String?, String>((ref, islandId) {
-  return ref.watch(adaptiveMemoryProvider.select(
-    (s) => s.recommendations[islandId],
-  ));
+final recommendedNodeProvider = Provider.family<String?, String>((
+  ref,
+  islandId,
+) {
+  return ref.watch(
+    adaptiveMemoryProvider.select(
+      (s) => s.recommendations[islandId],
+    ),
+  );
 });
 
 /// LearningIsland re-export — provider'lar için kolay erişim.

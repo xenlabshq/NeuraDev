@@ -3,41 +3,41 @@ import 'package:equatable/equatable.dart';
 /// Python hatasının kategorize edilmiş hâli.
 /// Öğretmen sistemi hata tipine göre bağlamsal ipucu verir.
 enum ErrorKind {
-  syntax,      // Yazım hatası (parantez, iki nokta, tırnak)
-  name,        // Tanımsız değişken/fonksiyon
-  type,        // Tip uyuşmazlığı (int + str)
+  syntax, // Yazım hatası (parantez, iki nokta, tırnak)
+  name, // Tanımsız değişken/fonksiyon
+  type, // Tip uyuşmazlığı (int + str)
   outOfBounds, // Liste sınırı dışı
-  logic,       // Çıktı yanlış (kod çalışıyor ama expectedOutput eşleşmiyor)
-  timeout,     // Sonsuz döngü / çok yavaş
-  zeroDivision,// Sıfıra bölme
-  empty,       // Boş kod
+  logic, // Çıktı yanlış (kod çalışıyor ama expectedOutput eşleşmiyor)
+  timeout, // Sonsuz döngü / çok yavaş
+  zeroDivision, // Sıfıra bölme
+  empty, // Boş kod
   unknown,
 }
 
 extension ErrorKindX on ErrorKind {
   String get emoji => switch (this) {
-        ErrorKind.syntax => '🔴',
-        ErrorKind.name => '🟠',
-        ErrorKind.type => '🟣',
-        ErrorKind.outOfBounds => '🟤',
-        ErrorKind.logic => '🟡',
-        ErrorKind.timeout => '⏱️',
-        ErrorKind.zeroDivision => '➗',
-        ErrorKind.empty => '📝',
-        ErrorKind.unknown => '❓',
-      };
+    ErrorKind.syntax => '🔴',
+    ErrorKind.name => '🟠',
+    ErrorKind.type => '🟣',
+    ErrorKind.outOfBounds => '🟤',
+    ErrorKind.logic => '🟡',
+    ErrorKind.timeout => '⏱️',
+    ErrorKind.zeroDivision => '➗',
+    ErrorKind.empty => '📝',
+    ErrorKind.unknown => '❓',
+  };
 
   String get label => switch (this) {
-        ErrorKind.syntax => 'Sözdizimi Hatası',
-        ErrorKind.name => 'Tanımsız İsim',
-        ErrorKind.type => 'Tip Hatası',
-        ErrorKind.outOfBounds => 'Dizin Hatası',
-        ErrorKind.logic => 'Mantık Hatası',
-        ErrorKind.timeout => 'Zaman Aşımı',
-        ErrorKind.zeroDivision => 'Sıfıra Bölme',
-        ErrorKind.empty => 'Boş Kod',
-        ErrorKind.unknown => 'Bilinmeyen Hata',
-      };
+    ErrorKind.syntax => 'Sözdizimi Hatası',
+    ErrorKind.name => 'Tanımsız İsim',
+    ErrorKind.type => 'Tip Hatası',
+    ErrorKind.outOfBounds => 'Dizin Hatası',
+    ErrorKind.logic => 'Mantık Hatası',
+    ErrorKind.timeout => 'Zaman Aşımı',
+    ErrorKind.zeroDivision => 'Sıfıra Bölme',
+    ErrorKind.empty => 'Boş Kod',
+    ErrorKind.unknown => 'Bilinmeyen Hata',
+  };
 }
 
 /// Bir hata için öğretmen ipucu paketi.
@@ -103,7 +103,8 @@ class ErrorAnalyzer {
       return ErrorHint(
         kind: ErrorKind.syntax,
         title: 'Sözdizimi (syntax) hatası',
-        message: 'Kodunda küçük bir yazım hatası var. '
+        message:
+            'Kodunda küçük bir yazım hatası var. '
             'Python bu kodu anlayamadı.',
         lineHint: lineHint,
         example: example != null
@@ -122,9 +123,9 @@ class ErrorAnalyzer {
         title: 'Tanımsız isim',
         message: nameMatch != null
             ? '‘$nameMatch’ adında bir değişken veya fonksiyon tanımlamadın. '
-                'Önce onu tanımla, sonra kullan.'
+                  'Önce onu tanımla, sonra kullan.'
             : 'Kullanmaya çalıştığın bir değişken/fonksiyon tanımsız. '
-                'Tanımladığından emin ol.',
+                  'Tanımladığından emin ol.',
         lineHint: lineHint,
         example: 'isim = "Ali"\nprint(isim)',
       );
@@ -137,7 +138,8 @@ class ErrorAnalyzer {
       return ErrorHint(
         kind: ErrorKind.type,
         title: 'Tip uyuşmazlığı',
-        message: 'Bir string ile sayıyı toplamaya veya karıştırmaya çalıştın. '
+        message:
+            'Bir string ile sayıyı toplamaya veya karıştırmaya çalıştın. '
             'Python’da tip dönüşümü gerekir.',
         example: 'yas = 25\nprint("Yaş: " + str(yas))',
       );
@@ -148,7 +150,8 @@ class ErrorAnalyzer {
       return ErrorHint(
         kind: ErrorKind.outOfBounds,
         title: 'Liste sınırı dışı',
-        message: 'Listede olmayan bir indekse erişmeye çalıştın. '
+        message:
+            'Listede olmayan bir indekse erişmeye çalıştın. '
             'İndeksler 0’dan başlar ve son elemanda liste.length-1 olur.',
         example: 'meyveler = ["elma", "armut"]\nprint(meyveler[0])  # ilk',
       );
@@ -169,7 +172,8 @@ class ErrorAnalyzer {
       return const ErrorHint(
         kind: ErrorKind.timeout,
         title: 'Çok uzun sürdü',
-        message: 'Döngün muhtemelen sonsuz. Koşulun hep True kalıyor. '
+        message:
+            'Döngün muhtemelen sonsuz. Koşulun hep True kalıyor. '
             'Sayaç değişkenini artırmayı unutmuş olabilirsin.',
         example: 'i = 0\nwhile i < 5:\n    print(i)\n    i += 1',
       );
@@ -182,7 +186,8 @@ class ErrorAnalyzer {
         return const ErrorHint(
           kind: ErrorKind.logic,
           title: 'Çıktı yok',
-          message: 'Kodun hata vermedi ama hiçbir şey yazdırmadın. '
+          message:
+              'Kodun hata vermedi ama hiçbir şey yazdırmadın. '
               'print() kullandığından emin ol.',
           example: 'print("Merhaba")',
         );
@@ -191,10 +196,12 @@ class ErrorAnalyzer {
         return ErrorHint(
           kind: ErrorKind.logic,
           title: 'Mantık hatası',
-          message: 'Kodun çalıştı ama çıktı beklenenden farklı. '
+          message:
+              'Kodun çalıştı ama çıktı beklenenden farklı. '
               'Beklenen: "${_truncate(exp, 60)}"\n'
               'Senin çıktın: "${_truncate(combined, 60)}"',
-          example: 'Büyük/küçük harf, boşluk veya noktalama fark etmiş olabilir.',
+          example:
+              'Büyük/küçük harf, boşluk veya noktalama fark etmiş olabilir.',
         );
       }
     }
@@ -202,9 +209,7 @@ class ErrorAnalyzer {
     return ErrorHint(
       kind: ErrorKind.unknown,
       title: 'Beklenmeyen hata',
-      message: errors.isEmpty
-          ? 'Bir şeyler ters gitti.'
-          : errors.join('\n'),
+      message: errors.isEmpty ? 'Bir şeyler ters gitti.' : errors.join('\n'),
     );
   }
 
@@ -251,8 +256,9 @@ class ErrorAnalyzer {
     for (var i = 0; i < lines.length; i++) {
       final l = lines[i];
       // if/for/while/def satırı sonunda : eksik mi?
-      if (RegExp(r'^\s*(if|for|while|def|elif|else|class)\b.*[^:]\s*$')
-          .hasMatch(l)) {
+      if (RegExp(
+        r'^\s*(if|for|while|def|elif|else|class)\b.*[^:]\s*$',
+      ).hasMatch(l)) {
         return 'if x > 0:  # satır sonuna : eklemeyi unutma';
       }
     }

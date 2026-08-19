@@ -48,11 +48,13 @@ class _AiAssistantPanelState extends ConsumerState<AiAssistantPanel> {
     final now = DateTime.now();
     setState(() {
       _messages.add(_AiMessage(text: trimmed, isMe: true, createdAt: now));
-      _messages.add(_AiMessage(
-        text: _generateResponse(trimmed),
-        isMe: false,
-        createdAt: now.add(const Duration(seconds: 1)),
-      ));
+      _messages.add(
+        _AiMessage(
+          text: _generateResponse(trimmed),
+          isMe: false,
+          createdAt: now.add(const Duration(seconds: 1)),
+        ),
+      );
       _input.clear();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -77,7 +79,9 @@ class _AiAssistantPanelState extends ConsumerState<AiAssistantPanel> {
     if (lower.contains('oyun')) {
       return 'Oyunlar sekmesinde Kelime Avı, Quick Math ve Renk Eşleştir var. Hepsini deneyebilirsin!';
     }
-    if (lower.contains('seviye') || lower.contains('xp') || lower.contains('level')) {
+    if (lower.contains('seviye') ||
+        lower.contains('xp') ||
+        lower.contains('level')) {
       return 'XP kazanmak için ders tamamla veya oyun oyna. Her 200 XP\'de level atlıyorsun. Profil\'de ilerlemeni görebilirsin.';
     }
     if (lower.contains('rozet') || lower.contains('badge')) {
@@ -404,8 +408,9 @@ class _AiBubble extends StatelessWidget {
               : null,
         ),
         child: Column(
-          crossAxisAlignment:
-              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isMe
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             Text(
               text,

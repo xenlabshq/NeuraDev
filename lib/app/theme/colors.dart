@@ -58,8 +58,8 @@ class AppColors {
   /// birlikte kullanılmalıdır; `Widget.build()` içinden çağrılmalı.
   static NColorTokens tokensOf(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark
-          ? const _DarkColorTokens()
-          : const _LightColorTokens();
+      ? const _DarkColorTokens()
+      : const _LightColorTokens();
 
   /// Tema bağımsız gradient'ler — bunlar light/dark için aynı kalır
   /// (CTA'lar, marka rozetleri, vb.).
@@ -96,16 +96,16 @@ class AppColors {
   /// Tema-aware sayfa arka planı.
   static LinearGradient pageBackground(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark
-          ? const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF0A0C12), Color(0xFF14171F)],
-            )
-          : const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFFF8FAFC), Color(0xFFEFF6FF)],
-            );
+      ? const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF0A0C12), Color(0xFF14171F)],
+        )
+      : const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFF8FAFC), Color(0xFFEFF6FF)],
+        );
 
   // Category colors (her iki tema için aynı)
   static const Color mathColor = Color(0xFF6366F1);
@@ -133,24 +133,40 @@ abstract class NColorTokens {
 
 class _LightColorTokens extends NColorTokens {
   const _LightColorTokens();
-  @override Color get surface => AppColors.surfaceLight;
-  @override Color get surfaceAlt => AppColors.surfaceAltLight;
-  @override Color get surfaceContainer => const Color(0xFFEEF0F3);
-  @override Color get textPrimary => AppColors.textPrimaryLight;
-  @override Color get textSecondary => AppColors.textSecondaryLight;
-  @override Color get textTertiary => AppColors.textTertiaryLight;
-  @override Color get border => AppColors.borderLight;
-  @override Color get shadow => const Color(0x1A000000); // %10 siyah
+  @override
+  Color get surface => AppColors.surfaceLight;
+  @override
+  Color get surfaceAlt => AppColors.surfaceAltLight;
+  @override
+  Color get surfaceContainer => const Color(0xFFEEF0F3);
+  @override
+  Color get textPrimary => AppColors.textPrimaryLight;
+  @override
+  Color get textSecondary => AppColors.textSecondaryLight;
+  @override
+  Color get textTertiary => AppColors.textTertiaryLight;
+  @override
+  Color get border => AppColors.borderLight;
+  @override
+  Color get shadow => const Color(0x1A000000); // %10 siyah
 }
 
 class _DarkColorTokens extends NColorTokens {
   const _DarkColorTokens();
-  @override Color get surface => AppColors.surfaceDark;
-  @override Color get surfaceAlt => AppColors.surfaceAltDark;
-  @override Color get surfaceContainer => AppColors.surfaceContainerDark;
-  @override Color get textPrimary => AppColors.textPrimaryDark;
-  @override Color get textSecondary => AppColors.textSecondaryDark;
-  @override Color get textTertiary => AppColors.textTertiaryDark;
-  @override Color get border => AppColors.borderDark;
-  @override Color get shadow => const Color(0x66000000); // %40 siyah
+  @override
+  Color get surface => AppColors.surfaceDark;
+  @override
+  Color get surfaceAlt => AppColors.surfaceAltDark;
+  @override
+  Color get surfaceContainer => AppColors.surfaceContainerDark;
+  @override
+  Color get textPrimary => AppColors.textPrimaryDark;
+  @override
+  Color get textSecondary => AppColors.textSecondaryDark;
+  @override
+  Color get textTertiary => AppColors.textTertiaryDark;
+  @override
+  Color get border => AppColors.borderDark;
+  @override
+  Color get shadow => const Color(0x66000000); // %40 siyah
 }

@@ -43,31 +43,30 @@ class AppSettings extends Equatable {
     double? textScale,
     bool? analyticsEnabled,
     bool? crashReportsEnabled,
-  }) =>
-      AppSettings(
-        notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-        pushEnabled: pushEnabled ?? this.pushEnabled,
-        emailDigest: emailDigest ?? this.emailDigest,
-        soundEnabled: soundEnabled ?? this.soundEnabled,
-        themeMode: themeMode ?? this.themeMode,
-        language: language ?? this.language,
-        textScale: textScale ?? this.textScale,
-        analyticsEnabled: analyticsEnabled ?? this.analyticsEnabled,
-        crashReportsEnabled: crashReportsEnabled ?? this.crashReportsEnabled,
-      );
+  }) => AppSettings(
+    notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+    pushEnabled: pushEnabled ?? this.pushEnabled,
+    emailDigest: emailDigest ?? this.emailDigest,
+    soundEnabled: soundEnabled ?? this.soundEnabled,
+    themeMode: themeMode ?? this.themeMode,
+    language: language ?? this.language,
+    textScale: textScale ?? this.textScale,
+    analyticsEnabled: analyticsEnabled ?? this.analyticsEnabled,
+    crashReportsEnabled: crashReportsEnabled ?? this.crashReportsEnabled,
+  );
 
   @override
   List<Object?> get props => [
-        notificationsEnabled,
-        pushEnabled,
-        emailDigest,
-        soundEnabled,
-        themeMode,
-        language,
-        textScale,
-        analyticsEnabled,
-        crashReportsEnabled,
-      ];
+    notificationsEnabled,
+    pushEnabled,
+    emailDigest,
+    soundEnabled,
+    themeMode,
+    language,
+    textScale,
+    analyticsEnabled,
+    crashReportsEnabled,
+  ];
 }
 
 /// SharedPreferences anahtarları.
@@ -93,8 +92,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
 
   void _load() {
     state = AppSettings(
-      notificationsEnabled:
-          _prefs.getBool(_Keys.notificationsEnabled) ?? true,
+      notificationsEnabled: _prefs.getBool(_Keys.notificationsEnabled) ?? true,
       pushEnabled: _prefs.getBool(_Keys.pushEnabled) ?? true,
       emailDigest: _prefs.getBool(_Keys.emailDigest) ?? false,
       soundEnabled: _prefs.getBool(_Keys.soundEnabled) ?? true,
@@ -102,8 +100,7 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
       language: _parseLanguage(_prefs.getString(_Keys.language)),
       textScale: _prefs.getDouble(_Keys.textScale) ?? 1.0,
       analyticsEnabled: _prefs.getBool(_Keys.analyticsEnabled) ?? false,
-      crashReportsEnabled:
-          _prefs.getBool(_Keys.crashReportsEnabled) ?? true,
+      crashReportsEnabled: _prefs.getBool(_Keys.crashReportsEnabled) ?? true,
     );
   }
 
@@ -162,11 +159,11 @@ class AppSettingsNotifier extends StateNotifier<AppSettings> {
 /// `appSettingsProvider`'ın override edilmesi gerekir.
 final appSettingsProvider =
     StateNotifierProvider<AppSettingsNotifier, AppSettings>(
-  (ref) => throw UnimplementedError(
-    'appSettingsProvider must be overridden in ProviderScope after '
-    'SharedPreferences.getInstance() resolves. See bootstrap.dart.',
-  ),
-);
+      (ref) => throw UnimplementedError(
+        'appSettingsProvider must be overridden in ProviderScope after '
+        'SharedPreferences.getInstance() resolves. See bootstrap.dart.',
+      ),
+    );
 
 /// TextScaler AppSettings.textScale'e göre: MaterialApp MediaQuery wrapper'ı.
 extension AppSettingsTextScale on AppSettings {

@@ -27,10 +27,14 @@ class SupportChatRepositoryImpl implements SupportChatRepository {
   @override
   Stream<List<SupportChat>> watchOpenChatsForModerators() {
     return _chats
-        .where('status', whereIn: [
-      SupportChatStatus.open.name,
-      SupportChatStatus.assigned.name,
-    ]).orderBy('createdAt', descending: false)
+        .where(
+          'status',
+          whereIn: [
+            SupportChatStatus.open.name,
+            SupportChatStatus.assigned.name,
+          ],
+        )
+        .orderBy('createdAt', descending: false)
         .snapshots()
         .map((snap) => snap.docs.map(SupportChat.fromDoc).toList());
   }

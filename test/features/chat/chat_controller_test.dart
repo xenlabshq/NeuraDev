@@ -40,11 +40,13 @@ void main() {
       status: SupportChatStatus.open,
       createdAt: _epoch,
     );
-    when(() => repo.openOrGetChat(
-          userId: any(named: 'userId'),
-          userName: any(named: 'userName'),
-          userRole: any(named: 'userRole'),
-        )).thenAnswer((_) async => existing);
+    when(
+      () => repo.openOrGetChat(
+        userId: any(named: 'userId'),
+        userName: any(named: 'userName'),
+        userRole: any(named: 'userRole'),
+      ),
+    ).thenAnswer((_) async => existing);
 
     final result = await container
         .read(supportChatControllerProvider)
@@ -60,33 +62,39 @@ void main() {
       displayName: 'Ali',
       role: UserRole.student,
     );
-    when(() => repo.sendMessage(
-          chatId: any(named: 'chatId'),
-          senderId: any(named: 'senderId'),
-          senderName: any(named: 'senderName'),
-          isModerator: any(named: 'isModerator'),
-          text: any(named: 'text'),
-        )).thenAnswer((_) async {});
+    when(
+      () => repo.sendMessage(
+        chatId: any(named: 'chatId'),
+        senderId: any(named: 'senderId'),
+        senderName: any(named: 'senderName'),
+        isModerator: any(named: 'isModerator'),
+        text: any(named: 'text'),
+      ),
+    ).thenAnswer((_) async {});
 
     final ctrl = container.read(supportChatControllerProvider);
 
     await ctrl.send(chatId: 'c1', sender: user, text: '   ');
-    verifyNever(() => repo.sendMessage(
-          chatId: any(named: 'chatId'),
-          senderId: any(named: 'senderId'),
-          senderName: any(named: 'senderName'),
-          isModerator: any(named: 'isModerator'),
-          text: any(named: 'text'),
-        ));
+    verifyNever(
+      () => repo.sendMessage(
+        chatId: any(named: 'chatId'),
+        senderId: any(named: 'senderId'),
+        senderName: any(named: 'senderName'),
+        isModerator: any(named: 'isModerator'),
+        text: any(named: 'text'),
+      ),
+    );
 
     await ctrl.send(chatId: 'c1', sender: user, text: '  Merhaba  ');
-    verify(() => repo.sendMessage(
-          chatId: 'c1',
-          senderId: 'u1',
-          senderName: 'Ali',
-          isModerator: false,
-          text: 'Merhaba',
-        )).called(1);
+    verify(
+      () => repo.sendMessage(
+        chatId: 'c1',
+        senderId: 'u1',
+        senderName: 'Ali',
+        isModerator: false,
+        text: 'Merhaba',
+      ),
+    ).called(1);
   });
 
   test('SupportMessage and SupportChat fromDoc handle nulls', () {

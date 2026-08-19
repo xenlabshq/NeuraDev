@@ -100,16 +100,16 @@ class NewsArticle extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        summary,
-        body,
-        source,
-        sourceUrl,
-        category,
-        publishedAt,
-        imageUrl,
-        isBreaking,
-        priority,
-      ];
+    id,
+    title,
+    summary,
+    body,
+    source,
+    sourceUrl,
+    category,
+    publishedAt,
+    imageUrl,
+    isBreaking,
+    priority,
+  ];
 }
