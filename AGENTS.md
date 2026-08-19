@@ -23,7 +23,7 @@ If only changing widget code, `dart analyze` + `flutter build linux --debug` is 
 
 - `Env.firebaseConfigured` (in `core/env/env.dart`) gates all Firebase access.
 - When `false` (default), every feature uses an in-memory repository:
-  - News → `InMemoryNewsRepository` (`features/news/data/in_memory_reels_repository.dart`)
+  - News → `InMemoryNewsRepository` (`features/news/data/repositories/in_memory_news_repository.dart`)
   - Chat/Support → `_InMemorySupportChatRepository` (`features/chat/presentation/providers/chat_providers.dart`)
   - Reels → `InMemoryReelsRepository` (`features/reels/data/in_memory_reels_repository.dart`)
   - Learning progress → `LearningProgressNotifier` (`features/learning/presentation/providers/learning_providers.dart`)
