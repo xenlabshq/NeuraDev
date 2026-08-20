@@ -192,13 +192,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           selected: _role == UserRole.parent,
                           onTap: () => setState(() => _role = UserRole.parent),
                         ),
-                        _RoleChip(
-                          label: 'Moderatör',
-                          icon: Icons.support_agent_rounded,
-                          selected: _role == UserRole.moderator,
-                          onTap: () =>
-                              setState(() => _role = UserRole.moderator),
-                        ),
                       ],
                     ),
                     const SizedBox(height: 28),

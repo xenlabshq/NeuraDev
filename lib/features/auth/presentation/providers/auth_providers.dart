@@ -8,7 +8,10 @@ import 'package:neuroup/features/auth/domain/usecases/login_usecase.dart';
 import 'package:neuroup/features/auth/presentation/providers/auth_state.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
-  (ref) => AuthRepositoryImpl(ref.watch(firebaseAuthProvider)),
+  (ref) => AuthRepositoryImpl(
+    ref.watch(firebaseAuthProvider),
+    ref.watch(firestoreProvider),
+  ),
 );
 
 /// Login use case — validasyon + repo çağrısı. Controller'lar bunu
