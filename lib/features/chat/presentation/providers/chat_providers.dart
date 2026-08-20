@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/env/env.dart';
 import '../../../../core/providers/core_providers.dart';
+import '../../../../features/auth/presentation/providers/auth_providers.dart';
 import '../../../../features/learning/presentation/providers/learning_providers.dart';
 import '../../../../shared/models/user_profile.dart';
 import '../../data/repositories/support_chat_repository_impl.dart';
@@ -39,12 +39,17 @@ final supportChatRepositoryProvider = Provider<SupportChatRepository>(
   },
 );
 
-/// Firebase Auth state — demo modda sabit demo user döner.
-final firebaseAuthStateProvider = StreamProvider<User?>((ref) {
+/// Firebase Auth durumu + Firestore'daki gerçek rol — demo modda boş kalır.
+/// AuthRepositoryImpl.authStateChanges() rolü users/{uid}.role'den okur;
+/// burada FirebaseAuth'u doğrudan kullanmıyoruz çünkü role bilgisi
+/// FirebaseAuth üzerinde tutulmuyor — eskiden burası rolü sabit `student`
+/// dönerdi, bu yüzden Firebase'e gerçekten bağlandıktan sonra hiçbir
+/// moderatör/admin kendi rolünü göremiyordu (haber yönetimi FAB'ı dahil).
+final resolvedAuthUserProvider = StreamProvider<UserProfile?>((ref) {
   if (!Env.firebaseConfigured) {
     return const Stream.empty();
   }
-  return ref.watch(firebaseAuthProvider).authStateChanges();
+  return ref.watch(authRepositoryProvider).authStateChanges();
 });
 
 /// Aktif kullanıcı — demo modda demo user.
@@ -52,20 +57,9 @@ final currentAuthUserProvider = Provider<UserProfile?>((ref) {
   if (!Env.firebaseConfigured) {
     return ref.watch(demoUserProvider);
   }
-  final asyncUser = ref.watch(firebaseAuthStateProvider);
-  return asyncUser.maybeWhen(
-    data: (u) => u == null
-        ? null
-        : UserProfile(
-            id: u.uid,
-            email: u.email ?? '',
-            displayName:
-                u.displayName ?? (u.email?.split('@').first ?? 'Kullanıcı'),
-            role: UserRole.student,
-            avatarUrl: u.photoURL,
-          ),
-    orElse: () => null,
-  );
+  return ref
+      .watch(resolvedAuthUserProvider)
+      .maybeWhen(data: (u) => u, orElse: () => null);
 });
 
 final mySupportChatStreamProvider = StreamProvider<List<SupportChat>>((ref) {
