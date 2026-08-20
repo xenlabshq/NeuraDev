@@ -53,6 +53,23 @@ service cloud.firestore {
       allow create, update, delete: if isStaff();
     }
 
+    // --- reels/{reelId} ---
+    // Kullanıcıların kendi oyunlarını paylaştığı vitrin. Herkes okuyabilir;
+    // sadece giriş yapmış kullanıcılar KENDİ adına (submittedBy == kendi
+    // uid'i) yeni bir reel oluşturabilir, başkası adına oluşturamaz.
+    // Düzenleme/silme yok (MVP) — sadece staff moderasyon amacıyla
+    // silebilir/güncelleyebilir.
+    match /reels/{reelId} {
+      allow read: if true;
+      allow create: if isSignedIn() &&
+        request.resource.data.submittedBy == request.auth.uid &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() > 0 &&
+        request.resource.data.gameUrl is string &&
+        request.resource.data.gameUrl.size() > 0;
+      allow update, delete: if isStaff();
+    }
+
     // --- support_chats/{chatId} ---
     // Sahibi veya destek ekibi (moderatör/admin) okuyup yazabilir.
     match /support_chats/{chatId} {

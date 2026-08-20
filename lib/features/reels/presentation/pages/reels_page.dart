@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/reels_providers.dart';
 import '../widgets/reel_comments_drawer.dart';
 import '../widgets/reel_widgets.dart';
+import 'reel_submit_page.dart';
 
 class ReelsPage extends ConsumerStatefulWidget {
   const ReelsPage({super.key});
@@ -65,6 +66,11 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
             ),
           ),
           Positioned(
+            top: MediaQuery.paddingOf(context).top + 8,
+            right: 12,
+            child: const _SubmitGameButton(),
+          ),
+          Positioned(
             top: 0,
             right: 4,
             bottom: 200,
@@ -104,6 +110,26 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Kullanıcının kendi oyununu Reels akışına eklemesi için giriş noktası.
+class _SubmitGameButton extends StatelessWidget {
+  const _SubmitGameButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withValues(alpha: 0.35),
+      shape: const CircleBorder(),
+      child: IconButton(
+        icon: const Icon(Icons.add_rounded, color: Colors.white),
+        tooltip: 'Oyununu paylaş',
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const ReelSubmitPage()),
+        ),
       ),
     );
   }
