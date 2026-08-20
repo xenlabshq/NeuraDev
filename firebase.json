@@ -1,1 +1,6 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"neuraup-app","appId":"1:526177330312:android:1d2378934a0bbce6a42b3d","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"neuraup-app","configurations":{"android":"1:526177330312:android:1d2378934a0bbce6a42b3d","ios":"1:526177330312:ios:3faca6ee346db057a42b3d"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "flutter": {"platforms":{"android":{"default":{"projectId":"neuraup-app","appId":"1:526177330312:android:1d2378934a0bbce6a42b3d","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"neuraup-app","configurations":{"android":"1:526177330312:android:1d2378934a0bbce6a42b3d","ios":"1:526177330312:ios:3faca6ee346db057a42b3d"}}}}}
+}
