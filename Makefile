@@ -1,5 +1,5 @@
 help:
-	@echo "Targets: get, analyze, test, format, run, build-apk, build-ios, clean"
+	@echo "Targets: get, analyze, test, format, run, build-apk, build-linux, build-ios, clean"
 
 get:
 	flutter pub get
@@ -18,6 +18,9 @@ run:
 
 build-apk:
 	flutter build apk --release --split-debug-info=build/symbols
+
+build-linux:
+	flutter build linux --release
 
 build-ios:
 	flutter build ios --release --no-codesign

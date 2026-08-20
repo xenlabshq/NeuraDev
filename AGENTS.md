@@ -13,7 +13,7 @@ Run in order — each must pass with zero output for error case:
 
 ```bash
 dart analyze                          # must show 0 errors
-flutter test                          # 21+ tests must pass
+flutter test                          # 220+ tests must pass
 flutter build linux --debug           # produces ./build/linux/x64/debug/bundle/neuroup
 ```
 
