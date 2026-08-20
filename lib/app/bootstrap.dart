@@ -13,6 +13,7 @@ import 'package:neuroup/core/env/env.dart';
 import 'package:neuroup/core/providers/app_settings_provider.dart';
 import 'package:neuroup/core/providers/core_providers.dart';
 import 'package:neuroup/core/services/logger_service.dart';
+import 'package:neuroup/firebase_options.dart';
 
 final Talker talker = TalkerFlutter.init(
   settings: TalkerSettings(
@@ -104,7 +105,9 @@ Future<void> bootstrap(Widget Function() builder) async {
       // it must succeed.
       if (Env.firebaseConfigured) {
         try {
-          await Firebase.initializeApp();
+          await Firebase.initializeApp(
+            options: DefaultFirebaseOptions.currentPlatform,
+          );
         } catch (e, st) {
           LoggerService.error('Firebase init failed', e, st);
           if (Env.isProduction) rethrow;
