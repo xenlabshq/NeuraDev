@@ -10,6 +10,8 @@ abstract class AuthRepository {
     required String displayName,
     required UserRole role,
   });
+  Future<Result<UserProfile>> signInWithGoogle();
+  Future<Result<void>> sendPasswordResetEmail(String email);
   Future<void> signOut();
   Future<Result<UserProfile?>> currentUser();
   Future<Result<void>> updateProfile(UserProfile profile);

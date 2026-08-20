@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -108,6 +109,9 @@ Future<void> bootstrap(Widget Function() builder) async {
           await Firebase.initializeApp(
             options: DefaultFirebaseOptions.currentPlatform,
           );
+          // Google ile giriş — google-services.json'daki Android OAuth
+          // client'ı otomatik okur, ekstra clientId vermeye gerek yok.
+          await GoogleSignIn.instance.initialize();
         } catch (e, st) {
           LoggerService.error('Firebase init failed', e, st);
           if (Env.isProduction) rethrow;

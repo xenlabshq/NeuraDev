@@ -41,6 +41,62 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    await ref.read(authStateProvider.notifier).signInWithGoogle();
+    if (!mounted) return;
+    final state = ref.read(authStateProvider);
+    if (state.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(state.error!)),
+      );
+    } else if (state.isAuthenticated) {
+      context.go('/lessons');
+    }
+  }
+
+  Future<void> _forgotPassword() async {
+    final controller = TextEditingController(text: _email.text.trim());
+    final email = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Şifremi unuttum'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.emailAddress,
+          decoration: const InputDecoration(
+            labelText: 'E-posta',
+            hintText: 'ornek@email.com',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            child: const Text('Sıfırlama linki gönder'),
+          ),
+        ],
+      ),
+    );
+    if (email == null || email.isEmpty || !mounted) return;
+    final result = await ref
+        .read(authStateProvider.notifier)
+        .sendPasswordResetEmail(email);
+    if (!mounted) return;
+    result.when(
+      success: (_) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$email adresine şifre sıfırlama linki gönderildi'),
+        ),
+      ),
+      failure: (f) => ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(f.message)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authStateProvider.select((s) => s.isLoading));
@@ -160,7 +216,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: isLoading ? null : _forgotPassword,
                         child: const Text('Şifremi unuttum'),
                       ),
                     ),
@@ -179,6 +235,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 ),
                               )
                             : const Text('Giriş Yap'),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: AppColors.border)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            'veya',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                        Expanded(child: Divider(color: AppColors.border)),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 56,
+                      child: OutlinedButton.icon(
+                        onPressed: isLoading ? null : _signInWithGoogle,
+                        icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
+                        label: const Text('Google ile devam et'),
                       ),
                     ),
                     const SizedBox(height: 20),

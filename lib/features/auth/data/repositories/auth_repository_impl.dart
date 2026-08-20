@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:neuroup/core/failures/failure.dart';
 import 'package:neuroup/core/services/logger_service.dart';
@@ -90,6 +91,61 @@ class AuthRepositoryImpl implements AuthRepository {
       return Err(AuthFailure(_mapAuthError(e)));
     } catch (e, st) {
       LoggerService.error('registerWithEmail unexpected', e, st);
+      return Err(failureFromException(e, st));
+    }
+  }
+
+  @override
+  Future<Result<UserProfile>> signInWithGoogle() async {
+    try {
+      final googleUser = await GoogleSignIn.instance.authenticate();
+      final idToken = googleUser.authentication.idToken;
+      if (idToken == null) {
+        return const Err(AuthFailure('Google girişi başarısız'));
+      }
+      final credential = GoogleAuthProvider.credential(idToken: idToken);
+      final userCredential = await _auth.signInWithCredential(credential);
+      final user = userCredential.user;
+      if (user == null) {
+        return const Err(AuthFailure('Google girişi başarısız'));
+      }
+      // İlk Google girişiyse users/{uid} belgesi yok — kayıt akışındaki
+      // gibi öntanımlı student rolüyle oluştur.
+      final doc = await _users.doc(user.uid).get();
+      if (!doc.exists) {
+        await _users.doc(user.uid).set({
+          'email': user.email ?? '',
+          'displayName': user.displayName ?? '',
+          'role': UserRole.student.name,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+      return Success(await _mapWithRole(user));
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        return const Err(AuthFailure('Google girişi iptal edildi'));
+      }
+      LoggerService.error('signInWithGoogle failed', e);
+      return const Err(AuthFailure('Google girişi başarısız'));
+    } on FirebaseAuthException catch (e, st) {
+      LoggerService.error('signInWithGoogle failed', e, st);
+      return Err(AuthFailure(_mapAuthError(e)));
+    } catch (e, st) {
+      LoggerService.error('signInWithGoogle unexpected', e, st);
+      return Err(failureFromException(e, st));
+    }
+  }
+
+  @override
+  Future<Result<void>> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      return const Success(null);
+    } on FirebaseAuthException catch (e, st) {
+      LoggerService.error('sendPasswordResetEmail failed', e, st);
+      return Err(AuthFailure(_mapAuthError(e)));
+    } catch (e, st) {
+      LoggerService.error('sendPasswordResetEmail unexpected', e, st);
       return Err(failureFromException(e, st));
     }
   }

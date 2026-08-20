@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:neuroup/core/providers/core_providers.dart';
+import 'package:neuroup/core/utils/result.dart';
 import 'package:neuroup/shared/models/user_profile.dart';
 import 'package:neuroup/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:neuroup/features/auth/domain/repositories/auth_repository.dart';
@@ -60,6 +61,23 @@ class AuthController extends StateNotifier<AuthState> {
       success: (user) => state.copyWith(user: user, isLoading: false),
       failure: (f) => state.copyWith(isLoading: false, error: f.message),
     );
+  }
+
+  Future<void> signInWithGoogle() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    final result = await _repo.signInWithGoogle();
+    if (!mounted) return;
+    state = result.when(
+      success: (user) => state.copyWith(user: user, isLoading: false),
+      failure: (f) => state.copyWith(isLoading: false, error: f.message),
+    );
+  }
+
+  /// Şifre sıfırlama e-postası gönderir. Başarı/hata mesajını çağıran
+  /// widget'ın göstermesi için bir [Result] döner — auth state'i etkilemez
+  /// (kullanıcı henüz giriş yapmış değil).
+  Future<Result<void>> sendPasswordResetEmail(String email) {
+    return _repo.sendPasswordResetEmail(email);
   }
 
   Future<void> signOut() async {

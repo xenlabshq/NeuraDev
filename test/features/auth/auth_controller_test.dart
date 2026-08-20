@@ -86,6 +86,49 @@ void main() {
       expect(state.isAuthenticated, isFalse);
       expect(state.user, isNull);
     });
+
+    test('signInWithGoogle updates state with user on success', () async {
+      const user = UserProfile(
+        id: 'g1',
+        email: 'g@gmail.com',
+        displayName: 'G',
+        role: UserRole.student,
+      );
+      when(
+        () => repo.signInWithGoogle(),
+      ).thenAnswer((_) async => const Success(user));
+
+      await container.read(authStateProvider.notifier).signInWithGoogle();
+
+      final state = container.read(authStateProvider);
+      expect(state.isAuthenticated, isTrue);
+      expect(state.user, equals(user));
+    });
+
+    test('signInWithGoogle exposes failure message on cancel', () async {
+      when(() => repo.signInWithGoogle()).thenAnswer(
+        (_) async => const Err(AuthFailure('Google girişi iptal edildi')),
+      );
+
+      await container.read(authStateProvider.notifier).signInWithGoogle();
+
+      final state = container.read(authStateProvider);
+      expect(state.isAuthenticated, isFalse);
+      expect(state.error, 'Google girişi iptal edildi');
+    });
+
+    test('sendPasswordResetEmail delegates to the repository', () async {
+      when(
+        () => repo.sendPasswordResetEmail('a@b.com'),
+      ).thenAnswer((_) async => const Success(null));
+
+      final result = await container
+          .read(authStateProvider.notifier)
+          .sendPasswordResetEmail('a@b.com');
+
+      expect(result.isSuccess, isTrue);
+      verify(() => repo.sendPasswordResetEmail('a@b.com')).called(1);
+    });
   });
 
   group('Result', () {
