@@ -5,6 +5,7 @@ import 'package:neuroup/app/router/home_shell.dart';
 import 'package:neuroup/app/theme/app_theme.dart';
 import 'package:neuroup/app/theme/colors.dart';
 import 'package:neuroup/core/providers/app_settings_provider.dart';
+import 'package:neuroup/features/admin/presentation/pages/admin_users_page.dart';
 import 'package:neuroup/features/chat/presentation/providers/chat_providers.dart'
     show currentAuthUserProvider;
 import 'package:neuroup/features/learning/presentation/providers/learning_providers.dart';
@@ -551,6 +552,16 @@ class _SettingsSection extends ConsumerWidget {
         color: AppColorsTextX.textSecondary(context),
         onTap: () => _showAbout(context),
       ),
+      if (user.role == UserRole.admin)
+        _SettingItem(
+          icon: Icons.admin_panel_settings_outlined,
+          title: 'Yönetim Paneli',
+          subtitle: 'Kullanıcı rollerini yönet',
+          color: AppColors.primary,
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const AdminUsersPage()),
+          ),
+        ),
       if (user.email != 'demo@neuroup.app')
         _SettingItem(
           icon: Icons.logout_rounded,
