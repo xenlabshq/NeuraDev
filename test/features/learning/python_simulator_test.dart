@@ -195,4 +195,142 @@ while i < 1000000:
       expect(result.steps.single.variables, {'x': 1});
     });
   });
+
+  group('PythonSimulator lists (indeksleme + append)', () {
+    test('index read returns the element at that position', () {
+      final result = sim.run(
+        'meyveler = ["elma", "armut", "muz"]\n'
+        'print(meyveler[0])\n'
+        'print(meyveler[2])',
+      );
+      expect(result.output, ['elma', 'muz']);
+    });
+
+    test('append mutates the list in place', () {
+      final result = sim.run(
+        'sayilar = [10, 20]\nsayilar.append(30)\nprint(sayilar)',
+      );
+      expect(result.output, ['[10, 20, 30]']);
+    });
+
+    test('index assignment replaces an element', () {
+      final result = sim.run(
+        'liste = [1, 2, 3]\nliste[1] = 99\nprint(liste)',
+      );
+      expect(result.output, ['[1, 99, 3]']);
+    });
+
+    test('out-of-bounds index produces IndexError', () {
+      final result = sim.run('liste = [1, 2]\nprint(liste[5])');
+      expect(result.success, isFalse);
+      expect(result.errors.first, contains('IndexError'));
+    });
+  });
+
+  group('PythonSimulator dicts', () {
+    test('literal + key read', () {
+      final result = sim.run(
+        'araba = {"marka": "BMW", "yil": 2020}\n'
+        'print(araba["marka"])\n'
+        'print(araba["yil"])',
+      );
+      expect(result.output, ['BMW', '2020']);
+    });
+
+    test('item assignment adds a new key', () {
+      final result = sim.run(
+        'urun = {"ad": "Telefon"}\nurun["fiyat"] = 5000\nprint(urun)',
+      );
+      expect(result.output, ["{'ad': 'Telefon', 'fiyat': 5000}"]);
+    });
+
+    test('missing key produces KeyError', () {
+      final result = sim.run('d = {"a": 1}\nprint(d["b"])');
+      expect(result.success, isFalse);
+      expect(result.errors.first, contains('KeyError'));
+    });
+  });
+
+  group('PythonSimulator functions (def/return)', () {
+    test('a void function runs its body as a side effect', () {
+      final result = sim.run('def selam():\n    print("Selam!")\n\nselam()');
+      expect(result.output, ['Selam!']);
+    });
+
+    test('a function can be called multiple times with different args', () {
+      final result = sim.run(
+        'def kare(sayi):\n    print(sayi * sayi)\n\nkare(5)\nkare(7)',
+      );
+      expect(result.output, ['25', '49']);
+    });
+
+    test('return sends a value back to the call site', () {
+      final result = sim.run(
+        'def kare(sayi):\n    return sayi * sayi\n\n'
+        'print(kare(4))\nprint(kare(9))',
+      );
+      expect(result.output, ['16', '81']);
+    });
+
+    test('code after return inside the function does not execute', () {
+      final result = sim.run(
+        'def f():\n    return 1\n    print("olmamali")\n\nprint(f())',
+      );
+      expect(result.output, ['1']);
+    });
+  });
+
+  group('PythonSimulator string methods', () {
+    test('upper and lower', () {
+      final result = sim.run(
+        'kelime = "Merhaba"\nprint(kelime.upper())\nprint(kelime.lower())',
+      );
+      expect(result.output, ['MERHABA', 'merhaba']);
+    });
+
+    test('replace', () {
+      final result = sim.run(
+        'metin = "Köpek koşuyor"\n'
+        'yeni = metin.replace("Köpek", "Kedi")\n'
+        'print(yeni)',
+      );
+      expect(result.output, ['Kedi koşuyor']);
+    });
+  });
+
+  group('PythonSimulator files (sanal dosya sistemi)', () {
+    test('write then read round-trips the exact content', () {
+      final result = sim.run(
+        'f = open("test.txt", "w")\n'
+        'f.write("Satır 1\\nSatır 2")\n'
+        'f.close()\n\n'
+        'f = open("test.txt", "r")\n'
+        'icerik = f.read()\n'
+        'f.close()\n'
+        'print(icerik)',
+      );
+      expect(result.output, ['Satır 1\nSatır 2']);
+    });
+
+    test('opening in "w" mode truncates prior content', () {
+      final result = sim.run(
+        'f = open("a.txt", "w")\nf.write("ilk")\nf.close()\n\n'
+        'f = open("a.txt", "w")\nf.write("ikinci")\nf.close()\n\n'
+        'f = open("a.txt", "r")\nprint(f.read())\nf.close()',
+      );
+      expect(result.output, ['ikinci']);
+    });
+  });
+
+  group('PythonSimulator stringify (Python doğru gösterim)', () {
+    test('a whole-number float from division keeps its .0', () {
+      final result = sim.run('print(81 / 9)');
+      expect(result.output, ['9.0']);
+    });
+
+    test('a string inside a list is quoted like Python repr', () {
+      final result = sim.run('print(["a", "b"])');
+      expect(result.output, ["['a', 'b']"]);
+    });
+  });
 }

@@ -2,7 +2,22 @@ import '../../domain/entities/execution_step.dart';
 import 'py_line.dart';
 import 'python_expression_evaluator.dart';
 
-/// Satır bloklarını (for/while/if dahil kontrol akışı) yürütür.
+/// Kullanıcı tanımlı bir fonksiyonun (def) kayıtlı hâli — parametreleri
+/// ve gövdesinin `lines` içindeki satır aralığını tutar.
+class _PyFunction {
+  _PyFunction({
+    required this.params,
+    required this.bodyStart,
+    required this.bodyEnd,
+    required this.bodyIndent,
+  });
+  final List<String> params;
+  final int bodyStart;
+  final int bodyEnd;
+  final int bodyIndent;
+}
+
+/// Satır bloklarını (for/while/if/def dahil kontrol akışı) yürütür.
 class PyStatementExecutor {
   PyStatementExecutor({
     required PyExpressionEvaluator evaluator,
@@ -10,6 +25,7 @@ class PyStatementExecutor {
     required Map<String, dynamic> variables,
     required List<String> errors,
     required List<ExecutionStep> steps,
+    required Map<String, String> files,
     int maxLoopIterations = 200,
     int maxSteps = 300,
   }) : _evaluator = evaluator,
@@ -17,6 +33,7 @@ class PyStatementExecutor {
        _variables = variables,
        _errors = errors,
        _steps = steps,
+       _files = files,
        _maxLoopIterations = maxLoopIterations,
        _maxSteps = maxSteps;
 
@@ -25,9 +42,15 @@ class PyStatementExecutor {
   final Map<String, dynamic> _variables;
   final List<String> _errors;
   final List<ExecutionStep> _steps;
+  final Map<String, String> _files;
   final int _maxLoopIterations;
   final int _maxSteps;
   int _loopCount = 0;
+
+  final Map<String, _PyFunction> _functions = {};
+  List<PyLine>? _lines;
+  bool _hasReturned = false;
+  dynamic _returnValue;
 
   bool get _hasError => _errors.isNotEmpty;
 
@@ -37,8 +60,10 @@ class PyStatementExecutor {
     int endLine,
     int baseIndent,
   ) {
+    _lines = lines;
     var i = startLine;
     while (i < endLine) {
+      if (_hasReturned) return;
       final line = lines[i];
       final relIndent = line.indent - baseIndent;
 
@@ -69,6 +94,11 @@ class PyStatementExecutor {
         i = _handleIf(lines, i, endLine, baseIndent);
         continue;
       }
+      // def
+      if (c.startsWith('def ')) {
+        i = _handleDef(lines, i, endLine, baseIndent);
+        continue;
+      }
 
       // Tek satırlık ifade
       _evalLine(line);
@@ -96,6 +126,74 @@ class PyStatementExecutor {
   void _executeBody(List<PyLine> lines, int bodyStart, int bodyEnd) {
     if (bodyStart >= bodyEnd) return;
     executeBlock(lines, bodyStart, bodyEnd, lines[bodyStart].indent);
+  }
+
+  int _handleDef(
+    List<PyLine> lines,
+    int startIdx,
+    int endLine,
+    int baseIndent,
+  ) {
+    final line = lines[startIdx];
+    final c = line.content;
+    final match = _matchPattern(
+      c,
+      RegExp(r'def\s+(\w+)\s*\(\s*(.*)\s*\)\s*:'),
+    );
+    if (match == null) {
+      _errors.add(
+        'SyntaxError: Geçersiz fonksiyon tanımı (satır ${line.number})',
+      );
+      return startIdx + 1;
+    }
+    final name = match.group(1)!;
+    final paramsStr = match.group(2)!.trim();
+    final params = paramsStr.isEmpty
+        ? const <String>[]
+        : paramsStr.split(',').map((p) => p.trim()).toList();
+    final bodyStart = startIdx + 1;
+    final bodyEnd = _findBlockEnd(lines, bodyStart, endLine, line.indent);
+    _functions[name] = _PyFunction(
+      params: params,
+      bodyStart: bodyStart,
+      bodyEnd: bodyEnd,
+      bodyIndent: bodyStart < bodyEnd ? lines[bodyStart].indent : line.indent,
+    );
+    return bodyEnd;
+  }
+
+  /// Kullanıcı tanımlı bir fonksiyonu çağırır. `PyExpressionEvaluator`'a
+  /// callback olarak enjekte edilir (ifade içinde `kare(4)` gibi
+  /// kullanılabilmesi için) ve bağımsız çağrı ifadeleri için de
+  /// [_evalLine] tarafından doğrudan kullanılır.
+  ///
+  /// NOT: Gerçek Python'daki gibi fonksiyon-yerel scope YOK — basit
+  /// simülatör tasarımı gereği parametreler global `_variables`'a
+  /// yazılır. Bu, öğretici senaryolarımızdaki (parametre isimleri
+  /// dışarıdaki değişkenlerle çakışmayan) dersler için yeterlidir.
+  dynamic callUserFunction(String name, List<String> argExprs) {
+    final fn = _functions[name];
+    final lines = _lines;
+    if (fn == null || lines == null) return null;
+
+    final argValues = argExprs.map((a) => _evaluator.eval(a.trim())).toList();
+    for (var i = 0; i < fn.params.length; i++) {
+      _variables[fn.params[i]] = i < argValues.length ? argValues[i] : null;
+    }
+
+    final savedReturnValue = _returnValue;
+    final savedHasReturned = _hasReturned;
+    _returnValue = null;
+    _hasReturned = false;
+
+    if (fn.bodyStart < fn.bodyEnd) {
+      executeBlock(lines, fn.bodyStart, fn.bodyEnd, fn.bodyIndent);
+    }
+
+    final result = _returnValue;
+    _returnValue = savedReturnValue;
+    _hasReturned = savedHasReturned;
+    return result;
   }
 
   int _handleFor(
@@ -292,15 +390,78 @@ class PyStatementExecutor {
       return;
     }
 
-    // open(...) (kullanıcı dosya yazma/okuma simüle ediyoruz)
-    if (c.startsWith('open(')) {
-      // Basitçe atla, çıktı üretmiyor
+    // return [expr]
+    final returnMatch = _matchPattern(c, RegExp(r'^return(\s+(.+))?$'));
+    if (returnMatch != null) {
+      final expr = returnMatch.group(2);
+      _returnValue = expr != null ? _evaluator.eval(expr) : null;
+      _hasReturned = true;
       _recordStep(line);
       return;
     }
 
-    // dosya.write(...) / dosya.close() — no-op
-    if (RegExp(r'^\w+\.(write|close|read)\(').hasMatch(c)) {
+    // liste.append(expr)
+    final appendMatch = _matchPattern(
+      c,
+      RegExp(r'^(\w+)\.append\(\s*(.*)\s*\)$'),
+    );
+    if (appendMatch != null) {
+      final name = appendMatch.group(1)!;
+      final argExpr = appendMatch.group(2)!;
+      final list = _variables[name];
+      if (list is List) {
+        list.add(_evaluator.eval(argExpr));
+      }
+      _recordStep(line);
+      return;
+    }
+
+    // İndeks ataması: base[index] = expr  (liste veya dict)
+    final indexAssignMatch = _matchPattern(
+      c,
+      RegExp(r'^(\w+)\[(.+?)\]\s*=\s*(.+)$'),
+    );
+    if (indexAssignMatch != null) {
+      final name = indexAssignMatch.group(1)!;
+      final indexExpr = indexAssignMatch.group(2)!;
+      final valueExpr = indexAssignMatch.group(3)!;
+      final base = _variables[name];
+      final indexVal = _evaluator.eval(indexExpr);
+      final value = _evaluator.eval(valueExpr);
+      if (base is List && indexVal is int) {
+        if (indexVal >= 0 && indexVal < base.length) {
+          base[indexVal] = value;
+        } else {
+          _errors.add('IndexError: liste sınırının dışında');
+        }
+      } else if (base is Map) {
+        base[indexVal] = value;
+      }
+      _recordStep(line);
+      return;
+    }
+
+    // dosya.write(expr)
+    final writeMatch = _matchPattern(
+      c,
+      RegExp(r'^(\w+)\.write\(\s*(.+)\s*\)$'),
+    );
+    if (writeMatch != null) {
+      final varName = writeMatch.group(1)!;
+      final argExpr = writeMatch.group(2)!;
+      final handle = _variables[varName];
+      if (handle is PyFileHandle) {
+        final text = _evaluator.stringify(_evaluator.eval(argExpr));
+        _files[handle.path] = (_files[handle.path] ?? '') + text;
+      }
+      _recordStep(line);
+      return;
+    }
+
+    // open(...) / dosya.close() — no-op (open() zaten atama sağında
+    // eval() üzerinden ele alınıyor, burada bağımsız satır olarak
+    // kullanılırsa sadece atlanır).
+    if (c.startsWith('open(') || RegExp(r'^\w+\.close\(').hasMatch(c)) {
       _recordStep(line);
       return;
     }
@@ -311,6 +472,19 @@ class PyStatementExecutor {
       final name = assignMatch.group(1)!;
       final expr = assignMatch.group(2)!;
       _variables[name] = _evaluator.eval(expr);
+      _recordStep(line);
+      return;
+    }
+
+    // Bağımsız fonksiyon çağrısı: selam()
+    final callMatch = _matchPattern(c, RegExp(r'^(\w+)\s*\(\s*(.*)\s*\)$'));
+    if (callMatch != null && _functions.containsKey(callMatch.group(1))) {
+      final name = callMatch.group(1)!;
+      final argsStr = callMatch.group(2)!;
+      final args = argsStr.trim().isEmpty
+          ? const <String>[]
+          : _evaluator.splitArgs(argsStr);
+      callUserFunction(name, args);
       _recordStep(line);
       return;
     }

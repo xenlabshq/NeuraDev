@@ -1,22 +1,39 @@
+/// `open()` ile döndürülen sahte dosya tanıtıcısı — gerçek bir dosya
+/// açmaz, sadece `PyStatementExecutor`'ın sanal dosya deposundaki
+/// (`files`) yolu ve modu takip eder.
+class PyFileHandle {
+  const PyFileHandle(this.path, this.mode);
+  final String path;
+  final String mode;
+}
+
 /// Python benzeri ifadeleri değerlendirir.
 ///
 /// Desteklenen:
 /// - sayılar (int, float)
-/// - string ("...", '...')
+/// - string ("...", '...') + .upper()/.lower()/.replace()
 /// - değişkenler
 /// - aritmetik: + - * /
 /// - karşılaştırma: == != < > <= >=
-/// - liste literal: [...]
+/// - liste literal: [...] + indeksleme + .append() (atama tarafında)
+/// - dict literal: {...} + indeksleme
 /// - f-string: f"..."
+/// - kullanıcı tanımlı fonksiyon çağrıları (enjekte edilen callback ile)
 class PyExpressionEvaluator {
   PyExpressionEvaluator({
     required Map<String, dynamic> variables,
     required List<String> errors,
+    required Map<String, String> files,
+    dynamic Function(String name, List<String> argExprs)? callUserFunction,
   }) : _variables = variables,
-       _errors = errors;
+       _errors = errors,
+       _files = files,
+       _callUserFunction = callUserFunction;
 
   final Map<String, dynamic> _variables;
   final List<String> _errors;
+  final Map<String, String> _files;
+  final dynamic Function(String name, List<String> argExprs)? _callUserFunction;
 
   dynamic eval(String expr) {
     expr = expr.trim();
@@ -44,6 +61,21 @@ class PyExpressionEvaluator {
       return splitArgs(inner).map((e) => eval(e.trim())).toList();
     }
 
+    // Dict literal: {"anahtar": deger, ...}
+    if (expr.startsWith('{') && expr.endsWith('}')) {
+      final inner = expr.substring(1, expr.length - 1).trim();
+      final result = <dynamic, dynamic>{};
+      if (inner.isEmpty) return result;
+      for (final pair in splitArgs(inner)) {
+        final colonIdx = _findTopLevelColon(pair);
+        if (colonIdx < 0) continue;
+        final key = eval(pair.substring(0, colonIdx).trim());
+        final value = eval(pair.substring(colonIdx + 1).trim());
+        result[key] = value;
+      }
+      return result;
+    }
+
     // Boolean / None
     if (expr == 'True') return true;
     if (expr == 'False') return false;
@@ -57,6 +89,12 @@ class PyExpressionEvaluator {
 
     // Değişken
     if (_variables.containsKey(expr)) return _variables[expr];
+
+    // İndeksleme: base[index] — liste veya dict.
+    final indexMatch = _matchPattern(expr, RegExp(r'^(\w+)\[(.+)\]$'));
+    if (indexMatch != null) {
+      return _evalIndex(indexMatch.group(1)!, indexMatch.group(2)!);
+    }
 
     // Karşılaştırma operatörü içeriyor mu?
     for (final op in ['==', '!=', '<=', '>=', '<', '>']) {
@@ -78,6 +116,19 @@ class PyExpressionEvaluator {
         return stringify(left) + stringify(right);
       }
       return _arith(left, op, right);
+    }
+
+    // base.method(args) çağrısı — string/dosya metotları.
+    final methodMatch = _matchPattern(
+      expr,
+      RegExp(r'^(\w+)\.(\w+)\s*\(\s*(.*)\s*\)$'),
+    );
+    if (methodMatch != null) {
+      return _evalMethodCall(
+        methodMatch.group(1)!,
+        methodMatch.group(2)!,
+        methodMatch.group(3)!,
+      );
     }
 
     // func(...) çağrısı
@@ -103,15 +154,82 @@ class PyExpressionEvaluator {
         // range handled in for, return empty here
         return <dynamic>[];
       }
-      if (fname == 'open' ||
-          fname == 'input' ||
-          fname == 'str' ||
-          fname == 'int') {
+      if (fname == 'open') {
+        final args = splitArgs(argsStr).map((a) => eval(a.trim())).toList();
+        final path = args.isNotEmpty ? stringify(args[0]) : '';
+        final mode = args.length > 1 ? stringify(args[1]) : 'r';
+        if (mode.contains('w')) {
+          // "w" modu dosyayı hemen (write çağrılmadan) sıfırlar —
+          // gerçek Python'daki gibi.
+          _files[path] = '';
+        }
+        return PyFileHandle(path, mode);
+      }
+      if (fname == 'input' || fname == 'str' || fname == 'int') {
         return null;
+      }
+      // Kullanıcı tanımlı fonksiyon.
+      if (_callUserFunction != null) {
+        final args = argsStr.trim().isEmpty
+            ? const <String>[]
+            : splitArgs(argsStr);
+        return _callUserFunction(fname, args);
       }
     }
 
     // Bilinmeyen
+    return null;
+  }
+
+  dynamic _evalIndex(String baseName, String indexExpr) {
+    if (!_variables.containsKey(baseName)) return null;
+    final base = _variables[baseName];
+    final indexVal = eval(indexExpr);
+    if (base is List) {
+      if (indexVal is! int || indexVal < 0 || indexVal >= base.length) {
+        _errors.add('IndexError: liste sınırının dışında');
+        return null;
+      }
+      return base[indexVal];
+    }
+    if (base is Map) {
+      if (!base.containsKey(indexVal)) {
+        _errors.add("KeyError: '$indexVal'");
+        return null;
+      }
+      return base[indexVal];
+    }
+    return null;
+  }
+
+  dynamic _evalMethodCall(String baseName, String methodName, String argsStr) {
+    final base = _variables[baseName];
+    final args = argsStr.trim().isEmpty
+        ? const <dynamic>[]
+        : splitArgs(argsStr).map((a) => eval(a.trim())).toList();
+
+    if (base is String) {
+      switch (methodName) {
+        case 'upper':
+          return base.toUpperCase();
+        case 'lower':
+          return base.toLowerCase();
+        case 'strip':
+          return base.trim();
+        case 'replace':
+          if (args.length == 2) {
+            return base.replaceAll(stringify(args[0]), stringify(args[1]));
+          }
+      }
+    }
+    if (base is PyFileHandle) {
+      switch (methodName) {
+        case 'read':
+          return _files[base.path] ?? '';
+        case 'close':
+          return null;
+      }
+    }
     return null;
   }
 
@@ -131,26 +249,30 @@ class PyExpressionEvaluator {
     return true;
   }
 
+  /// `print`/`str()` tarzı gösterim — string'ler tırnaksız yazılır.
   String stringify(dynamic v) {
     if (v == null) return 'None';
     if (v is bool) return v ? 'True' : 'False';
     if (v is String) return v;
-    if (v is double) {
-      // Python: tamsayı gibi yazılabilir
-      if (v == v.truncate()) return v.toInt().toString();
-      return v.toString();
-    }
+    if (v is double) return v.toString();
     if (v is List) {
-      final items = v.map(stringify).join(', ');
+      final items = v.map(_repr).join(', ');
       return '[$items]';
     }
     if (v is Map) {
       final entries = v.entries
-          .map((e) => "'${e.key}': ${stringify(e.value)}")
+          .map((e) => '${_repr(e.key)}: ${_repr(e.value)}')
           .join(', ');
       return '{$entries}';
     }
     return v.toString();
+  }
+
+  /// `repr()` tarzı gösterim — liste/dict İÇİNDEKİ elemanlar için;
+  /// string'ler Python'daki gibi tek tırnakla gösterilir.
+  String _repr(dynamic v) {
+    if (v is String) return "'$v'";
+    return stringify(v);
   }
 
   /// Virgülle ayrılmış argümanları (parantez/köşeli parantez ve string
@@ -238,6 +360,25 @@ class PyExpressionEvaluator {
           return i;
         }
       }
+    }
+    return -1;
+  }
+
+  int _findTopLevelColon(String s) {
+    var inStr = false;
+    String? q;
+    for (var i = 0; i < s.length; i++) {
+      final c = s[i];
+      if (inStr) {
+        if (c == q && (i == 0 || s[i - 1] != r'\')) inStr = false;
+        continue;
+      }
+      if (c == '"' || c == "'") {
+        inStr = true;
+        q = c;
+        continue;
+      }
+      if (c == ':') return i;
     }
     return -1;
   }

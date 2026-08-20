@@ -17,6 +17,7 @@ class PythonSimulator {
   final Map<String, dynamic> _variables = {};
   final List<String> _errors = [];
   final List<ExecutionStep> _steps = [];
+  final Map<String, String> _files = {};
 
   List<String> get output => List.unmodifiable(_output);
   List<String> get errors => List.unmodifiable(_errors);
@@ -30,17 +31,28 @@ class PythonSimulator {
     _errors.clear();
     _variables.clear();
     _steps.clear();
+    _files.clear();
 
+    // executor, evaluator'a bağımlı ama evaluator'ın kullanıcı
+    // fonksiyonu çağırabilmesi için executor'a da ihtiyacı var —
+    // döngüsel bağımlılığı `late` ile kırıyoruz: closure çağrıldığında
+    // (yani gerçek bir fonksiyon çağrısı olduğunda) executor artık
+    // atanmış olacak.
+    late PyStatementExecutor executor;
     final evaluator = PyExpressionEvaluator(
       variables: _variables,
       errors: _errors,
+      files: _files,
+      callUserFunction: (name, argExprs) =>
+          executor.callUserFunction(name, argExprs),
     );
-    final executor = PyStatementExecutor(
+    executor = PyStatementExecutor(
       evaluator: evaluator,
       output: _output,
       variables: _variables,
       errors: _errors,
       steps: _steps,
+      files: _files,
     );
 
     try {
