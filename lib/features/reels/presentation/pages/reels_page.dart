@@ -1,7 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../chat/presentation/providers/chat_providers.dart';
 import '../providers/reels_providers.dart';
 import '../widgets/reel_comments_drawer.dart';
 import '../widgets/reel_widgets.dart';
@@ -116,20 +118,29 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
 }
 
 /// Kullanıcının kendi oyununu Reels akışına eklemesi için giriş noktası.
-class _SubmitGameButton extends StatelessWidget {
+/// Reels'i gezmek giriş gerektirmiyor ama gönderim yapmak gerektiriyor —
+/// giriş yapmamış kullanıcı burada login ekranına yönlendirilir.
+class _SubmitGameButton extends ConsumerWidget {
   const _SubmitGameButton();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Material(
       color: Colors.black.withValues(alpha: 0.35),
       shape: const CircleBorder(),
       child: IconButton(
         icon: const Icon(Icons.add_rounded, color: Colors.white),
         tooltip: 'Oyununu paylaş',
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const ReelSubmitPage()),
-        ),
+        onPressed: () {
+          final isAuthed = ref.read(currentAuthUserProvider) != null;
+          if (!isAuthed) {
+            context.push('/login');
+            return;
+          }
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const ReelSubmitPage()),
+          );
+        },
       ),
     );
   }

@@ -1,9 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/env/env.dart';
+import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/chat/presentation/pages/chat_room_page.dart';
 import '../../features/chat/presentation/pages/unified_support_page.dart';
+import '../../features/chat/presentation/providers/chat_providers.dart';
 import '../../features/learning/presentation/pages/island_map_page.dart';
 import '../../features/news/presentation/pages/news_detail_page.dart';
 import '../../features/news/presentation/pages/news_page.dart';
@@ -12,16 +16,52 @@ import '../../features/reels/presentation/pages/reels_page.dart';
 import '../pages/demo_landing_page.dart';
 import 'home_shell.dart';
 
+/// go_router'ın `redirect` callback'i senkron çalışır; auth durumu
+/// değiştiğinde (stream event'i) router'ı yeniden değerlendirmeye
+/// zorlamak için bu ChangeNotifier kullanılır (`refreshListenable`).
+class _AuthRefreshNotifier extends ChangeNotifier {
+  void ping() => notifyListeners();
+}
+
+/// Giriş yapmadan da gezilebilecek rotalar. Reels bilinçli olarak herkese
+/// açık — yeni ziyaretçi kendi hesabı olmadan da içeriğe göz atabilsin.
+/// Reels'e kendi oyununu göndermek ise (bkz. ReelSubmitPage) hâlâ giriş
+/// gerektiriyor, ayrıca oradan kontrol ediliyor.
+const _publicPaths = {'/reels', '/login', '/register'};
+
 final routerProvider = Provider<GoRouter>((ref) {
+  final refresh = _AuthRefreshNotifier();
+  ref.listen(currentAuthUserProvider, (_, _) => refresh.ping());
+  ref.onDispose(refresh.dispose);
+
   final initial = Env.firebaseConfigured ? '/lessons' : '/demo';
 
   return GoRouter(
     initialLocation: initial,
     debugLogDiagnostics: false,
+    refreshListenable: refresh,
+    redirect: (context, state) {
+      if (!Env.firebaseConfigured) return null;
+      final isAuthed = ref.read(currentAuthUserProvider) != null;
+      final target = state.matchedLocation;
+      final isAuthRoute = target == '/login' || target == '/register';
+
+      if (!isAuthed && !_publicPaths.contains(target)) return '/login';
+      if (isAuthed && isAuthRoute) return '/lessons';
+      return null;
+    },
     routes: [
       GoRoute(
         path: '/demo',
         builder: (_, __) => const DemoLandingPage(),
+      ),
+      GoRoute(
+        path: '/login',
+        builder: (_, __) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (_, __) => const RegisterPage(),
       ),
       ShellRoute(
         builder: (context, state, child) => HomeShell(child: child),
