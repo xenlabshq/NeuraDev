@@ -62,6 +62,23 @@ class NewsRepositoryImpl implements NewsRepository {
     LoggerService.debug('seeded ${NewsSeed.all().length} news articles');
   }
 
+  @override
+  Future<String> createArticle(NewsArticle article) async {
+    final doc = article.id.isEmpty ? _news.doc() : _news.doc(article.id);
+    await doc.set(_toMap(article));
+    return doc.id;
+  }
+
+  @override
+  Future<void> updateArticle(NewsArticle article) async {
+    await _news.doc(article.id).set(_toMap(article));
+  }
+
+  @override
+  Future<void> deleteArticle(String id) async {
+    await _news.doc(id).delete();
+  }
+
   NewsArticle _fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? <String, dynamic>{};
     return NewsArticle(
@@ -79,6 +96,10 @@ class NewsRepositoryImpl implements NewsRepository {
           (data['publishedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       imageUrl: data['imageUrl'] as String?,
       isBreaking: data['isBreaking'] as bool? ?? false,
+      priority: NewsPriority.values.firstWhere(
+        (p) => p.name == data['priority'],
+        orElse: () => NewsPriority.normal,
+      ),
     );
   }
 
@@ -92,5 +113,6 @@ class NewsRepositoryImpl implements NewsRepository {
     'publishedAt': a.publishedAt,
     'imageUrl': a.imageUrl,
     'isBreaking': a.isBreaking,
+    'priority': a.priority.name,
   };
 }

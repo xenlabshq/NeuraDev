@@ -6,4 +6,13 @@ abstract class NewsRepository {
   Future<NewsArticle?> getById(String id);
   Future<int> refresh();
   Future<void> seedIfEmpty();
+
+  /// Yeni bir haber ekler. `article.id` boşsa otomatik bir kimlik
+  /// üretilir; oluşan/kullanılan kimliği döner.
+  Future<String> createArticle(NewsArticle article);
+
+  /// Var olan bir haberi (`article.id` ile) tamamen günceller.
+  Future<void> updateArticle(NewsArticle article);
+
+  Future<void> deleteArticle(String id);
 }

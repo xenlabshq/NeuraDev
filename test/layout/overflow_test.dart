@@ -133,8 +133,13 @@ void main() {
   );
   testWidgets(
     'NewsNoOverflow_Compact',
-    (tester) async =>
-        _overflowTest(tester, 'NewsPage', const NewsPage(), size: kCompactSize),
+    (tester) async => _overflowTest(
+      tester,
+      'NewsPage',
+      const NewsPage(),
+      size: kCompactSize,
+      overrides: learningOverrides,
+    ),
   );
   testWidgets('NewsNoOverflow_Compact_TextScale15', (tester) async {
     final errors = <String>[];
@@ -145,6 +150,7 @@ void main() {
     try {
       await tester.pumpWidget(
         ProviderScope(
+          overrides: learningOverrides,
           child: MaterialApp(
             home: MediaQuery(
               data: const MediaQueryData(
@@ -180,6 +186,7 @@ void main() {
     try {
       await tester.pumpWidget(
         ProviderScope(
+          overrides: learningOverrides,
           child: MaterialApp(
             home: MediaQuery(
               data: const MediaQueryData(
@@ -233,8 +240,13 @@ void main() {
   );
   testWidgets(
     'NewsNoOverflow_Phone',
-    (tester) async =>
-        _overflowTest(tester, 'NewsPage', const NewsPage(), size: kPhoneSize),
+    (tester) async => _overflowTest(
+      tester,
+      'NewsPage',
+      const NewsPage(),
+      size: kPhoneSize,
+      overrides: learningOverrides,
+    ),
   );
   testWidgets(
     'IslandMapNoOverflow_Phone',
@@ -278,8 +290,13 @@ void main() {
   );
   testWidgets(
     'NewsNoOverflow_Tablet',
-    (tester) async =>
-        _overflowTest(tester, 'NewsPage', const NewsPage(), size: kTabletSize),
+    (tester) async => _overflowTest(
+      tester,
+      'NewsPage',
+      const NewsPage(),
+      size: kTabletSize,
+      overrides: learningOverrides,
+    ),
   );
   testWidgets(
     'IslandMapNoOverflow_Tablet',
@@ -310,8 +327,13 @@ void main() {
   );
   testWidgets(
     'NewsNoOverflow_Wide',
-    (tester) async =>
-        _overflowTest(tester, 'NewsPage', const NewsPage(), size: kWideSize),
+    (tester) async => _overflowTest(
+      tester,
+      'NewsPage',
+      const NewsPage(),
+      size: kWideSize,
+      overrides: learningOverrides,
+    ),
   );
   testWidgets(
     'IslandMapNoOverflow_Wide',

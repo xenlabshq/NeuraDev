@@ -65,4 +65,63 @@ void main() {
     final second = await repo.watchAll().first;
     expect(first.length, second.length);
   });
+
+  group('admin write operations', () {
+    NewsArticle draft({String id = ''}) => NewsArticle(
+      id: id,
+      title: 'Yeni haber',
+      summary: 'özet',
+      body: 'gövde metni',
+      source: 'Neuroup Editör',
+      sourceUrl: '',
+      category: NewsCategory.technology,
+      publishedAt: DateTime(2026, 1, 1),
+      priority: NewsPriority.high,
+    );
+
+    test('createArticle assigns an id and persists all fields', () async {
+      final id = await repo.createArticle(draft());
+      expect(id, isNotEmpty);
+
+      final saved = await repo.getById(id);
+      expect(saved, isNotNull);
+      expect(saved!.title, 'Yeni haber');
+      expect(saved.category, NewsCategory.technology);
+      // Regresyon guard: priority alanı önceden Firestore'a hiç
+      // yazılmıyordu, her zaman 'normal'e geri dönüyordu.
+      expect(saved.priority, NewsPriority.high);
+    });
+
+    test('createArticle respects an explicitly provided id', () async {
+      final id = await repo.createArticle(draft(id: 'ozel-id'));
+      expect(id, 'ozel-id');
+      expect(await repo.getById('ozel-id'), isNotNull);
+    });
+
+    test('updateArticle overwrites an existing article', () async {
+      final id = await repo.createArticle(draft());
+      final saved = (await repo.getById(id))!;
+      await repo.updateArticle(
+        NewsArticle(
+          id: id,
+          title: 'Güncellenmiş başlık',
+          summary: saved.summary,
+          body: saved.body,
+          source: saved.source,
+          sourceUrl: saved.sourceUrl,
+          category: saved.category,
+          publishedAt: saved.publishedAt,
+          priority: saved.priority,
+        ),
+      );
+      final updated = await repo.getById(id);
+      expect(updated!.title, 'Güncellenmiş başlık');
+    });
+
+    test('deleteArticle removes the article', () async {
+      final id = await repo.createArticle(draft());
+      await repo.deleteArticle(id);
+      expect(await repo.getById(id), isNull);
+    });
+  });
 }

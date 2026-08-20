@@ -6,9 +6,12 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/home_shell.dart';
 import '../../../../app/theme/colors.dart';
 import '../../../../shared/widgets/common_widgets.dart';
+import '../../../chat/presentation/providers/chat_providers.dart'
+    show currentAuthUserProvider;
 import '../../data/services/messaging_service.dart';
 import '../../domain/entities/news_article.dart';
 import '../providers/news_providers.dart';
+import 'news_admin_page.dart';
 
 /// Vitrin/Reels tarzında yeniden tasarlanmış haber sayfası.
 ///
@@ -51,8 +54,29 @@ class _NewsPageState extends ConsumerState<NewsPage> {
     final asyncNews = _selected == null
         ? ref.watch(newsStreamProvider)
         : ref.watch(newsByCategoryProvider(_selected!));
+    final user = ref.watch(currentAuthUserProvider);
+    final canManageNews = user?.role.isSupportStaff ?? false;
 
     return Scaffold(
+      floatingActionButton: canManageNews
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: kBottomBarHeight),
+              child: FloatingActionButton.extended(
+                heroTag: 'news-admin-fab',
+                backgroundColor: AppColors.accent,
+                icon: const Icon(Icons.edit_note_rounded, color: Colors.white),
+                label: const Text(
+                  'Haber Yönetimi',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const NewsAdminPage(),
+                  ),
+                ),
+              ),
+            )
+          : null,
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth >= 900;
