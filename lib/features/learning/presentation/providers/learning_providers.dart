@@ -3,8 +3,10 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 
+import '../../../../core/providers/app_settings_provider.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../data/seed_islands.dart';
+import '../../data/seed_islands_en.dart';
 import '../../domain/entities/learning_island.dart';
 
 class UserLearningProgress extends Equatable {
@@ -55,10 +57,19 @@ class IslandsState extends Equatable {
 }
 
 class LearningProgressNotifier extends StateNotifier<IslandsState> {
-  LearningProgressNotifier(this._cache)
-    : super(_loadFromCache(_cache, IslandSeed.all()));
+  LearningProgressNotifier(this._cache, {required AppLanguage language})
+    : _language = language,
+      super(_loadFromCache(_cache, _seedFor(language)));
 
   final Box<dynamic> _cache;
+  final AppLanguage _language;
+
+  /// Dile göre ders içeriği — id/sıra/renk/puan aynı kalır, sadece
+  /// metin ve kod örnekleri değişir. Bu sayede dil değiştirilince
+  /// (bkz. `learningProgressProvider`) ilerleme (`completedNodeIds`,
+  /// node id'sine göre tutulur) sorunsuz taşınır.
+  static List<LearningIsland> _seedFor(AppLanguage language) =>
+      language == AppLanguage.en ? IslandSeedEn.all() : IslandSeed.all();
 
   static const _kCompleted = 'completedNodeIds';
   static const _kTotalXp = 'totalXp';
@@ -185,7 +196,7 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
   /// Tüm ilerlemeyi sıfırla (debug için).
   void resetProgress() {
     state = IslandsState(
-      islands: IslandSeed.all(),
+      islands: _seedFor(_language),
       progress: const UserLearningProgress(),
     );
     _cache.clear();
@@ -258,9 +269,15 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
 
 /// Progress provider — state'i IslandsState (adalar + progress içerir).
 final learningProgressProvider =
-    StateNotifierProvider<LearningProgressNotifier, IslandsState>(
-      (ref) => LearningProgressNotifier(ref.watch(learningProgressBoxProvider)),
-    );
+    StateNotifierProvider<LearningProgressNotifier, IslandsState>((ref) {
+      final language = ref.watch(
+        appSettingsProvider.select((s) => s.language),
+      );
+      return LearningProgressNotifier(
+        ref.watch(learningProgressBoxProvider),
+        language: language,
+      );
+    });
 
 /// Progress-only provider (XP, streak, completedNodeIds) — UI'da kolay erişim.
 final userProgressProvider = Provider<UserLearningProgress>(
@@ -271,7 +288,13 @@ final userProgressProvider = Provider<UserLearningProgress>(
 final islandsProvider = Provider<List<LearningIsland>>(
   (ref) {
     final state = ref.watch(learningProgressProvider);
+    final notifier = ref.watch(learningProgressProvider.notifier);
     // Ref.computed: her progress değişiminde adalar yeniden hesaplanır.
+    // `nodesWithState` her adanın node'larını gerçek `completedNodeIds`e
+    // göre işaretler — aksi halde `island.completedNodes`/`allCompleted`
+    // (ada haritası ilerleme çubuğu, tamamlanan ders sayacı) hep 0'da
+    // takılı kalır çünkü seed node'ların `isCompleted` alanı hiç
+    // güncellenmez (bkz. F-41).
     final result = <LearningIsland>[];
     final completed = state.progress.completedNodeIds;
     for (var i = 0; i < state.islands.length; i++) {
@@ -279,7 +302,12 @@ final islandsProvider = Provider<List<LearningIsland>>(
       final isUnlocked =
           i == 0 ||
           state.islands[i - 1].nodes.every((n) => completed.contains(n.id));
-      result.add(island.copyWith(unlocked: isUnlocked));
+      result.add(
+        island.copyWith(
+          unlocked: isUnlocked,
+          nodes: notifier.nodesWithState(island),
+        ),
+      );
     }
     return result;
   },

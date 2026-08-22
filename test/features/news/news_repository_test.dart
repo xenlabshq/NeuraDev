@@ -1,8 +1,11 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neuroup/features/news/data/repositories/news_repository_impl.dart';
 import 'package:neuroup/features/news/domain/entities/news_article.dart';
 import 'package:neuroup/features/news/domain/repositories/news_repository.dart';
+import 'package:neuroup/features/news/presentation/utils/news_labels.dart';
+import 'package:neuroup/l10n/gen/app_localizations.dart';
 
 void main() {
   late NewsRepository repo;
@@ -44,6 +47,33 @@ void main() {
     }
   });
 
+  test('fetchArchivePage paginates newest-first and filters by category', () async {
+    await repo.seedIfEmpty();
+    final firstPage = await repo.fetchArchivePage(pageSize: 5);
+    expect(firstPage.length, 5);
+
+    final secondPage = await repo.fetchArchivePage(
+      before: firstPage.last.publishedAt,
+      pageSize: 5,
+    );
+    expect(secondPage, isNotEmpty);
+    expect(
+      secondPage.every(
+        (a) => a.publishedAt.isBefore(firstPage.last.publishedAt),
+      ),
+      isTrue,
+    );
+
+    final eduPage = await repo.fetchArchivePage(
+      category: NewsCategory.education,
+      pageSize: 50,
+    );
+    expect(eduPage, isNotEmpty);
+    for (final a in eduPage) {
+      expect(a.category, NewsCategory.education);
+    }
+  });
+
   test('NewsArticle age label', () {
     final article = NewsArticle(
       id: 'x',
@@ -55,7 +85,8 @@ void main() {
       category: NewsCategory.world,
       publishedAt: DateTime.now().subtract(const Duration(minutes: 5)),
     );
-    expect(article.ageLabel, '5 dk önce');
+    final l10n = lookupAppLocalizations(const Locale('tr'));
+    expect(article.relativeAge(l10n), '5 dk önce');
   });
 
   test('seedIfEmpty is idempotent', () async {

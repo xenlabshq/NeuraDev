@@ -37,4 +37,10 @@ class InMemoryUserAdminRepository implements UserAdminRepository {
     final i = _users.indexWhere((u) => u.id == userId);
     if (i >= 0) _users[i] = _users[i].copyWith(role: role);
   }
+
+  @override
+  Future<void> setBanned(String userId, bool banned) async {
+    final i = _users.indexWhere((u) => u.id == userId);
+    if (i >= 0) _users[i] = _users[i].copyWith(banned: banned);
+  }
 }

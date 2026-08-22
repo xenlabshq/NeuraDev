@@ -45,7 +45,11 @@ class AuthRepositoryImpl implements AuthRepository {
       if (user == null) {
         return const Err(AuthFailure('Kullanıcı bulunamadı'));
       }
-      return Success(await _mapWithRole(user));
+      final profile = await _mapWithRole(user);
+      if (profile == null) {
+        return const Err(AuthFailure(_bannedMessage));
+      }
+      return Success(profile);
     } on FirebaseAuthException catch (e, st) {
       LoggerService.error('signInWithEmail failed', e, st);
       return Err(AuthFailure(_mapAuthError(e)));
@@ -120,7 +124,11 @@ class AuthRepositoryImpl implements AuthRepository {
           'createdAt': FieldValue.serverTimestamp(),
         });
       }
-      return Success(await _mapWithRole(user));
+      final profile = await _mapWithRole(user);
+      if (profile == null) {
+        return const Err(AuthFailure(_bannedMessage));
+      }
+      return Success(profile);
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled) {
         return const Err(AuthFailure('Google girişi iptal edildi'));
@@ -160,6 +168,9 @@ class AuthRepositoryImpl implements AuthRepository {
     return Success(await _mapWithRole(u));
   }
 
+  static const _bannedMessage =
+      'Hesabın askıya alındı. Destek ile iletişime geç.';
+
   @override
   Future<Result<void>> updateProfile(UserProfile profile) async {
     try {
@@ -170,11 +181,15 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
-  Future<UserProfile> _mapWithRole(User u) async {
+  /// `null` dönerse hesap banlanmış demektir — çağıran taraf oturumu
+  /// kapatılmış olarak ele almalı (bkz. authStateChanges/signInWith*).
+  Future<UserProfile?> _mapWithRole(User u) async {
     var role = UserRole.student;
+    var banned = false;
     try {
       final doc = await _users.doc(u.uid).get();
       final raw = doc.data()?['role'] as String?;
+      banned = doc.data()?['banned'] as bool? ?? false;
       if (raw != null) {
         role = UserRole.values.firstWhere(
           (r) => r.name == raw,
@@ -183,6 +198,10 @@ class AuthRepositoryImpl implements AuthRepository {
       }
     } catch (e, st) {
       LoggerService.error('rol okunamadı, student varsayıldı', e, st);
+    }
+    if (banned) {
+      await _auth.signOut();
+      return null;
     }
     return _map(u).copyWith(role: role);
   }

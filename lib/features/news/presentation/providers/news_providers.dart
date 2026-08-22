@@ -29,8 +29,15 @@ final newsStreamProvider = StreamProvider<List<NewsArticle>>((ref) async* {
 
 final StreamProviderFamily<List<NewsArticle>, NewsCategory>
 newsByCategoryProvider = StreamProvider.family<List<NewsArticle>, NewsCategory>(
-  (ref, category) {
-    return ref.read(newsRepositoryProvider).watchByCategory(category);
+  (ref, category) async* {
+    if (!Env.firebaseConfigured) {
+      final repo = ref.read(newsRepositoryProvider);
+      final list = await repo.watchByCategory(category).first;
+      yield list;
+      return;
+    }
+    await ref.read(newsRepositoryProvider).seedIfEmpty();
+    yield* ref.read(newsRepositoryProvider).watchByCategory(category);
   },
 );
 
@@ -52,3 +59,80 @@ class NewsRefreshController {
     return _ref.read(newsRepositoryProvider).refresh();
   }
 }
+
+/// Yönetim panelinin arşiv durumu — kategoriye göre filtrelenmiş,
+/// sayfalanmış geçmiş haberler. Gerçek bir haber sitesi gibi "daha
+/// fazla yükle" ile geriye doğru gezilebilir.
+class NewsAdminArchiveState {
+  const NewsAdminArchiveState({
+    this.category,
+    this.articles = const [],
+    this.hasMore = true,
+    this.loading = false,
+  });
+
+  final NewsCategory? category;
+  final List<NewsArticle> articles;
+  final bool hasMore;
+  final bool loading;
+
+  NewsAdminArchiveState copyWith({
+    NewsCategory? category,
+    bool clearCategory = false,
+    List<NewsArticle>? articles,
+    bool? hasMore,
+    bool? loading,
+  }) => NewsAdminArchiveState(
+    category: clearCategory ? null : (category ?? this.category),
+    articles: articles ?? this.articles,
+    hasMore: hasMore ?? this.hasMore,
+    loading: loading ?? this.loading,
+  );
+}
+
+class NewsAdminArchiveNotifier extends StateNotifier<NewsAdminArchiveState> {
+  NewsAdminArchiveNotifier(this._ref) : super(const NewsAdminArchiveState()) {
+    loadMore();
+  }
+
+  final Ref _ref;
+  static const _pageSize = 20;
+
+  Future<void> setCategory(NewsCategory? category) async {
+    state = NewsAdminArchiveState(category: category);
+    await loadMore();
+  }
+
+  /// Admin bir haber ekledi/güncelledi/sildi — arşivi baştan yükle ki
+  /// yeni haber en üstte görünsün.
+  Future<void> reload() async {
+    state = state.copyWith(articles: [], hasMore: true);
+    await loadMore();
+  }
+
+  Future<void> loadMore() async {
+    if (state.loading || !state.hasMore) return;
+    state = state.copyWith(loading: true);
+    final before = state.articles.isEmpty
+        ? null
+        : state.articles.last.publishedAt;
+    final page = await _ref
+        .read(newsRepositoryProvider)
+        .fetchArchivePage(
+          category: state.category,
+          before: before,
+          pageSize: _pageSize,
+        );
+    state = state.copyWith(
+      articles: [...state.articles, ...page],
+      hasMore: page.length == _pageSize,
+      loading: false,
+    );
+  }
+}
+
+final newsAdminArchiveProvider =
+    StateNotifierProvider.autoDispose<
+      NewsAdminArchiveNotifier,
+      NewsAdminArchiveState
+    >((ref) => NewsAdminArchiveNotifier(ref));

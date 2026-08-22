@@ -6,11 +6,13 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/home_shell.dart';
 import '../../../../app/theme/colors.dart';
 import '../../../../shared/widgets/common_widgets.dart';
+import '../../../../l10n/gen/app_localizations.dart';
 import '../../../chat/presentation/providers/chat_providers.dart'
     show currentAuthUserProvider;
 import '../../data/services/messaging_service.dart';
 import '../../domain/entities/news_article.dart';
 import '../providers/news_providers.dart';
+import '../utils/news_labels.dart';
 import 'news_admin_page.dart';
 
 /// Vitrin/Reels tarzında yeniden tasarlanmış haber sayfası.
@@ -176,6 +178,7 @@ class _NewsPageState extends ConsumerState<NewsPage> {
     AsyncValue<List<NewsArticle>> asyncNews, {
     required bool showCategoryStrip,
   }) {
+    final l10n = AppLocalizations.of(context);
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(
         parent: BouncingScrollPhysics(),
@@ -198,14 +201,14 @@ class _NewsPageState extends ConsumerState<NewsPage> {
                 scrollDirection: Axis.horizontal,
                 children: [
                   _CategoryChip(
-                    label: 'Tümü',
+                    label: l10n.newsAllCategory,
                     selected: _selected == null,
                     color: AppColors.accent,
                     onTap: () => setState(() => _selected = null),
                   ),
                   ...NewsCategory.values.map(
                     (c) => _CategoryChip(
-                      label: '${c.emoji} ${c.label}',
+                      label: '${c.emoji} ${c.localizedLabel(l10n)}',
                       selected: _selected == c,
                       color: _colorForCategory(c),
                       onTap: () => setState(() => _selected = c),
@@ -242,9 +245,9 @@ class _NewsPageState extends ConsumerState<NewsPage> {
                   hasScrollBody: false,
                   child: EmptyState(
                     icon: Icons.article_outlined,
-                    title: 'Haber yok',
-                    message: 'Bu kategoride henüz haber bulunmuyor.',
-                    actionLabel: 'Tümünü Gör',
+                    title: l10n.newsEmptyTitle,
+                    message: l10n.newsEmptyMessage,
+                    actionLabel: l10n.newsShowAllAction,
                     onAction: () => setState(() => _selected = null),
                   ),
                 ),
@@ -284,7 +287,7 @@ class _NewsPageState extends ConsumerState<NewsPage> {
               items.add(const SizedBox(height: 20));
               items.add(
                 _SectionHeader(
-                  title: 'Diğer Haberler',
+                  title: l10n.newsOtherArticlesTitle,
                   count: rest.length - 1,
                 ),
               );
@@ -340,6 +343,7 @@ class _NewsSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -376,10 +380,10 @@ class _NewsSidebar extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Kategoriler',
-                    style: TextStyle(
+                    l10n.newsCategoriesTitle,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
@@ -392,7 +396,7 @@ class _NewsSidebar extends StatelessWidget {
             const SizedBox(height: 16),
             // Tümü chip
             _SidebarCategoryTile(
-              label: 'Tümü',
+              label: l10n.newsAllCategory,
               emoji: '📰',
               color: AppColors.accent,
               selected: selected == null,
@@ -402,7 +406,7 @@ class _NewsSidebar extends StatelessWidget {
             // Kategoriler
             for (final c in NewsCategory.values) ...[
               _SidebarCategoryTile(
-                label: c.label,
+                label: c.localizedLabel(l10n),
                 emoji: c.emoji,
                 color: colorFor(c),
                 selected: selected == c,
@@ -497,6 +501,7 @@ class _SidebarStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -533,10 +538,10 @@ class _SidebarStatsCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Trend',
-                  style: TextStyle(
+                  l10n.newsTrendTitle,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
@@ -546,11 +551,11 @@ class _SidebarStatsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _statRow('Bugün', '5', AppColors.accent),
+          _statRow(l10n.newsStatToday, '5', AppColors.accent),
           const SizedBox(height: 6),
-          _statRow('Bu Hafta', '24', AppColors.info),
+          _statRow(l10n.newsStatThisWeek, '24', AppColors.info),
           const SizedBox(height: 6),
-          _statRow('Toplam', '128', AppColors.success),
+          _statRow(l10n.newsStatTotal, '128', AppColors.success),
         ],
       ),
     );
@@ -606,36 +611,27 @@ class _NewsHeader extends StatelessWidget {
   final ValueChanged<NewsCategory?> onCategoryPicked;
   final Color Function(NewsCategory) colorFor;
 
-  String _todayLabel() {
-    final months = [
-      'Oca',
-      'Şub',
-      'Mar',
-      'Nis',
-      'May',
-      'Haz',
-      'Tem',
-      'Ağu',
-      'Eyl',
-      'Eki',
-      'Kas',
-      'Ara',
-    ];
+  String _todayLabel(BuildContext context) {
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+    final months = isEnglish
+        ? const [
+            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+          ]
+        : const [
+            'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+            'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
+          ];
+    final days = isEnglish
+        ? const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        : const ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
     final now = DateTime.now();
-    final days = [
-      'Pzt',
-      'Sal',
-      'Çar',
-      'Per',
-      'Cum',
-      'Cmt',
-      'Paz',
-    ];
     return '${days[now.weekday - 1]}, ${now.day} ${months[now.month - 1]}';
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // Kategori label'ı artık hero header altında gösterilmiyor —
     // kullanıcı "Eğitim / Bilim gibi yazılar çıkmasın" istedi.
     // Seçim bilgisi zaten bottom sheet'teki bubble pill'de ve
@@ -688,7 +684,7 @@ class _NewsHeader extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  _todayLabel(),
+                  _todayLabel(context),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 11,
@@ -785,8 +781,8 @@ class _NewsHeader extends StatelessWidget {
                         width: 0.6,
                       ),
                     ),
-                    child: const Text(
-                      'Haberler',
+                    child: Text(
+                      l10n.navNews,
                       softWrap: false,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -878,6 +874,7 @@ class _BreakingBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -913,9 +910,9 @@ class _BreakingBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'SON DAKİKA',
-                  style: TextStyle(
+                Text(
+                  l10n.newsBreakingLabel,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
@@ -1000,6 +997,7 @@ class _FeaturedArticle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final color = _colorForCategory(article.category);
     return Material(
       color: Colors.transparent,
@@ -1085,7 +1083,7 @@ class _FeaturedArticle extends StatelessWidget {
                               Icon(Icons.star_rounded, color: color, size: 14),
                               const SizedBox(width: 4),
                               Text(
-                                'ÖNE ÇIKAN',
+                                l10n.newsFeaturedLabel,
                                 style: TextStyle(
                                   color: color,
                                   fontSize: 10,
@@ -1112,7 +1110,7 @@ class _FeaturedArticle extends StatelessWidget {
                       runSpacing: 4,
                       children: [
                         _SmallChip(
-                          label: article.category.label,
+                          label: article.category.localizedLabel(l10n),
                           color: color,
                         ),
                         _PriorityBadgeInline(priority: article.priority),
@@ -1153,7 +1151,7 @@ class _FeaturedArticle extends StatelessWidget {
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
-                            article.ageLabel,
+                            article.relativeAge(l10n),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -1181,7 +1179,9 @@ class _FeaturedArticle extends StatelessWidget {
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
-                            '${article.body.split(' ').length ~/ 200 + 1} dk okuma',
+                            l10n.readingTimeMinutes(
+                              article.body.split(' ').length ~/ 200 + 1,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -1240,6 +1240,7 @@ class _NewsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final color = switch (article.category) {
       NewsCategory.education => AppColors.violet,
       NewsCategory.technology => AppColors.info,
@@ -1287,7 +1288,10 @@ class _NewsCard extends StatelessWidget {
                       spacing: 4,
                       runSpacing: 4,
                       children: [
-                        _SmallChip(label: article.category.label, color: color),
+                        _SmallChip(
+                          label: article.category.localizedLabel(l10n),
+                          color: color,
+                        ),
                         _PriorityBadgeInline(priority: article.priority),
                       ],
                     ),
@@ -1314,7 +1318,7 @@ class _NewsCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
-                            article.ageLabel,
+                            article.relativeAge(l10n),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -1413,6 +1417,7 @@ class _NewsError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 40),
       child: Column(
@@ -1432,9 +1437,9 @@ class _NewsError extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Haberler yüklenemedi',
-            style: TextStyle(
+          Text(
+            l10n.newsLoadFailedTitle,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w800,
@@ -1455,7 +1460,7 @@ class _NewsError extends StatelessWidget {
           FilledButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh_rounded, size: 18),
-            label: const Text('Tekrar Dene'),
+            label: Text(l10n.actionRetry),
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.accent,
             ),
@@ -1499,9 +1504,9 @@ class _CategoryRevealBubble extends StatelessWidget {
   final Color Function(NewsCategory) colorFor;
   final ValueChanged<NewsCategory?> onSelect;
 
-  String _label() {
-    if (selected == null) return 'Tümü';
-    return '${selected!.emoji} ${selected!.label}';
+  String _label(AppLocalizations l10n) {
+    if (selected == null) return l10n.newsAllCategory;
+    return '${selected!.emoji} ${selected!.localizedLabel(l10n)}';
   }
 
   Color _accent() => selected == null ? AppColors.accent : colorFor(selected!);
@@ -1509,6 +1514,11 @@ class _CategoryRevealBubble extends StatelessWidget {
   Future<void> _open(BuildContext context) async {
     final picked = await showModalBottomSheet<NewsCategory?>(
       context: context,
+      // HomeShell'in floating tab bar'ı üstünde açılması için root
+      // navigator'a bağlanıyor — aksi halde shell'in iç navigator'ı
+      // içinde kalıp barın ALTINDA render ediliyordu (bkz. "Dünya"
+      // butonunun barın altında kalması raporu).
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (ctx) => _CategoryMenuSheet(
@@ -1525,6 +1535,7 @@ class _CategoryRevealBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final accent = _accent();
     return Material(
       color: Colors.transparent,
@@ -1547,7 +1558,7 @@ class _CategoryRevealBubble extends StatelessWidget {
               Flexible(
                 fit: FlexFit.loose,
                 child: Text(
-                  _label(),
+                  _label(l10n),
                   softWrap: false,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1587,6 +1598,7 @@ class _CategoryMenuSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SafeArea(
       top: false,
       child: Container(
@@ -1621,11 +1633,11 @@ class _CategoryMenuSheet extends StatelessWidget {
                 ),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(4, 0, 4, 12),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 0, 4, 12),
               child: Text(
-                'Kategori seç',
-                style: TextStyle(
+                l10n.newsPickCategoryTitle,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
@@ -1636,7 +1648,7 @@ class _CategoryMenuSheet extends StatelessWidget {
             _sheetTile(
               context: context,
               emoji: '📰',
-              label: 'Tümü',
+              label: l10n.newsAllCategory,
               color: AppColors.accent,
               isSelected: selected == null,
               onTap: () => Navigator.of(context).pop<NewsCategory?>(null),
@@ -1645,7 +1657,7 @@ class _CategoryMenuSheet extends StatelessWidget {
               _sheetTile(
                 context: context,
                 emoji: c.emoji,
-                label: c.label,
+                label: c.localizedLabel(l10n),
                 color: colorFor(c),
                 isSelected: selected == c,
                 onTap: () => Navigator.of(context).pop<NewsCategory?>(c),

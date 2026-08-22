@@ -7,6 +7,7 @@ import 'package:neuroup/app/router/home_shell.dart'
     show kBottomBarHeight, LessonOverlayScope;
 
 import '../../../../app/theme/colors.dart';
+import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../shared/utils/layout_helper.dart';
 import '../../domain/entities/learning_island.dart';
 import '../providers/learning_providers.dart';
@@ -42,10 +43,11 @@ class _IslandDetailPageState extends ConsumerState<IslandDetailPage> {
     final islandId = widget.islandId;
     final islands = ref.watch(islandsProvider);
     final island = islands.firstWhereOrNull((i) => i.id == islandId);
+    final l10n = AppLocalizations.of(context);
     if (island == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Ada bulunamadı')),
-        body: Center(child: Text('Ada bulunamadı (id: $islandId).')),
+        appBar: AppBar(title: Text(l10n.islandNotFoundTitle)),
+        body: Center(child: Text(l10n.islandNotFoundBody(islandId))),
       );
     }
     final notifier = ref.read(learningProgressProvider.notifier);
@@ -95,21 +97,16 @@ class _IslandDetailPageState extends ConsumerState<IslandDetailPage> {
   }
 
   void _onNodeTap(BuildContext context, LearningNode node) {
+    final l10n = AppLocalizations.of(context);
     if (node.isLocked) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Bu ders kilitli. Önceki dersi tamamla!'),
-        ),
+        SnackBar(content: Text(l10n.lessonLockedMessage)),
       );
       return;
     }
     if (node.isCompleted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Bu dersi zaten tamamladın! Tekrar denemek için tıkla.',
-          ),
-        ),
+        SnackBar(content: Text(l10n.lessonAlreadyCompletedMessage)),
       );
     }
     Navigator.of(context).push<Widget>(

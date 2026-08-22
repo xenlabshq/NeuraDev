@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:neuroup/app/router/home_shell.dart';
 import 'package:neuroup/app/theme/app_theme.dart';
 import 'package:neuroup/app/theme/colors.dart';
 import 'package:neuroup/core/providers/app_settings_provider.dart';
 import 'package:neuroup/features/admin/presentation/pages/admin_users_page.dart';
+import 'package:neuroup/features/auth/presentation/providers/auth_providers.dart'
+    show authRepositoryProvider, authStateProvider;
 import 'package:neuroup/features/chat/presentation/providers/chat_providers.dart'
-    show currentAuthUserProvider;
+    show currentAuthUserProvider, resolvedAuthUserProvider;
 import 'package:neuroup/features/learning/presentation/providers/learning_providers.dart';
 import 'package:neuroup/features/profile/presentation/badge_providers.dart';
+import 'package:neuroup/features/reports/presentation/pages/reports_page.dart';
+import 'package:neuroup/features/reports/presentation/providers/report_providers.dart';
+import 'package:neuroup/l10n/gen/app_localizations.dart';
 import 'package:neuroup/shared/models/user_level.dart';
 import 'package:neuroup/shared/models/user_profile.dart';
+import 'package:neuroup/shared/utils/badge_labels.dart';
 import 'package:neuroup/shared/utils/layout_helper.dart';
 import 'package:neuroup/shared/widgets/level_frame.dart';
 
@@ -36,18 +44,27 @@ class ProfilePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentAuthUserProvider);
     final progress = ref.watch(userProgressProvider);
+    final l10n = AppLocalizations.of(context);
 
-    final effectiveUser =
+    // XP/seviye/streak'in TEK doğruluk kaynağı `userProgressProvider`
+    // (yerel Hive ilerlemesi) — Firebase Auth'tan gelen `UserProfile` bu
+    // alanları hiç taşımaz (varsayılan xp=0/level=1 ile gelir), bu yüzden
+    // gerçek modda giriş yapmış kullanıcılarda XP her zaman 0 görünürdü.
+    // Kimlik alanlarını (id/email/ad/rol) `user`dan, ilerleme alanlarını
+    // her zaman canlı progress'ten alarak birleştiriyoruz.
+    final baseUser =
         user ??
         UserProfile(
           id: 'demo',
           email: 'demo@neuroup.app',
-          displayName: 'Demo Kullanıcı',
+          displayName: l10n.demoUserDisplayName,
           role: UserRole.student,
-          level: _levelFromXp(progress.totalXp),
-          xp: progress.totalXp,
-          streakDays: progress.streak,
         );
+    final effectiveUser = baseUser.copyWith(
+      level: _levelFromXp(progress.totalXp),
+      xp: progress.totalXp,
+      streakDays: progress.streak,
+    );
 
     return Scaffold(
       body: CustomScrollView(
@@ -218,6 +235,7 @@ class _LevelCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(userProgressProvider);
     final islands = ref.watch(islandsProvider);
+    final l10n = AppLocalizations.of(context);
 
     final totalNodes = islands.fold<int>(0, (s, i) => s + i.totalNodes);
     final completedNodes = progress.completedNodeIds.length;
@@ -266,7 +284,7 @@ class _LevelCard extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Text(
-                  '/ ${level.xpForNextLevel} XP',
+                  l10n.xpOfTotal(level.xpForNextLevel),
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -283,7 +301,7 @@ class _LevelCard extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  'SEV. ${level.level}',
+                  l10n.levelPill(level.level),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
@@ -296,7 +314,7 @@ class _LevelCard extends ConsumerWidget {
           const SizedBox(height: 4),
           // 'Sonraki seviyeye X XP kaldı' alt metin.
           Text(
-            'Sonraki seviyeye ${level.xpToNext} XP kaldı',
+            l10n.xpToNextLevel(level.xpToNext),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -326,7 +344,7 @@ class _LevelCard extends ConsumerWidget {
                 child: _Stat(
                   icon: Icons.local_fire_department_rounded,
                   value: '${user.streakDays}',
-                  label: 'Gün Seri',
+                  label: l10n.statStreak,
                   color: AppColors.warning,
                 ),
               ),
@@ -339,7 +357,7 @@ class _LevelCard extends ConsumerWidget {
                 child: _Stat(
                   icon: Icons.check_circle_rounded,
                   value: '$completedNodes',
-                  label: 'Tamamlanan',
+                  label: l10n.statCompleted,
                   color: AppColors.success,
                 ),
               ),
@@ -352,7 +370,7 @@ class _LevelCard extends ConsumerWidget {
                 child: _Stat(
                   icon: Icons.book_rounded,
                   value: '$totalNodes',
-                  label: 'Toplam Ders',
+                  label: l10n.statTotalLessons,
                   color: AppColors.info,
                 ),
               ),
@@ -399,10 +417,13 @@ class _BadgeMini extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = AppColors.tokensOf(context);
     final tokenscheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Tooltip(
       message: isUnlocked
-          ? '${template.name}: ${template.description}'
-          : 'Henüz kazanılmadı: ${template.description}',
+          ? '${template.localizedName(l10n)}: '
+                '${template.localizedDescription(l10n)}'
+          : '${l10n.badgeLockedPrefix}: '
+                '${template.localizedDescription(l10n)}',
       child: Container(
         width: 70,
         padding: const EdgeInsets.all(6),
@@ -441,7 +462,7 @@ class _BadgeMini extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              template.name,
+              template.localizedName(l10n),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
@@ -503,78 +524,97 @@ class _SettingsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prefs = ref.watch(appSettingsProvider);
+    final l10n = AppLocalizations.of(context);
     final settings = [
       _SettingItem(
         icon: Icons.person_outline_rounded,
-        title: 'Hesap Bilgileri',
-        subtitle: 'Profil, e-posta, şifre',
+        title: l10n.settingsAccountTitle,
+        subtitle: l10n.settingsAccountSubtitle,
         color: AppColors.primary,
         onTap: () => _showAccountSheet(context, ref, user),
       ),
       _SettingItem(
         icon: Icons.notifications_outlined,
-        title: 'Bildirimler',
+        title: l10n.settingsNotificationsTitle,
         subtitle: prefs.notificationsEnabled
-            ? 'Açık · push, e-posta, ses'
-            : 'Kapalı',
+            ? l10n.settingsNotificationsOnSubtitle
+            : l10n.settingsOff,
         color: AppColors.warning,
         onTap: () => _showNotificationsSheet(context, ref),
       ),
       _SettingItem(
         icon: Icons.palette_outlined,
-        title: 'Görünüm',
+        title: l10n.settingsAppearanceTitle,
         subtitle:
-            '${_themeLabel(prefs.themeMode)} · ${_langLabel(prefs.language)} · '
+            '${_themeLabel(l10n, prefs.themeMode)} · '
+            '${_langLabel(prefs.language)} · '
             '${(prefs.textScale * 100).round()}%',
         color: AppColors.accent,
         onTap: () => _showAppearanceSheet(context, ref),
       ),
       _SettingItem(
         icon: Icons.shield_outlined,
-        title: 'Gizlilik',
+        title: l10n.settingsPrivacyTitle,
         subtitle: prefs.analyticsEnabled
-            ? 'Anonim analiz: açık'
-            : 'Anonim analiz: kapalı',
+            ? l10n.settingsAnalyticsOn
+            : l10n.settingsAnalyticsOff,
         color: AppColors.info,
         onTap: () => _showPrivacySheet(context, ref),
       ),
       _SettingItem(
         icon: Icons.help_outline_rounded,
-        title: 'Yardım & Destek',
-        subtitle: 'SSS, bizimle iletişim',
+        title: l10n.settingsHelpTitle,
+        subtitle: l10n.settingsHelpSubtitle,
         color: AppColors.success,
         onTap: () => _showHelpSheet(context),
       ),
       _SettingItem(
         icon: Icons.info_outline_rounded,
-        title: 'Hakkında',
-        subtitle: 'Sürüm 1.0.0',
+        title: l10n.settingsAboutTitle,
+        subtitle: l10n.settingsAboutSubtitle,
         color: AppColorsTextX.textSecondary(context),
         onTap: () => _showAbout(context),
       ),
       if (user.role == UserRole.admin)
         _SettingItem(
           icon: Icons.admin_panel_settings_outlined,
-          title: 'Yönetim Paneli',
-          subtitle: 'Kullanıcı rollerini yönet',
+          title: l10n.settingsAdminTitle,
+          subtitle: l10n.settingsAdminSubtitle,
           color: AppColors.primary,
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(builder: (_) => const AdminUsersPage()),
           ),
         ),
-      if (user.email != 'demo@neuroup.app')
+      if (user.role.isSupportStaff)
         _SettingItem(
-          icon: Icons.logout_rounded,
-          title: 'Çıkış Yap',
-          subtitle: 'Hesabından çık',
+          icon: Icons.flag_outlined,
+          title: l10n.settingsReportsTitle,
+          subtitle: () {
+            final pending = ref
+                .watch(pendingReportsStreamProvider)
+                .valueOrNull
+                ?.length;
+            return pending != null && pending > 0
+                ? l10n.settingsReportsPendingCount(pending)
+                : l10n.settingsReportsSubtitle;
+          }(),
           color: AppColors.error,
-          onTap: () => _confirmLogout(context),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const ReportsPage()),
+          ),
         ),
+      _SettingItem(
+        icon: Icons.logout_rounded,
+        title: l10n.settingsLogoutTitle,
+        subtitle: l10n.settingsLogoutSubtitle,
+        color: AppColors.error,
+        onTap: () => _confirmLogout(context, ref),
+      ),
       // Reset progress (tüm öğrenme ilerlemesini sıfırlar, debug için)
       _SettingItem(
         icon: Icons.refresh_rounded,
-        title: 'İlerlemeyi Sıfırla',
-        subtitle: 'Tüm ada/node ilerlemesini sıfırlar',
+        title: l10n.settingsResetProgressTitle,
+        subtitle: l10n.settingsResetProgressSubtitle,
         color: AppColorsTextX.textTertiary(context),
         onTap: () => _confirmResetProgress(context, ref),
       ),
@@ -608,10 +648,10 @@ class _SettingsSection extends ConsumerWidget {
   }
 
   // ---- yardımcı etiketler ----
-  String _themeLabel(AppThemeMode m) => switch (m) {
-    AppThemeMode.system => 'Sistem',
-    AppThemeMode.light => 'Açık',
-    AppThemeMode.dark => 'Koyu',
+  String _themeLabel(AppLocalizations l10n, AppThemeMode m) => switch (m) {
+    AppThemeMode.system => l10n.themeSystem,
+    AppThemeMode.light => l10n.themeLight,
+    AppThemeMode.dark => l10n.themeDark,
   };
   String _langLabel(AppLanguage l) => switch (l) {
     AppLanguage.tr => 'Türkçe',
@@ -624,10 +664,12 @@ class _SettingsSection extends ConsumerWidget {
     WidgetRef ref,
     UserProfile user,
   ) {
+    final l10n = AppLocalizations.of(context);
     final nameCtl = TextEditingController(text: user.displayName);
     final emailCtl = TextEditingController(text: user.email);
     showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Padding(
@@ -659,24 +701,29 @@ class _SettingsSection extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Hesap Bilgileri',
+                  l10n.accountSheetTitle,
                   style: Theme.of(ctx).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 14),
                 TextField(
                   controller: nameCtl,
-                  decoration: const InputDecoration(
-                    labelText: 'Görünen Ad',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.displayNameLabel,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: emailCtl,
-                  enabled: user.email != 'demo@neuroup.app',
-                  decoration: const InputDecoration(
-                    labelText: 'E-posta',
-                    border: OutlineInputBorder(),
+                  // E-posta şimdilik değiştirilemez — sadece görüntüleme.
+                  // Gerçek e-posta değişimi doğrulama (mevcut e-postaya
+                  // link, yeniden kimlik doğrulama) gerektirir; bu akış
+                  // henüz yok, bu yüzden alan bilinçli olarak kilitli.
+                  enabled: false,
+                  decoration: InputDecoration(
+                    labelText: l10n.emailLabel,
+                    border: const OutlineInputBorder(),
+                    helperText: l10n.emailNotEditableHelper,
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -685,35 +732,39 @@ class _SettingsSection extends ConsumerWidget {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => Navigator.of(ctx).pop(),
-                        child: const Text('İptal'),
+                        child: Text(l10n.actionCancel),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: FilledButton(
-                        onPressed: () {
-                          if (user.email == 'demo@neuroup.app') {
-                            // Demo modda sadece snackbar göster
-                            Navigator.of(ctx).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Profil adı kaydedildi (demo mod). '
-                                  'Gerçek kayıt Firebase bağlantısı ile aktif.',
+                        onPressed: () async {
+                          final newName = nameCtl.text.trim();
+                          if (newName.isEmpty) return;
+                          final result = await ref
+                              .read(authRepositoryProvider)
+                              .updateProfile(
+                                user.copyWith(displayName: newName),
+                              );
+                          if (!ctx.mounted) return;
+                          Navigator.of(ctx).pop();
+                          if (!context.mounted) return;
+                          result.when(
+                            success: (_) {
+                              ref.invalidate(resolvedAuthUserProvider);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.profileUpdated),
                                 ),
-                              ),
-                            );
-                          } else {
-                            // Gerçek auth için save callback'i.
-                            Navigator.of(ctx).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Profil güncellendi'),
-                              ),
-                            );
-                          }
+                              );
+                            },
+                            failure: (f) =>
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(f.message)),
+                                ),
+                          );
                         },
-                        child: const Text('Kaydet'),
+                        child: Text(l10n.actionSave),
                       ),
                     ),
                   ],
@@ -729,8 +780,10 @@ class _SettingsSection extends ConsumerWidget {
   // ---- Bildirimler sheet ----
   void _showNotificationsSheet(BuildContext context, WidgetRef ref) {
     final prefs = ref.read(appSettingsProvider);
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
@@ -776,7 +829,7 @@ class _SettingsSection extends ConsumerWidget {
                             child: Row(
                               children: [
                                 Text(
-                                  'Bildirimler',
+                                  l10n.settingsNotificationsTitle,
                                   style: Theme.of(ctx).textTheme.headlineSmall,
                                 ),
                               ],
@@ -784,7 +837,7 @@ class _SettingsSection extends ConsumerWidget {
                           ),
                           const SizedBox(height: 4),
                           SwitchListTile(
-                            title: const Text('Bildirimlere izin ver'),
+                            title: Text(l10n.notifAllowLabel),
                             value: enabled,
                             onChanged: (v) {
                               setLocal(() => enabled = v);
@@ -794,7 +847,7 @@ class _SettingsSection extends ConsumerWidget {
                             },
                           ),
                           SwitchListTile(
-                            title: const Text('Push bildirimler'),
+                            title: Text(l10n.notifPushLabel),
                             value: push,
                             onChanged: !enabled
                                 ? null
@@ -806,7 +859,7 @@ class _SettingsSection extends ConsumerWidget {
                                   },
                           ),
                           SwitchListTile(
-                            title: const Text('E-posta özeti'),
+                            title: Text(l10n.notifEmailDigestLabel),
                             value: email,
                             onChanged: !enabled
                                 ? null
@@ -818,7 +871,7 @@ class _SettingsSection extends ConsumerWidget {
                                   },
                           ),
                           SwitchListTile(
-                            title: const Text('Bildirim sesi'),
+                            title: Text(l10n.notifSoundLabel),
                             value: sound,
                             onChanged: !enabled
                                 ? null
@@ -834,7 +887,7 @@ class _SettingsSection extends ConsumerWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: FilledButton(
                               onPressed: () => Navigator.of(ctx).pop(),
-                              child: const Text('Tamam'),
+                              child: Text(l10n.actionOk),
                             ),
                           ),
                         ],
@@ -855,6 +908,7 @@ class _SettingsSection extends ConsumerWidget {
     final prefs = ref.read(appSettingsProvider);
     showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
@@ -863,6 +917,12 @@ class _SettingsSection extends ConsumerWidget {
         var scale = prefs.textScale;
         return StatefulBuilder(
           builder: (ctx, setLocal) {
+            // Dil değişimini bu sheet'in kendi etiketlerine de yansıtmak
+            // için l10n her rebuild'de burada (dış context değil, ctx ile)
+            // yeniden çözülüyor — aksi halde kullanıcı dili değiştirdiğinde
+            // sheet'in kendi metinleri (Görünüm/Tema/Dil...) eski dilde
+            // takılı kalıyordu.
+            final l10n = AppLocalizations.of(ctx);
             return Padding(
               padding: EdgeInsets.only(
                 bottom: MediaQuery.of(ctx).viewInsets.bottom > 0
@@ -891,25 +951,25 @@ class _SettingsSection extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Görünüm',
+                            l10n.settingsAppearanceTitle,
                             style: Theme.of(ctx).textTheme.headlineSmall,
                           ),
                           const SizedBox(height: 12),
-                          const Text('Tema'),
+                          Text(l10n.appearanceThemeLabel),
                           const SizedBox(height: 4),
                           SegmentedButton<AppThemeMode>(
-                            segments: const [
+                            segments: [
                               ButtonSegment(
                                 value: AppThemeMode.system,
-                                label: Text('Sistem'),
+                                label: Text(l10n.themeSystem),
                               ),
                               ButtonSegment(
                                 value: AppThemeMode.light,
-                                label: Text('Açık'),
+                                label: Text(l10n.themeLight),
                               ),
                               ButtonSegment(
                                 value: AppThemeMode.dark,
-                                label: Text('Koyu'),
+                                label: Text(l10n.themeDark),
                               ),
                             ],
                             selected: {theme},
@@ -921,7 +981,7 @@ class _SettingsSection extends ConsumerWidget {
                             },
                           ),
                           const SizedBox(height: 16),
-                          const Text('Dil'),
+                          Text(l10n.appearanceLanguageLabel),
                           const SizedBox(height: 4),
                           SegmentedButton<AppLanguage>(
                             segments: const [
@@ -943,7 +1003,9 @@ class _SettingsSection extends ConsumerWidget {
                             },
                           ),
                           const SizedBox(height: 16),
-                          Text('Metin boyutu: ${(scale * 100).round()}%'),
+                          Text(
+                            l10n.appearanceTextSize((scale * 100).round()),
+                          ),
                           Slider(
                             value: scale,
                             min: 0.8,
@@ -960,7 +1022,7 @@ class _SettingsSection extends ConsumerWidget {
                           const SizedBox(height: 8),
                           FilledButton(
                             onPressed: () => Navigator.of(ctx).pop(),
-                            child: const Text('Tamam'),
+                            child: Text(l10n.actionOk),
                           ),
                         ],
                       ),
@@ -978,8 +1040,10 @@ class _SettingsSection extends ConsumerWidget {
   // ---- Gizlilik sheet ----
   void _showPrivacySheet(BuildContext context, WidgetRef ref) {
     final prefs = ref.read(appSettingsProvider);
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
@@ -1020,7 +1084,7 @@ class _SettingsSection extends ConsumerWidget {
                             child: Row(
                               children: [
                                 Text(
-                                  'Gizlilik',
+                                  l10n.settingsPrivacyTitle,
                                   style: Theme.of(ctx).textTheme.headlineSmall,
                                 ),
                               ],
@@ -1028,8 +1092,8 @@ class _SettingsSection extends ConsumerWidget {
                           ),
                           const SizedBox(height: 4),
                           SwitchListTile(
-                            title: const Text('Anonim analiz'),
-                            subtitle: const Text('Kullanım verilerini paylaş'),
+                            title: Text(l10n.privacyAnalyticsLabel),
+                            subtitle: Text(l10n.privacyAnalyticsSubtitle),
                             value: analytics,
                             onChanged: (v) {
                               setLocal(() => analytics = v);
@@ -1039,8 +1103,8 @@ class _SettingsSection extends ConsumerWidget {
                             },
                           ),
                           SwitchListTile(
-                            title: const Text('Çökme raporları'),
-                            subtitle: const Text('Hata loglarını gönder'),
+                            title: Text(l10n.privacyCrashReportsLabel),
+                            subtitle: Text(l10n.privacyCrashReportsSubtitle),
                             value: crash,
                             onChanged: (v) {
                               setLocal(() => crash = v);
@@ -1054,7 +1118,7 @@ class _SettingsSection extends ConsumerWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: FilledButton(
                               onPressed: () => Navigator.of(ctx).pop(),
-                              child: const Text('Tamam'),
+                              child: Text(l10n.actionOk),
                             ),
                           ),
                         ],
@@ -1072,41 +1136,17 @@ class _SettingsSection extends ConsumerWidget {
 
   // ---- Yardım sheet ----
   void _showHelpSheet(BuildContext context) {
-    final entries = const [
-      _FaqEntry(
-        q: 'Nasıl ders tamamlarım?',
-        a:
-            'Bir adaya tıkla, ders kodunu yaz veya örnek çözümü uygula, '
-            'Çalıştır butonuna bas. Çıktı doğruysa DOĞRU rozeti görünür, '
-            'ardından +XP butonu aktif olur.',
-      ),
-      _FaqEntry(
-        q: 'Bir sonraki ada nasıl açılır?',
-        a:
-            'Bir önceki adanın tüm derslerini tamamla. Ada tamamen '
-            'tamamlanınca bir sonraki ada otomatik açılır.',
-      ),
-      _FaqEntry(
-        q: 'XP ve seviye nasıl çalışır?',
-        a:
-            'Her ders belirli XP verir. Her 100 XP 1 level atlatır. '
-            'Bronze → Silver → Gold → Diamond → Master tierları var.',
-      ),
-      _FaqEntry(
-        q: 'Reels vitrin nedir?',
-        a:
-            'Geliştirici topluluğunun oyun demosu paylaştığı kısa video '
-            'akışıdır. Beğeni, yorum ve CTA butonları içerir.',
-      ),
-      _FaqEntry(
-        q: 'Demo modda veriler kaydedilir mi?',
-        a:
-            'Hayır. Demo modda tüm veriler in-memory çalışır. Firebase '
-            'bağlantısı gerçek kayıt için gereklidir.',
-      ),
+    final l10n = AppLocalizations.of(context);
+    final entries = [
+      _FaqEntry(q: l10n.faqQ1, a: l10n.faqA1),
+      _FaqEntry(q: l10n.faqQ2, a: l10n.faqA2),
+      _FaqEntry(q: l10n.faqQ3, a: l10n.faqA3),
+      _FaqEntry(q: l10n.faqQ4, a: l10n.faqA4),
+      _FaqEntry(q: l10n.faqQ5, a: l10n.faqA5),
     ];
     showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (ctx) {
@@ -1137,10 +1177,13 @@ class _SettingsSection extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 22),
                   child: Row(
                     children: [
-                      Text('SSS', style: Theme.of(ctx).textTheme.headlineSmall),
+                      Text(
+                        l10n.faqTitle,
+                        style: Theme.of(ctx).textTheme.headlineSmall,
+                      ),
                       const Spacer(),
                       IconButton(
-                        tooltip: 'Kapat',
+                        tooltip: l10n.actionClose,
                         icon: const Icon(Icons.close_rounded),
                         onPressed: () => Navigator.of(ctx).pop(),
                       ),
@@ -1186,7 +1229,14 @@ class _SettingsSection extends ConsumerWidget {
   }
 
   // ---- About sheet ----
-  void _showAbout(BuildContext context) {
+  Future<void> _showAbout(BuildContext context) async {
+    // Gerçek sürümü pubspec.yaml'dan derlenen APK/bundle'ın kendisinden
+    // okur — hardcoded bir string gibi build'den bağımsız kalıp
+    // güncellenmeyi unutma riski taşımaz.
+    final packageInfo = await PackageInfo.fromPlatform();
+    if (!context.mounted) return;
+    final l10n = AppLocalizations.of(context);
+    final versionText = '${packageInfo.version}+${packageInfo.buildNumber}';
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -1236,27 +1286,32 @@ class _SettingsSection extends ConsumerWidget {
                     style: Theme.of(context).textTheme.displaySmall,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Eğitim, haber, sohbet ve oyunları bir araya getiren '
-                    'çapraz platform öğrenme uygulaması.',
+                  Text(
+                    l10n.aboutDescription,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 20),
-                  const _AboutRow(label: 'Sürüm', value: '1.0.0'),
-                  const _AboutRow(
-                    label: 'Platform',
+                  _AboutRow(
+                    label: l10n.aboutVersionLabel,
+                    value: versionText,
+                  ),
+                  _AboutRow(
+                    label: l10n.aboutPlatformLabel,
                     value: 'iOS • Android • Linux',
                   ),
-                  const _AboutRow(
-                    label: 'Mimari',
+                  _AboutRow(
+                    label: l10n.aboutArchitectureLabel,
                     value: 'Riverpod + Clean Arch',
                   ),
-                  const _AboutRow(label: 'Paket', value: 'com.neuroup.app'),
+                  _AboutRow(
+                    label: l10n.aboutPackageLabel,
+                    value: 'com.neuroup.app',
+                  ),
                   const SizedBox(height: 20),
                   FilledButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Kapat'),
+                    child: Text(l10n.actionClose),
                   ),
                 ],
               ),
@@ -1268,25 +1323,32 @@ class _SettingsSection extends ConsumerWidget {
   }
 
   // ---- Logout onayı ----
-  void _confirmLogout(BuildContext context) {
+  void _confirmLogout(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Çıkış Yap'),
-        content: const Text('Hesabından çıkmak istediğine emin misin?'),
+        title: Text(l10n.settingsLogoutTitle),
+        content: Text(l10n.logoutConfirmMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('İptal'),
+            child: Text(l10n.actionCancel),
           ),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(ctx).pop();
+              // Gerçek oturumu kapat — authStateChanges() bunu yakalayıp
+              // currentAuthUserProvider'ı null yapar, router /login'e
+              // yönlendirir.
+              await ref.read(authStateProvider.notifier).signOut();
+              if (!context.mounted) return;
+              context.go('/login');
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Çıkış yapıldı (demo mod)')),
+                SnackBar(content: Text(l10n.loggedOutMessage)),
               );
             },
-            child: const Text('Çıkış Yap'),
+            child: Text(l10n.settingsLogoutTitle),
           ),
         ],
       ),
@@ -1295,8 +1357,9 @@ class _SettingsSection extends ConsumerWidget {
 
   void _confirmResetProgress(BuildContext context, WidgetRef ref) {
     // İki aşamalı onay: önce bilgilendirme + uyarı diyaloğu,
-    // ardından kullanıcının "SIFIRLA" yazmasını isteyen doğrulama
+    // ardından kullanıcının onay kelimesini yazmasını isteyen doğrulama
     // adımı. Yanlışlıkla tıklamayı engelleyen en güvenli kalıptır.
+    final l10n = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -1314,17 +1377,16 @@ class _SettingsSection extends ConsumerWidget {
           ),
         ),
         iconPadding: const EdgeInsets.only(top: 12),
-        title: const Text(
-          'İlerlemeyi Sıfırla',
+        title: Text(
+          l10n.settingsResetProgressTitle,
           textAlign: TextAlign.center,
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Tüm öğrenme verileriniz kalıcı olarak silinecek. '
-              'Bu işlemi geri alamazsın.',
+            Text(
+              l10n.resetProgressWarning,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -1339,25 +1401,25 @@ class _SettingsSection extends ConsumerWidget {
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   _ResetConsequenceRow(
                     icon: Icons.school_outlined,
-                    text: 'Tüm ada ilerlemen',
+                    text: l10n.resetConsequenceIslands,
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   _ResetConsequenceRow(
                     icon: Icons.star_outline_rounded,
-                    text: 'XP ve seviye bilgilerin',
+                    text: l10n.resetConsequenceXp,
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   _ResetConsequenceRow(
                     icon: Icons.local_fire_department_outlined,
-                    text: 'Günlük streak sayacın',
+                    text: l10n.resetConsequenceStreak,
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   _ResetConsequenceRow(
                     icon: Icons.emoji_events_outlined,
-                    text: 'Kazanılmış rozetler',
+                    text: l10n.resetConsequenceBadges,
                   ),
                 ],
               ),
@@ -1369,7 +1431,7 @@ class _SettingsSection extends ConsumerWidget {
           // İptal — sol (güvenli yol, görsel olarak ayrıştırılmış).
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Vazgeç'),
+            child: Text(l10n.actionGiveUp),
           ),
           // Devam Et — sağ, dikkat çekici ama henüz tehlikeli değil.
           FilledButton.tonal(
@@ -1377,15 +1439,17 @@ class _SettingsSection extends ConsumerWidget {
               Navigator.of(ctx).pop();
               _showResetFinalConfirm(context, ref);
             },
-            child: const Text('Devam Et'),
+            child: Text(l10n.actionContinue),
           ),
         ],
       ),
     );
   }
 
-  /// İkinci aşama: "SIFIRLA" yazma gerektiren sıkı onay.
+  /// İkinci aşama: onay kelimesini yazma gerektiren sıkı onay.
   void _showResetFinalConfirm(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final confirmWord = l10n.resetConfirmWord;
     final ctl = TextEditingController();
     showDialog<void>(
       context: context,
@@ -1400,17 +1464,16 @@ class _SettingsSection extends ConsumerWidget {
                 color: AppColors.error,
                 size: 32,
               ),
-              title: const Text(
-                'Son Onay',
+              title: Text(
+                l10n.finalConfirmTitle,
                 textAlign: TextAlign.center,
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    'Onaylamak için aşağıya büyük harfle '
-                    '"SIFIRLA" yaz:',
+                  Text(
+                    l10n.finalConfirmInstruction(confirmWord),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
@@ -1418,12 +1481,12 @@ class _SettingsSection extends ConsumerWidget {
                     controller: ctl,
                     autofocus: true,
                     textCapitalization: TextCapitalization.characters,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'SIFIRLA',
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      hintText: confirmWord,
                     ),
                     onChanged: (v) {
-                      setLocal(() => matches = v.trim() == 'SIFIRLA');
+                      setLocal(() => matches = v.trim() == confirmWord);
                     },
                   ),
                 ],
@@ -1432,7 +1495,7 @@ class _SettingsSection extends ConsumerWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('Vazgeç'),
+                  child: Text(l10n.actionGiveUp),
                 ),
                 FilledButton(
                   style: FilledButton.styleFrom(
@@ -1445,13 +1508,13 @@ class _SettingsSection extends ConsumerWidget {
                               .read(learningProgressProvider.notifier)
                               .resetProgress();
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('İlerleme sıfırlandı'),
+                            SnackBar(
+                              content: Text(l10n.progressResetMessage),
                             ),
                           );
                         }
                       : null,
-                  child: const Text('Sıfırla'),
+                  child: Text(l10n.settingsResetProgressTitle),
                 ),
               ],
             );

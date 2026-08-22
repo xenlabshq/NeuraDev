@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/router/home_shell.dart' show LessonOverlayScope;
 import '../../../../app/theme/colors.dart';
+import '../../../../l10n/gen/app_localizations.dart';
 import '../../domain/entities/news_article.dart';
 import '../providers/news_providers.dart';
+import '../utils/news_labels.dart';
 
 /// Admin/moderatör için haber ekleme-düzenleme formu.
 ///
@@ -30,12 +33,16 @@ class _NewsFormPageState extends ConsumerState<NewsFormPage> {
   late NewsPriority _priority;
   late bool _isBreaking;
   bool _saving = false;
+  LessonOverlayScope? _overlayScope;
 
   bool get _isEditing => widget.existing != null;
 
   @override
   void initState() {
     super.initState();
+    // Shell altındaki floating tab bar'ı gizle — aksi halde
+    // Kaydet/Yayınla düğmesi barın altında kalıyordu.
+    _overlayScope = LessonOverlayScope(context);
     final a = widget.existing;
     _title = TextEditingController(text: a?.title ?? '');
     _summary = TextEditingController(text: a?.summary ?? '');
@@ -56,6 +63,7 @@ class _NewsFormPageState extends ConsumerState<NewsFormPage> {
     _source.dispose();
     _sourceUrl.dispose();
     _imageUrl.dispose();
+    _overlayScope?.dispose();
     super.dispose();
   }
 
@@ -87,22 +95,26 @@ class _NewsFormPageState extends ConsumerState<NewsFormPage> {
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Kaydedilemedi: $e')),
+        SnackBar(content: Text(l10n.newsSaveFailed(e.toString()))),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
 
-  String? _required(String? v) =>
-      (v == null || v.trim().isEmpty) ? 'Bu alan gerekli' : null;
+  String? _required(BuildContext context, String? v) =>
+      (v == null || v.trim().isEmpty)
+      ? AppLocalizations.of(context).fieldRequired
+      : null;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Haberi Düzenle' : 'Yeni Haber'),
+        title: Text(_isEditing ? l10n.newsEditTitle : l10n.newsNewTitle),
       ),
       body: Form(
         key: _formKey,
@@ -111,52 +123,52 @@ class _NewsFormPageState extends ConsumerState<NewsFormPage> {
           children: [
             TextFormField(
               controller: _title,
-              decoration: const InputDecoration(labelText: 'Başlık'),
-              validator: _required,
+              decoration: InputDecoration(labelText: l10n.newsFieldTitle),
+              validator: (v) => _required(context, v),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _summary,
-              decoration: const InputDecoration(labelText: 'Özet'),
+              decoration: InputDecoration(labelText: l10n.newsFieldSummary),
               maxLines: 2,
-              validator: _required,
+              validator: (v) => _required(context, v),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _body,
-              decoration: const InputDecoration(labelText: 'İçerik'),
+              decoration: InputDecoration(labelText: l10n.newsFieldBody),
               maxLines: 6,
-              validator: _required,
+              validator: (v) => _required(context, v),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _source,
-              decoration: const InputDecoration(labelText: 'Kaynak'),
-              validator: _required,
+              decoration: InputDecoration(labelText: l10n.newsFieldSource),
+              validator: (v) => _required(context, v),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _sourceUrl,
-              decoration: const InputDecoration(
-                labelText: 'Kaynak linki (opsiyonel)',
+              decoration: InputDecoration(
+                labelText: l10n.newsFieldSourceUrl,
               ),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _imageUrl,
-              decoration: const InputDecoration(
-                labelText: 'Görsel linki (opsiyonel)',
+              decoration: InputDecoration(
+                labelText: l10n.newsFieldImageUrl,
               ),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<NewsCategory>(
               initialValue: _category,
-              decoration: const InputDecoration(labelText: 'Kategori'),
+              decoration: InputDecoration(labelText: l10n.newsFieldCategory),
               items: NewsCategory.values
                   .map(
                     (c) => DropdownMenuItem(
                       value: c,
-                      child: Text('${c.emoji} ${c.label}'),
+                      child: Text('${c.emoji} ${c.localizedLabel(l10n)}'),
                     ),
                   )
                   .toList(),
@@ -165,10 +177,13 @@ class _NewsFormPageState extends ConsumerState<NewsFormPage> {
             const SizedBox(height: 12),
             DropdownButtonFormField<NewsPriority>(
               initialValue: _priority,
-              decoration: const InputDecoration(labelText: 'Önem derecesi'),
+              decoration: InputDecoration(labelText: l10n.newsFieldPriority),
               items: NewsPriority.values
                   .map(
-                    (p) => DropdownMenuItem(value: p, child: Text(p.label)),
+                    (p) => DropdownMenuItem(
+                      value: p,
+                      child: Text(p.localizedLabel(l10n)),
+                    ),
                   )
                   .toList(),
               onChanged: (v) => setState(() => _priority = v ?? _priority),
@@ -176,7 +191,7 @@ class _NewsFormPageState extends ConsumerState<NewsFormPage> {
             const SizedBox(height: 8),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Son dakika'),
+              title: Text(l10n.newsFieldBreaking),
               value: _isBreaking,
               onChanged: (v) => setState(() => _isBreaking = v),
             ),
@@ -197,7 +212,7 @@ class _NewsFormPageState extends ConsumerState<NewsFormPage> {
                           color: Colors.white,
                         ),
                       )
-                    : Text(_isEditing ? 'Güncelle' : 'Yayınla'),
+                    : Text(_isEditing ? l10n.actionUpdate : l10n.actionPublish),
               ),
             ),
           ],

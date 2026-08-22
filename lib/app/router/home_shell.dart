@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../l10n/gen/app_localizations.dart';
+
 /// Bottom navigation bar için ayrılan toplam yükseklik
 /// (margin + bar içerik + alt safe area).
 const double kBottomBarHeight = 84;
@@ -264,9 +266,18 @@ class _PillTabItem extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     final fg = active ? scheme.onPrimary : scheme.onSurfaceVariant;
+    final l10n = AppLocalizations.of(context);
+    final label = switch (item.route) {
+      '/lessons' => l10n.navLessons,
+      '/reels' => l10n.navReels,
+      '/news' => l10n.navNews,
+      '/support' => l10n.navSupport,
+      '/profile' => l10n.navProfile,
+      _ => item.label,
+    };
 
     return Semantics(
-      label: item.label,
+      label: label,
       selected: active,
       button: true,
       child: Material(

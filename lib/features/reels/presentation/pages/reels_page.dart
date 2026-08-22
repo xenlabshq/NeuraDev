@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../l10n/gen/app_localizations.dart';
 import '../../../chat/presentation/providers/chat_providers.dart';
 import '../providers/reels_providers.dart';
 import '../widgets/reel_comments_drawer.dart';
@@ -38,14 +39,19 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
   void _onPageChanged(int i) {
     setState(() => _currentIndex = i);
     if (_activeCommentsReelId != null) _closeComments();
+    // Sonsuz kaydırma: sona 2 reel kala bir sonraki sayfayı önceden iste.
+    final reels = ref.read(reelsProvider);
+    if (i >= reels.length - 2) {
+      ref.read(reelsProvider.notifier).loadMore();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final reels = ref.watch(reelsProvider);
     if (reels.isEmpty) {
-      return const Scaffold(
-        body: Center(child: Text('Henüz reel yok')),
+      return Scaffold(
+        body: Center(child: Text(AppLocalizations.of(context).reelsEmpty)),
       );
     }
 
@@ -130,7 +136,7 @@ class _SubmitGameButton extends ConsumerWidget {
       shape: const CircleBorder(),
       child: IconButton(
         icon: const Icon(Icons.add_rounded, color: Colors.white),
-        tooltip: 'Oyununu paylaş',
+        tooltip: AppLocalizations.of(context).reelsShareYourGame,
         onPressed: () {
           final isAuthed = ref.read(currentAuthUserProvider) != null;
           if (!isAuthed) {

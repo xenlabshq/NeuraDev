@@ -9,6 +9,7 @@ import '../../data/python_simulator.dart';
 import '../../domain/entities/error_hint.dart';
 import '../../domain/entities/execution_step.dart';
 import '../../domain/entities/learning_island.dart';
+import '../../../../l10n/gen/app_localizations.dart';
 import '../providers/adaptive_providers.dart';
 import '../providers/learning_providers.dart';
 
@@ -85,7 +86,9 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
       if (island == null || node == null) {
         setState(() {
           _running = false;
-          _error = 'Ders bulunamadı (id: ${widget.islandId}/${widget.nodeId}).';
+          _error = AppLocalizations.of(
+            context,
+          ).lessonNotFoundBody('${widget.islandId}/${widget.nodeId}');
         });
         return;
       }
@@ -142,8 +145,8 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
   void _verify() {
     if (!_success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Önce kodu çalıştır ve doğru çıktıyı al!'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).nodeEditorRunFirst),
         ),
       );
       return;
@@ -176,12 +179,15 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
   @override
   Widget build(BuildContext context) {
     final (island, node) = _findActive();
+    final l10n = AppLocalizations.of(context);
     if (island == null || node == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Ders bulunamadı')),
+        appBar: AppBar(title: Text(l10n.lessonNotFoundTitle)),
         body: Center(
           child: Text(
-            'Ders yüklenemedi (id: ${widget.islandId}/${widget.nodeId}).',
+            l10n.lessonLoadFailedBody(
+              '${widget.islandId}/${widget.nodeId}',
+            ),
           ),
         ),
       );
@@ -216,7 +222,7 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
                   ? Icons.menu_book_rounded
                   : Icons.menu_book_outlined,
             ),
-            tooltip: 'Eğitimi göster',
+            tooltip: l10n.nodeEditorShowTutorial,
             onPressed: () => setState(() => _showTutorial = !_showTutorial),
           ),
         ],
@@ -333,9 +339,9 @@ class _TutorialPanel extends StatelessWidget {
                   size: 18,
                 ),
                 const SizedBox(width: 6),
-                const Text(
-                  'EĞİTİM',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context).nodeEditorTutorialLabel,
+                  style: const TextStyle(
                     color: AppColors.gold,
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
@@ -344,7 +350,7 @@ class _TutorialPanel extends StatelessWidget {
                 ),
                 const Spacer(),
                 IconButton(
-                  tooltip: 'Eğitimi kapat',
+                  tooltip: AppLocalizations.of(context).nodeEditorHideTutorial,
                   icon: const Icon(
                     Icons.close_rounded,
                     color: Colors.white70,
@@ -419,7 +425,7 @@ class _CodeEditor extends StatelessWidget {
                       fontSize: 14,
                       height: 1.5,
                     ),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       border: InputBorder.none,
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
@@ -428,9 +434,9 @@ class _CodeEditor extends StatelessWidget {
                       // olarak beyaz arka plan alıyor; bu da koyu
                       // editör içinde açık gri yazıyı görünmez
                       // yapıyordu. Container rengini zorla.
-                      fillColor: Color(0xFF1E1E1E),
-                      hintText: '# Python kodunu buraya yaz...',
-                      hintStyle: TextStyle(
+                      fillColor: const Color(0xFF1E1E1E),
+                      hintText: AppLocalizations.of(context).nodeEditorHint,
+                      hintStyle: const TextStyle(
                         color: Color(0xFF6A6A6A),
                         fontFamily: 'monospace',
                       ),
@@ -531,6 +537,7 @@ class _OutputPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       color: const Color(0xFF0E0E0E),
       child: Column(
@@ -562,9 +569,9 @@ class _OutputPanel extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  'ÇIKTI',
-                  style: TextStyle(
+                Text(
+                  l10n.nodeEditorOutputLabel,
+                  style: const TextStyle(
                     color: Color(0xFFCCCCCC),
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
@@ -582,18 +589,18 @@ class _OutputPanel extends StatelessWidget {
                       color: AppColors.success.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.check_rounded,
                           color: AppColors.success,
                           size: 14,
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
-                          'DOĞRU',
-                          style: TextStyle(
+                          l10n.nodeEditorCorrectLabel,
+                          style: const TextStyle(
                             color: AppColors.success,
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
@@ -612,9 +619,9 @@ class _OutputPanel extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (running)
-                    const Row(
+                    Row(
                       children: [
-                        SizedBox(
+                        const SizedBox(
                           width: 14,
                           height: 14,
                           child: CircularProgressIndicator(
@@ -622,10 +629,10 @@ class _OutputPanel extends StatelessWidget {
                             color: AppColors.warning,
                           ),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text(
-                          'Çalışıyor...',
-                          style: TextStyle(
+                          l10n.nodeEditorRunning,
+                          style: const TextStyle(
                             color: AppColors.warning,
                             fontFamily: 'monospace',
                             fontSize: 12,
@@ -644,9 +651,9 @@ class _OutputPanel extends StatelessWidget {
                       ),
                     )
                   else if (output.isEmpty)
-                    const Text(
-                      'Kodu çalıştırmak için ▶ butonuna bas.',
-                      style: TextStyle(
+                    Text(
+                      l10n.nodeEditorPressRun,
+                      style: const TextStyle(
                         color: Color(0xFF6A6A6A),
                         fontFamily: 'monospace',
                         fontSize: 12,
@@ -685,17 +692,17 @@ class _OutputPanel extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Row(
+                          Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.flag_rounded,
                                 color: AppColors.info,
                                 size: 14,
                               ),
-                              SizedBox(width: 4),
+                              const SizedBox(width: 4),
                               Text(
-                                'BEKLENEN ÇIKTI',
-                                style: TextStyle(
+                                l10n.nodeEditorExpectedOutput,
+                                style: const TextStyle(
                                   color: AppColors.info,
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
@@ -759,6 +766,7 @@ class _VariableTrackerCardState extends State<_VariableTrackerCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final steps = widget.steps;
     final step = steps[_index];
     final previous = _index > 0
@@ -783,11 +791,11 @@ class _VariableTrackerCardState extends State<_VariableTrackerCard> {
                 size: 14,
               ),
               const SizedBox(width: 4),
-              const Flexible(
+              Flexible(
                 child: Text(
-                  'DEĞİŞKEN İZLEYİCİ',
+                  l10n.nodeEditorVariableTracker,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.gold,
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
@@ -797,7 +805,7 @@ class _VariableTrackerCardState extends State<_VariableTrackerCard> {
               ),
               const Spacer(),
               Text(
-                'Adım ${_index + 1}/${steps.length}',
+                l10n.nodeEditorStepCount(_index + 1, steps.length),
                 style: const TextStyle(
                   color: Color(0xFFAAAAAA),
                   fontSize: 11,
@@ -811,7 +819,7 @@ class _VariableTrackerCardState extends State<_VariableTrackerCard> {
             children: [
               _StepButton(
                 icon: Icons.chevron_left_rounded,
-                tooltip: 'Önceki adım',
+                tooltip: l10n.nodeEditorPreviousStep,
                 onTap: _index > 0 ? () => setState(() => _index--) : null,
               ),
               const SizedBox(width: 4),
@@ -826,7 +834,7 @@ class _VariableTrackerCardState extends State<_VariableTrackerCard> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    'satır ${step.line}: ${step.sourceLine}',
+                    l10n.nodeEditorLineIndicator(step.line, step.sourceLine),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -840,7 +848,7 @@ class _VariableTrackerCardState extends State<_VariableTrackerCard> {
               const SizedBox(width: 4),
               _StepButton(
                 icon: Icons.chevron_right_rounded,
-                tooltip: 'Sonraki adım',
+                tooltip: l10n.nodeEditorNextStep,
                 onTap: _index < steps.length - 1
                     ? () => setState(() => _index++)
                     : null,
@@ -850,7 +858,7 @@ class _VariableTrackerCardState extends State<_VariableTrackerCard> {
           if (step.printedOutput != null) ...[
             const SizedBox(height: 6),
             Text(
-              '→ ekrana yazdı: "${step.printedOutput}"',
+              l10n.nodeEditorPrintedOutput(step.printedOutput!),
               style: const TextStyle(
                 color: AppColors.success,
                 fontFamily: 'monospace',
@@ -860,9 +868,9 @@ class _VariableTrackerCardState extends State<_VariableTrackerCard> {
           ],
           if (step.variables.isEmpty) ...[
             const SizedBox(height: 6),
-            const Text(
-              'Henüz bir değişken tanımlanmadı.',
-              style: TextStyle(
+            Text(
+              l10n.nodeEditorNoVariablesYet,
+              style: const TextStyle(
                 color: Color(0xFF6A6A6A),
                 fontFamily: 'monospace',
                 fontSize: 11,
@@ -982,6 +990,7 @@ class _ActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 6, 10, 10),
       decoration: BoxDecoration(
@@ -1010,8 +1019,8 @@ class _ActionBar extends StatelessWidget {
                 ),
                 onPressed: onShowSolution,
                 icon: const Icon(Icons.lightbulb_outline_rounded, size: 16),
-                label: const Text(
-                  'Çözüm',
+                label: Text(
+                  l10n.nodeEditorSolution,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1031,8 +1040,8 @@ class _ActionBar extends StatelessWidget {
                 ),
                 onPressed: running ? null : onRun,
                 icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                label: const Text(
-                  'Çalıştır',
+                label: Text(
+                  l10n.nodeEditorRun,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1078,6 +1087,7 @@ class _SuccessDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
@@ -1099,9 +1109,9 @@ class _SuccessDialog extends StatelessWidget {
               size: 64,
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Tebrikler!',
-              style: TextStyle(
+            Text(
+              l10n.congratulationsTitle,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
@@ -1110,7 +1120,7 @@ class _SuccessDialog extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '+$xp XP kazandın!',
+              l10n.xpEarnedMessage(xp),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.95),
                 fontSize: 18,
@@ -1125,7 +1135,7 @@ class _SuccessDialog extends StatelessWidget {
                 minimumSize: const Size(160, 48),
               ),
               onPressed: onContinue,
-              child: const Text('Devam Et'),
+              child: Text(l10n.actionContinue),
             ),
           ],
         ),
@@ -1209,7 +1219,9 @@ class _ErrorHintCardState extends State<_ErrorHintCard> {
                         ),
                         if (h.lineHint != null)
                           Text(
-                            'Yaklaşık satır: ${h.lineHint}',
+                            AppLocalizations.of(
+                              context,
+                            ).nodeEditorApproxLine(h.lineHint!),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.5),
                               fontSize: 10,

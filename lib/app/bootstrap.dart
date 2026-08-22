@@ -109,9 +109,14 @@ Future<void> bootstrap(Widget Function() builder) async {
           await Firebase.initializeApp(
             options: DefaultFirebaseOptions.currentPlatform,
           );
-          // Google ile giriş — google-services.json'daki Android OAuth
-          // client'ı otomatik okur, ekstra clientId vermeye gerek yok.
-          await GoogleSignIn.instance.initialize();
+          // Google ile giriş — google_sign_in 7.x Android'de Credential
+          // Manager kullanıyor, bu da "Web" tipli OAuth client'ı
+          // serverClientId olarak açıkça ister (bkz. Env.googleServerClientId
+          // yorumu). Verilmeden "No credential available" hatasıyla
+          // sessizce başarısız oluyordu.
+          await GoogleSignIn.instance.initialize(
+            serverClientId: Env.googleServerClientId,
+          );
         } catch (e, st) {
           LoggerService.error('Firebase init failed', e, st);
           if (Env.isProduction) rethrow;

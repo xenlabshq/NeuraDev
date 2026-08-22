@@ -60,4 +60,15 @@ void main() {
   test('toggleLike on an unknown id throws', () {
     expect(() => repo.toggleLike('nope'), throwsStateError);
   });
+
+  test('fetchMore returns remaining items past the offset', () async {
+    final page = await repo.fetchMore(offset: 3, pageSize: 10);
+    expect(page.length, 2);
+    expect(page.first.id, repo.getAll()[3].id);
+  });
+
+  test('fetchMore returns an empty list once the offset exceeds all items', () async {
+    final page = await repo.fetchMore(offset: 5, pageSize: 10);
+    expect(page, isEmpty);
+  });
 }

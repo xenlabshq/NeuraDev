@@ -40,20 +40,25 @@ class BadgeState extends Equatable {
 class BadgeUnlockNotifier extends StateNotifier<BadgeState> {
   BadgeUnlockNotifier(this._ref) : super(const BadgeState()) {
     // İlk oluşturulduğunda mevcut progress'i değerlendir.
-    _evaluate();
-    // İleride değişim olursa tetikle.
+    _evaluate(_ref.read(learningProgressProvider).progress);
+    // İleride değişim olursa tetikle. `next.progress`'i doğrudan callback
+    // parametresinden alıyoruz — `_ref.read(userProgressProvider)` gibi
+    // TÜRETİLMİŞ bir provider'ı bu callback içinde okumak eski/stale
+    // değer döndürebiliyordu (Riverpod, `learningProgressProvider`'ın
+    // doğrudan dinleyicilerini, ondan türeyen `userProgressProvider`'ın
+    // henüz yeniden hesaplanmamış olabileceği bir sırada tetikleyebiliyor).
+    // Bu yüzden rozetler hiç açılmıyordu.
     _ref.listen<IslandsState>(
       learningProgressProvider,
-      (_, __) => _evaluate(),
+      (_, next) => _evaluate(next.progress),
     );
   }
 
   final Ref _ref;
 
-  /// Tüm rozetleri mevcut progress'e göre değerlendir;
+  /// Tüm rozetleri verilen progress'e göre değerlendir;
   /// koşul sağlandıysa unlock'la.
-  void _evaluate() {
-    final progress = _ref.read(userProgressProvider);
+  void _evaluate(UserLearningProgress progress) {
     final newUnlocks = <String, DateTime>{};
     final existing = state.unlocks;
 

@@ -26,6 +26,22 @@ class InMemoryNewsRepository implements NewsRepository {
   }
 
   @override
+  Future<List<NewsArticle>> fetchArchivePage({
+    NewsCategory? category,
+    DateTime? before,
+    int pageSize = 20,
+  }) async {
+    var list = _sorted(_all);
+    if (before != null) {
+      list = list.where((a) => a.publishedAt.isBefore(before)).toList();
+    }
+    if (category != null) {
+      list = list.where((a) => a.category == category).toList();
+    }
+    return list.take(pageSize).toList();
+  }
+
+  @override
   Future<NewsArticle?> getById(String id) async {
     await Future<void>.delayed(const Duration(milliseconds: 50));
     for (final a in _all) {

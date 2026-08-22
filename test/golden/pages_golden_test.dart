@@ -12,14 +12,21 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
-import 'package:neuroup/app/pages/demo_landing_page.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:neuroup/core/providers/app_settings_provider.dart';
 import 'package:neuroup/core/providers/core_providers.dart';
+import 'package:neuroup/features/auth/domain/repositories/auth_repository.dart';
+import 'package:neuroup/features/auth/presentation/providers/auth_providers.dart';
 import 'package:neuroup/features/profile/profile_page.dart';
+import 'package:neuroup/l10n/gen/app_localizations.dart';
+import 'package:neuroup/shared/models/user_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class _MockAuthRepository extends Mock implements AuthRepository {}
 
 const Size _kGoldenSize = Size(393, 1400);
 
@@ -27,6 +34,17 @@ Widget _wrap(Widget child, {List<Override> overrides = const []}) {
   return ProviderScope(
     overrides: overrides,
     child: MaterialApp(
+      // Goldens Türkçe (varsayılan dil) referans alınarak üretildi —
+      // test ortamının locale'i farklıysa (genelde en_US) metin
+      // uzunlukları değişip hem overflow hem piksel farkına yol açar.
+      locale: const Locale('tr'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: MediaQuery(
         data: const MediaQueryData(
           size: _kGoldenSize,
@@ -68,21 +86,12 @@ void main() {
     await tempDir.delete(recursive: true);
   });
 
-  testWidgets('DemoLandingPage golden', (tester) async {
-    await _setGoldenSurface(tester);
-    await tester.pumpWidget(_wrap(const DemoLandingPage()));
-    // Tek frame — sürekli tekrar eden animasyonların pumpAndSettle'ı
-    // sonsuza kadar bekletmesini önlemek için deterministik ilk kare.
-    await tester.pump(const Duration(milliseconds: 100));
-
-    await expectLater(
-      find.byType(DemoLandingPage),
-      matchesGoldenFile('goldens/demo_landing_page.png'),
-    );
-  });
-
   testWidgets('ProfilePage golden', (tester) async {
     await _setGoldenSurface(tester);
+    final mockAuthRepo = _MockAuthRepository();
+    when(
+      () => mockAuthRepo.authStateChanges(),
+    ).thenAnswer((_) => Stream<UserProfile?>.value(null));
     await tester.pumpWidget(
       _wrap(
         const ProfilePage(),
@@ -91,6 +100,7 @@ void main() {
           appSettingsProvider.overrideWith(
             (ref) => AppSettingsNotifier(prefs),
           ),
+          authRepositoryProvider.overrideWithValue(mockAuthRepo),
         ],
       ),
     );

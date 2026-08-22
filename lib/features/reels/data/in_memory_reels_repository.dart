@@ -11,6 +11,16 @@ class InMemoryReelsRepository implements ReelsRepository {
   List<GameReel> getAll() => List.unmodifiable(_reels);
 
   @override
+  Future<List<GameReel>> fetchMore({
+    required int offset,
+    int pageSize = 10,
+  }) async {
+    if (offset >= _reels.length) return const [];
+    final end = (offset + pageSize).clamp(0, _reels.length);
+    return List.unmodifiable(_reels.sublist(offset, end));
+  }
+
+  @override
   GameReel? getById(String id) {
     for (final r in _reels) {
       if (r.id == id) return r;

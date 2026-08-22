@@ -1,15 +1,20 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
+import 'package:neuroup/core/providers/app_settings_provider.dart';
 import 'package:neuroup/core/providers/core_providers.dart';
 import 'package:neuroup/features/learning/presentation/pages/node_editor_page.dart';
+import 'package:neuroup/l10n/gen/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   late Directory tempDir;
   late Box<dynamic> box;
+  late SharedPreferences prefs;
 
   setUpAll(() async {
     tempDir = await Directory.systemTemp.createTemp(
@@ -17,6 +22,8 @@ void main() {
     );
     Hive.init(tempDir.path);
     box = await Hive.openBox<dynamic>('node_editor_test_box');
+    SharedPreferences.setMockInitialValues({});
+    prefs = await SharedPreferences.getInstance();
   });
 
   tearDownAll(() async {
@@ -25,11 +32,22 @@ void main() {
   });
 
   Widget wrap() => ProviderScope(
-    overrides: [learningProgressBoxProvider.overrideWithValue(box)],
-    child: const MaterialApp(
+    overrides: [
+      learningProgressBoxProvider.overrideWithValue(box),
+      appSettingsProvider.overrideWith((ref) => AppSettingsNotifier(prefs)),
+    ],
+    child: MaterialApp(
+      locale: const Locale('tr'),
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       // island_variables / n_var_2: 'sayi = 42\nondalik = 3.14\n
       // print(sayi)\nprint(ondalik)' — gerçek seed içeriği.
-      home: NodeEditorPage(islandId: 'island_variables', nodeId: 'n_var_2'),
+      home: const NodeEditorPage(islandId: 'island_variables', nodeId: 'n_var_2'),
     ),
   );
 

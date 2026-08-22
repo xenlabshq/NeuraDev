@@ -7,5 +7,655 @@
   "welcomeMessage": "Neuroup'a hoş geldin!",
   "@welcomeMessage": {
     "description": "Genel karşılama mesajı örneği — l10n altyapısının çalıştığını doğrulamak için."
-  }
+  },
+  "navLessons": "Dersler",
+  "navReels": "Vitrin",
+  "navNews": "Haberler",
+  "navSupport": "Destek",
+  "navProfile": "Profil",
+  "demoModulesTitle": "Modüller",
+  "demoModulesSubtitle": "Her şey tek yerden",
+  "demoModuleLessonsSubtitle": "Python adaları",
+  "demoModuleNewsSubtitle": "Eğitimden gelişmeler",
+  "demoModuleReelsTitle": "Oyun Vitrini",
+  "demoModuleReelsSubtitle": "Geliştirici Reels",
+  "demoModuleSupportTitle": "Destek & AI",
+  "demoModuleSupportSubtitle": "Moderatör veya AI ile görüş",
+  "demoModuleProfileSubtitle": "İlerleme ve ayarlar",
+  "signedOutMessage": "Hesabından çıkış yaptın. Profil ve hesaba özel bölümlere erişmek için tekrar giriş yap.",
+  "actionSignIn": "Giriş Yap",
+  "demoBadgeLabel": "DEMO",
+  "heroGreeting": "Merhaba!",
+  "heroWelcome": "Neuroup'a\\nhoş geldin",
+  "demoInfoTitle": "Demo Modu",
+  "demoInfoBody": "Firebase yapılandırılmamış. Tüm modülleri guest olarak gezebilirsin. Sohbet ve AI demo modda in-memory çalışıyor.",
+  "demoUserDisplayName": "Demo Kullanıcı",
+  "xpOfTotal": "/ {xp} XP",
+  "@xpOfTotal": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "levelPill": "SEV. {level}",
+  "@levelPill": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "xpToNextLevel": "Sonraki seviyeye {xp} XP kaldı",
+  "@xpToNextLevel": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "statStreak": "Gün Seri",
+  "statCompleted": "Tamamlanan",
+  "statTotalLessons": "Toplam Ders",
+  "badgeLockedPrefix": "Henüz kazanılmadı",
+  "settingsAccountTitle": "Hesap Bilgileri",
+  "settingsAccountSubtitle": "Profil, e-posta, şifre",
+  "settingsNotificationsTitle": "Bildirimler",
+  "settingsNotificationsOnSubtitle": "Açık · push, e-posta, ses",
+  "settingsOff": "Kapalı",
+  "settingsAppearanceTitle": "Görünüm",
+  "settingsPrivacyTitle": "Gizlilik",
+  "settingsAnalyticsOn": "Anonim analiz: açık",
+  "settingsAnalyticsOff": "Anonim analiz: kapalı",
+  "settingsHelpTitle": "Yardım & Destek",
+  "settingsHelpSubtitle": "SSS, bizimle iletişim",
+  "settingsAboutTitle": "Hakkında",
+  "settingsAboutSubtitle": "Sürüm 1.0.0",
+  "settingsAdminTitle": "Yönetim Paneli",
+  "settingsAdminSubtitle": "Kullanıcı rollerini yönet",
+  "settingsReportsTitle": "Şikayetler",
+  "settingsReportsSubtitle": "Bildirilen gönderileri incele",
+  "settingsReportsPendingCount": "{count} bekleyen şikayet",
+  "@settingsReportsPendingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsLogoutTitle": "Çıkış Yap",
+  "settingsLogoutSubtitle": "Hesabından çık",
+  "settingsResetProgressTitle": "İlerlemeyi Sıfırla",
+  "settingsResetProgressSubtitle": "Tüm ada/node ilerlemesini sıfırlar",
+  "themeSystem": "Sistem",
+  "themeLight": "Açık",
+  "themeDark": "Koyu",
+  "accountSheetTitle": "Hesap Bilgileri",
+  "displayNameLabel": "Görünen Ad",
+  "emailLabel": "E-posta",
+  "emailNotEditableHelper": "E-posta şu an değiştirilemiyor",
+  "actionCancel": "İptal",
+  "profileNameSavedDemo": "Profil adı kaydedildi (demo mod).",
+  "profileUpdated": "Profil güncellendi",
+  "actionSave": "Kaydet",
+  "notifAllowLabel": "Bildirimlere izin ver",
+  "notifPushLabel": "Push bildirimler",
+  "notifEmailDigestLabel": "E-posta özeti",
+  "notifSoundLabel": "Bildirim sesi",
+  "actionOk": "Tamam",
+  "appearanceThemeLabel": "Tema",
+  "appearanceLanguageLabel": "Dil",
+  "appearanceTextSize": "Metin boyutu: {percent}%",
+  "@appearanceTextSize": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "privacyAnalyticsLabel": "Anonim analiz",
+  "privacyAnalyticsSubtitle": "Kullanım verilerini paylaş",
+  "privacyCrashReportsLabel": "Çökme raporları",
+  "privacyCrashReportsSubtitle": "Hata loglarını gönder",
+  "faqTitle": "SSS",
+  "actionClose": "Kapat",
+  "faqQ1": "Nasıl ders tamamlarım?",
+  "faqA1": "Bir adaya tıkla, ders kodunu yaz veya örnek çözümü uygula, Çalıştır butonuna bas. Çıktı doğruysa DOĞRU rozeti görünür, ardından +XP butonu aktif olur.",
+  "faqQ2": "Bir sonraki ada nasıl açılır?",
+  "faqA2": "Bir önceki adanın tüm derslerini tamamla. Ada tamamen tamamlanınca bir sonraki ada otomatik açılır.",
+  "faqQ3": "XP ve seviye nasıl çalışır?",
+  "faqA3": "Her ders belirli XP verir. Her 100 XP 1 level atlatır. Bronze → Silver → Gold → Diamond → Master tierları var.",
+  "faqQ4": "Reels vitrin nedir?",
+  "faqA4": "Geliştirici topluluğunun oyun demosu paylaştığı kısa video akışıdır. Beğeni, yorum ve CTA butonları içerir.",
+  "faqQ5": "Demo modda veriler kaydedilir mi?",
+  "faqA5": "Hayır. Demo modda tüm veriler in-memory çalışır. Firebase bağlantısı gerçek kayıt için gereklidir.",
+  "aboutDescription": "Eğitim, haber, sohbet ve oyunları bir araya getiren çapraz platform öğrenme uygulaması.",
+  "aboutVersionLabel": "Sürüm",
+  "aboutPlatformLabel": "Platform",
+  "aboutArchitectureLabel": "Mimari",
+  "aboutPackageLabel": "Paket",
+  "logoutConfirmMessage": "Hesabından çıkmak istediğine emin misin?",
+  "loggedOutMessage": "Çıkış yapıldı",
+  "resetProgressWarning": "Tüm öğrenme verileriniz kalıcı olarak silinecek. Bu işlemi geri alamazsın.",
+  "resetConsequenceIslands": "Tüm ada ilerlemen",
+  "resetConsequenceXp": "XP ve seviye bilgilerin",
+  "resetConsequenceStreak": "Günlük streak sayacın",
+  "resetConsequenceBadges": "Kazanılmış rozetler",
+  "actionGiveUp": "Vazgeç",
+  "actionContinue": "Devam Et",
+  "finalConfirmTitle": "Son Onay",
+  "finalConfirmInstruction": "Onaylamak için aşağıya büyük harfle \"{word}\" yaz:",
+  "@finalConfirmInstruction": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "resetConfirmWord": "SIFIRLA",
+  "progressResetMessage": "İlerleme sıfırlandı",
+  "newsCategoriesTitle": "Kategoriler",
+  "newsAllCategory": "Tümü",
+  "newsTrendTitle": "Trend",
+  "newsStatToday": "Bugün",
+  "newsStatThisWeek": "Bu Hafta",
+  "newsStatTotal": "Toplam",
+  "newsOtherArticlesTitle": "Diğer Haberler",
+  "newsCategoryEducation": "Eğitim",
+  "newsCategoryTechnology": "Teknoloji",
+  "newsCategoryScience": "Bilim",
+  "newsCategoryWorld": "Dünya",
+  "newsCategorySports": "Spor",
+  "newsPriorityCritical": "Son Dakika",
+  "newsPriorityHigh": "Önemli",
+  "newsPriorityNormal": "Haber",
+  "newsPriorityInfo": "Bilgi",
+  "newsPriorityPositive": "İlham",
+  "newsEmptyTitle": "Haber yok",
+  "newsEmptyMessage": "Bu kategoride henüz haber bulunmuyor.",
+  "newsShowAllAction": "Tümünü Gör",
+  "newsBreakingLabel": "SON DAKİKA",
+  "newsFeaturedLabel": "ÖNE ÇIKAN",
+  "timeAgoMinutes": "{count} dk önce",
+  "@timeAgoMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeAgoHours": "{count} sa önce",
+  "@timeAgoHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeAgoDays": "{count} gün önce",
+  "@timeAgoDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timeAgoWeeks": "{count} hafta önce",
+  "@timeAgoWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "readingTimeMinutes": "{count} dk okuma",
+  "@readingTimeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newsLoadFailedTitle": "Haberler yüklenemedi",
+  "actionRetry": "Tekrar Dene",
+  "newsPickCategoryTitle": "Kategori seç",
+  "genericErrorPrefix": "Hata",
+  "newsNotFoundTitle": "Haber bulunamadı",
+  "newsNotFoundMessage": "Bu haber mevcut değil.",
+  "newsReadAtSourceAction": "Kaynakta Oku",
+  "actionShare": "Paylaş",
+  "shareComingSoon": "Paylaşım yakında",
+  "adminDeleteNewsTitle": "Haberi sil",
+  "adminDeleteNewsConfirm": "{name} silinsin mi?",
+  "@adminDeleteNewsConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "actionDelete": "Sil",
+  "adminNewsManagementTitle": "Haber Yönetimi",
+  "adminNoNewsYet": "Henüz haber yok.",
+  "actionEdit": "Düzenle",
+  "adminAddNewsTooltip": "Yeni haber ekle",
+  "newsSaveFailed": "Kaydedilemedi: {name}",
+  "@newsSaveFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldRequired": "Bu alan gerekli",
+  "newsEditTitle": "Haberi Düzenle",
+  "newsNewTitle": "Yeni Haber",
+  "newsFieldTitle": "Başlık",
+  "newsFieldSummary": "Özet",
+  "newsFieldBody": "İçerik",
+  "newsFieldSource": "Kaynak",
+  "newsFieldSourceUrl": "Kaynak linki (opsiyonel)",
+  "newsFieldImageUrl": "Görsel linki (opsiyonel)",
+  "newsFieldCategory": "Kategori",
+  "newsFieldPriority": "Önem derecesi",
+  "newsFieldBreaking": "Son dakika",
+  "actionUpdate": "Güncelle",
+  "actionPublish": "Yayınla",
+  "reelsCommentsCount": "Yorumlar ({count})",
+  "@reelsCommentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reelsCommentHint": "Yorum yaz...",
+  "actionSend": "Gönder",
+  "reelsFollowingTab": "Takip Ettiklerim",
+  "reelsDiscoverTab": "Keşfet",
+  "reelsFollowAction": "Takip et",
+  "reelsLikedLabel": "Beğenildi",
+  "reelsLikeLabel": "Beğen",
+  "reelsCommentsLabel": "Yorumlar",
+  "reelsSavedLabel": "Kaydedildi",
+  "reelsSaveLabel": "Kaydet",
+  "reelsLinkFailed": "Link açılamadı",
+  "reelsTryGame": "Oyunu Dene",
+  "reelsOpenVideoExternally": "Videoyu Aç",
+  "reelsInvalidUrl": "Geçerli bir link gir (https://...)",
+  "reelsSignInFirst": "Önce giriş yapmalısın",
+  "reelsPickVideoFirst": "Bir video dosyası seçmeli ya da bir video linki girmelisin",
+  "reelsVideoUrlLabel": "Video linki",
+  "reelsVideoUrlHint": "https://... (YouTube, Google Drive vb.)",
+  "reelsFallbackUserTag": "kullanici",
+  "reelsFallbackUserName": "Kullanıcı",
+  "reelsNewCommunityHud": "Topluluk · Yeni",
+  "reelsSubmitFailed": "Gönderilemedi: {name}",
+  "@reelsSubmitFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reelsShareYourGame": "Oyununu Paylaş",
+  "reelsGameplayVideoLabel": "Oynanış videosu",
+  "reelsGameNameLabel": "Oyun adı",
+  "reelsShortDescriptionLabel": "Kısa tanıtım",
+  "reelsShortDescriptionHint": "Oyununu bir-iki cümlede anlat",
+  "reelsTagsLabel": "Etiketler (opsiyonel)",
+  "reelsGameLinkLabel": "Oyun linki",
+  "reelsPickVideoPrompt": "Galeriden bir oynanış videosu seç",
+  "reelsPickAction": "Seç",
+  "reelsChangeAction": "Değiştir",
+  "reelsEmpty": "Henüz reel yok",
+  "reelsEditYourGame": "Oyununu Düzenle",
+  "reelsVideoKeptHint": "Video değiştirilmeyecek — istersen yeni bir video seçebilirsin",
+  "reelsMoreOptions": "Diğer seçenekler",
+  "reelsReportAction": "Şikayet Et",
+  "reelsReportDialogTitle": "Bu gönderiyi şikayet et",
+  "reelsReportReasonHint": "Neden şikayet ediyorsun? (örn. uygunsuz içerik, spam)",
+  "reelsReportSubmitted": "Şikayetin gönderildi, teşekkürler",
+  "reelsReportFailed": "Şikayet gönderilemedi: {name}",
+  "@reelsReportFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsPageTitle": "Şikayetler",
+  "reportsEmpty": "Bekleyen şikayet yok",
+  "reportsReportedBy": "{name} tarafından bildirildi",
+  "@reportsReportedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsRemoveContentAction": "Gönderiyi Kaldır",
+  "reportsBanUserAction": "Kullanıcıyı Banla",
+  "reportsDismissAction": "Asılsız, Kapat",
+  "reportsContentRemoved": "Gönderi kaldırıldı ve şikayet kapatıldı",
+  "reportsUserBannedAndDismissed": "Kullanıcı banlandı ve şikayet kapatıldı",
+  "reportsDismissed": "Şikayet kapatıldı",
+  "reportsActionFailed": "İşlem başarısız: {name}",
+  "@reportsActionFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reelsDeleteConfirmTitle": "Gönderiyi sil",
+  "reelsDeleteConfirmMessage": "\"{title}\" silinsin mi? Bu işlem geri alınamaz.",
+  "@reelsDeleteConfirmMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reelsDeleted": "Gönderi silindi",
+  "reelsDeleteFailed": "Silinemedi: {name}",
+  "@reelsDeleteFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reelsUpdated": "Gönderi güncellendi",
+  "supportHeaderSubtitle": "Soru sor, destek al",
+  "supportAiAssistantTab": "AI Asistan",
+  "supportQuickMsgHelp": "Yardım istiyorum",
+  "supportQuickMsgQuestion": "Bir sorum var",
+  "supportQuickMsgError": "Hata aldım",
+  "notSignedIn": "Giriş yapılmadı",
+  "supportOpenChatsLabel": "Açık sohbetler",
+  "supportTeamName": "Destek Ekibi",
+  "supportNoMessagesYet": "Henüz mesaj yok",
+  "supportQuickStartLabel": "Hızlı başlat",
+  "supportEmptyTitle": "Yardım ister misin?",
+  "supportEmptyMessage": "Destek ekibimizle sohbet başlat. Sorularını yanıtlamak için buradayız.",
+  "supportStartNewChat": "Yeni sohbet başlat",
+  "supportNoPendingChats": "Şu an bekleyen sohbet yok.",
+  "supportNewChat": "Yeni sohbet",
+  "chatUserLabel": "Kullanıcı",
+  "chatUnansweredLabel": "Yanıtlanmadı",
+  "chatOnlineLabel": "Çevrimiçi",
+  "chatCloseChatTooltip": "Sohbeti kapat",
+  "chatWelcomeMessage": "Sohbete hoş geldin!\\nMesajını aşağıya yaz.",
+  "chatMessageHint": "Mesaj yaz...",
+  "chatModeratorBadge": "MODERATÖR",
+  "aiSuggestionLessons": "Dersler nasıl çalışır?",
+  "aiSuggestionXp": "XP kazanma yolları",
+  "aiSuggestionGames": "Oyunları nasıl oynarım?",
+  "aiSuggestionBadges": "Rozetler ne işe yarar?",
+  "aiGreeting": "Merhaba! Ben Neuroup AI asistanıyım. Öğrenme, dersler, oyunlar veya hesap ile ilgili sorularına yardımcı olabilirim.",
+  "aiResponseGreeting": "Merhaba! Sana nasıl yardımcı olabilirim? Dersler, oyunlar veya hesap ayarları hakkında soru sorabilirsin.",
+  "aiResponseLessons": "Dersler sekmesine gidip \"Python Adaları\" haritasını açabilirsin. Her ada bir Python konusu öğretir. Şu an Başlangıç Adası tamamlandı.",
+  "aiResponseGames": "Oyunlar sekmesinde Kelime Avı, Quick Math ve Renk Eşleştir var. Hepsini deneyebilirsin!",
+  "aiResponseXp": "XP kazanmak için ders tamamla veya oyun oyna. Her 200 XP'de level atlıyorsun. Profil'de ilerlemeni görebilirsin.",
+  "aiResponseBadges": "Toplam 8 rozet var. Quiz tamamladıkça ve görevleri yerine getirdikçe kazanırsın. Profil'den kontrol et!",
+  "aiResponseProfile": "Profil'de seviye, XP, rozetler ve ayarların var. Avatar çerçeven seviyene göre değişir.",
+  "aiResponseHelp": "Yardım için:\\n• \"Dersler nasıl çalışır?\"\\n• \"Oyunları nasıl oynarım?\"\\n• \"Seviye sistemi nedir?\"\\n• \"Nasıl rozet kazanırım?\"\\n\\nBirini seç veya kendi sorunu yaz!",
+  "aiResponseFallback": "İlginç bir soru! Şu an yerel moddayım, bazı sorulara cevap verebilirim. \"yardım\" yazarak neler sorabileceğini görebilirsin.",
+  "aiPanelTitle": "Neuroup AI",
+  "aiPanelSubtitle": "Aşağıdaki önerilerden birini seç ya da kendi sorunu yaz.",
+  "aiInputHint": "AI'a sor...",
+  "authForgotPasswordTitle": "Şifremi unuttum",
+  "authSendResetLink": "Sıfırlama linki gönder",
+  "authResetLinkSent": "{name} adresine şifre sıfırlama linki gönderildi",
+  "@authResetLinkSent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "authWelcomeBackSubtitle": "Tekrar hoş geldin!",
+  "authLoginTitle": "Hesabına giriş yap",
+  "authEmailRequired": "E-posta gerekli",
+  "authInvalidEmail": "Geçersiz e-posta",
+  "authPasswordLabel": "Şifre",
+  "authShowPassword": "Şifreyi göster",
+  "authHidePassword": "Şifreyi gizle",
+  "authPasswordTooShort": "En az 6 karakter",
+  "authForgotPasswordLink": "Şifremi unuttum",
+  "authOr": "veya",
+  "authContinueWithGoogle": "Google ile devam et",
+  "authNoAccount": "Hesabın yok mu?",
+  "authSignUp": "Kayıt ol",
+  "actionBack": "Geri",
+  "authJoinUsSubtitle": "Aramıza katıl!",
+  "authCreateAccountTitle": "Hesap oluştur",
+  "authFullNameLabel": "Ad Soyad",
+  "authFullNameHint": "Adın Soyadın",
+  "authNameRequired": "Ad gerekli",
+  "authAccountTypeLabel": "Hesap türü",
+  "authRoleStudent": "Öğrenci",
+  "authRoleTeacher": "Öğretmen",
+  "authRoleParent": "Veli",
+  "authCreateAccountAction": "Hesap Oluştur",
+  "roleModerator": "Moderatör",
+  "roleAdmin": "Yönetici",
+  "adminNoUsersFound": "Kullanıcı bulunamadı",
+  "adminLoadFailed": "Yüklenemedi: {name}",
+  "@adminLoadFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminRoleChanged": "{name} artık {role}",
+  "@adminRoleChanged": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "adminChangeRoleTitle": "Rolü değiştir",
+  "adminChangeRoleConfirm": "{name} kullanıcısının rolünü {oldRole} → {newRole} olarak değiştirmek istediğine emin misin?",
+  "@adminChangeRoleConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "oldRole": {
+        "type": "String"
+      },
+      "newRole": {
+        "type": "String"
+      }
+    }
+  },
+  "actionChange": "Değiştir",
+  "adminSearchByEmailHint": "E-posta veya isimle ara...",
+  "adminNoUsersMatchSearch": "Aramaya uyan kullanıcı yok",
+  "adminBannedLabel": "Banlı",
+  "adminBanAction": "Banla",
+  "adminUnbanAction": "Ban Kaldır",
+  "adminCannotBanSelf": "Kendi hesabını banlayamazsın",
+  "adminBanConfirmTitle": "Kullanıcıyı banla",
+  "adminUnbanConfirmTitle": "Ban kaldır",
+  "adminBanConfirmMessage": "{name} banlanacak — bir sonraki girişinde otomatik çıkış yapılacak ve tekrar giriş yapamayacak. Emin misin?",
+  "@adminBanConfirmMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminUnbanConfirmMessage": "{name} kullanıcısının banı kaldırılsın mı? Tekrar giriş yapabilecek.",
+  "@adminUnbanConfirmMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminUserBanned": "{name} banlandı",
+  "@adminUserBanned": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "adminUserUnbanned": "{name} kullanıcısının banı kaldırıldı",
+  "@adminUserUnbanned": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "islandNotFoundTitle": "Ada bulunamadı",
+  "islandNotFoundBody": "Ada bulunamadı (id: {name}).",
+  "@islandNotFoundBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "lessonLockedMessage": "Bu ders kilitli. Önceki dersi tamamla!",
+  "lessonAlreadyCompletedMessage": "Bu dersi zaten tamamladın! Tekrar denemek için tıkla.",
+  "islandLockedMessage": "Bu ada kilitli. Önceki adayı tamamla!",
+  "focusSheetTitle": "Odaklanman Gereken Dersler",
+  "focusSheetAllLearned": "Tüm dersler öğrenilmiş görünüyor!",
+  "focusSheetViewAllLessons": "Tüm Dersleri Gör",
+  "focusSheetStartRecommended": "Önerilenle Başla",
+  "pythonIslandsTitle": "Python Adaları",
+  "islandsMapSummary": "{doneLessons} / {totalLessons} ders · {doneIslands} / {totalIslands} ada",
+  "@islandsMapSummary": {
+    "placeholders": {
+      "doneLessons": {
+        "type": "int"
+      },
+      "totalLessons": {
+        "type": "int"
+      },
+      "doneIslands": {
+        "type": "int"
+      },
+      "totalIslands": {
+        "type": "int"
+      }
+    }
+  },
+  "islandMapHint": "Ada için tıkla · sürükle",
+  "introSheetIslandCount": "10 ada · 50+ interaktif ders",
+  "introStepDragTitle": "Sürükle & Yakınlaştır",
+  "introStepDragDesc": "Haritayı parmağınla kaydır, iki parmakla yakınlaştır.",
+  "introStepUnlockTitle": "Kilidi Açmak İçin Sırayla Git",
+  "introStepUnlockDesc": "Her ada bir öncekinin tüm derslerini tamamlayınca açılır.",
+  "introStepCrystalsTitle": "Kristalleri Yakala",
+  "introStepCrystalsDesc": "Her ders bir hex kristal. Tamamladıkça altına döner ve ⭐ alırsın.",
+  "introSheetStartExploring": "Keşfe Başla",
+  "focusTileRecommended": "Önerilen",
+  "lessonNotFoundBody": "Ders bulunamadı (id: {name}).",
+  "@lessonNotFoundBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nodeEditorRunFirst": "Önce kodu çalıştır ve doğru çıktıyı al!",
+  "lessonNotFoundTitle": "Ders bulunamadı",
+  "lessonLoadFailedBody": "Ders yüklenemedi (id: {name}).",
+  "@lessonLoadFailedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "nodeEditorShowTutorial": "Eğitimi göster",
+  "nodeEditorHideTutorial": "Eğitimi kapat",
+  "nodeEditorTutorialLabel": "EĞİTİM",
+  "nodeEditorHint": "# Python kodunu buraya yaz...",
+  "nodeEditorOutputLabel": "ÇIKTI",
+  "nodeEditorCorrectLabel": "DOĞRU",
+  "nodeEditorRunning": "Çalışıyor...",
+  "nodeEditorPressRun": "Kodu çalıştırmak için ▶ butonuna bas.",
+  "nodeEditorExpectedOutput": "BEKLENEN ÇIKTI",
+  "nodeEditorVariableTracker": "DEĞİŞKEN İZLEYİCİ",
+  "nodeEditorStepCount": "Adım {current}/{total}",
+  "@nodeEditorStepCount": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nodeEditorPreviousStep": "Önceki adım",
+  "nodeEditorLineIndicator": "satır {line}: {code}",
+  "@nodeEditorLineIndicator": {
+    "placeholders": {
+      "line": {
+        "type": "int"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "nodeEditorNextStep": "Sonraki adım",
+  "nodeEditorPrintedOutput": "→ ekrana yazdı: \"{output}\"",
+  "@nodeEditorPrintedOutput": {
+    "placeholders": {
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "nodeEditorNoVariablesYet": "Henüz bir değişken tanımlanmadı.",
+  "nodeEditorSolution": "Çözüm",
+  "nodeEditorRun": "Çalıştır",
+  "congratulationsTitle": "Tebrikler!",
+  "xpEarnedMessage": "+{xp} XP kazandın!",
+  "@xpEarnedMessage": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "nodeEditorApproxLine": "Yaklaşık satır: {line}",
+  "@nodeEditorApproxLine": {
+    "placeholders": {
+      "line": {
+        "type": "int"
+      }
+    }
+  },
+  "badgeFirstStepName": "İlk Adım",
+  "badgeFirstStepDesc": "İlk dersini tamamla",
+  "badgeQuizMasterName": "Quiz Ustası",
+  "badgeQuizMasterDesc": "5 quiz'i %90+ ile geç",
+  "badgeStreak7Name": "7 Gün Seri",
+  "badgeStreak7Desc": "7 gün üst üste giriş yap",
+  "badgeWordChampionName": "Kelime Şampiyonu",
+  "badgeWordChampionDesc": "Kelime Avı'nda 500 puan",
+  "badgeMathWizardName": "Matematik Dâhisi",
+  "badgeMathWizardDesc": "Tüm matematik derslerini tamamla",
+  "badgeScienceExplorerName": "Bilim Kaşifi",
+  "badgeScienceExplorerDesc": "Tüm fen derslerini tamamla",
+  "badgeHistoryBuffName": "Tarih Bilgini",
+  "badgeHistoryBuffDesc": "Tüm tarih derslerini tamamla",
+  "badgeHelperName": "Yardımsever",
+  "badgeHelperDesc": "Destek sohbetini ilk defa kullan",
+  "adminLoadMoreArchive": "Daha Fazla Yükle"
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../l10n/gen/app_localizations.dart';
 import '../../domain/entities/game_reel.dart';
 import '../providers/reels_providers.dart';
 
@@ -49,6 +50,7 @@ class _ReelCommentsDrawerState extends ConsumerState<ReelCommentsDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final current = ref.watch(reelProvider(widget.reel.id)) ?? widget.reel;
     final mq = MediaQuery.of(context);
     // Yükseklik %68 yerine, klavye açıksa (viewInsets.bottom) onun
@@ -79,7 +81,7 @@ class _ReelCommentsDrawerState extends ConsumerState<ReelCommentsDrawer> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Yorumlar (${current.comments.length})',
+                    l10n.reelsCommentsCount(current.comments.length),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -175,7 +177,7 @@ class _ReelCommentsDrawerState extends ConsumerState<ReelCommentsDrawer> {
                       controller: _input,
                       style: const TextStyle(color: Colors.white, fontSize: 13),
                       decoration: InputDecoration(
-                        hintText: 'Yorum yaz...',
+                        hintText: l10n.reelsCommentHint,
                         hintStyle: const TextStyle(
                           color: Color(0xFF6E6390),
                           fontSize: 13,
@@ -207,9 +209,9 @@ class _ReelCommentsDrawerState extends ConsumerState<ReelCommentsDrawer> {
                           horizontal: 18,
                           vertical: 12,
                         ),
-                        child: const Text(
-                          'Gönder',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.actionSend,
+                          style: const TextStyle(
                             color: Color(0xFF14101F),
                             fontSize: 14,
                             fontWeight: FontWeight.w700,

@@ -15,28 +15,39 @@ class SupportChatRepositoryImpl implements SupportChatRepository {
   CollectionReference<Map<String, dynamic>> _messages(String chatId) =>
       _chats.doc(chatId).collection('messages');
 
+  // `where()` + `orderBy()` farklı alanlarda kombine edilirse Firestore
+  // composite index istiyor (bkz. haberler kategorisi ile aynı sorun —
+  // news_repository_impl.dart'taki client-side filtreleme). Burada da
+  // aynı çözüm: tek-alanlı orderBy (otomatik indekslenir) + filtreyi
+  // Dart tarafında uygula.
   @override
   Stream<List<SupportChat>> watchChatsForUser(String userId) {
     return _chats
-        .where('userId', isEqualTo: userId)
         .orderBy('lastMessageAt', descending: true)
         .snapshots()
-        .map((snap) => snap.docs.map(SupportChat.fromDoc).toList());
+        .map(
+          (snap) => snap.docs
+              .map(SupportChat.fromDoc)
+              .where((c) => c.userId == userId)
+              .toList(),
+        );
   }
 
   @override
   Stream<List<SupportChat>> watchOpenChatsForModerators() {
+    const openStatuses = {
+      SupportChatStatus.open,
+      SupportChatStatus.assigned,
+    };
     return _chats
-        .where(
-          'status',
-          whereIn: [
-            SupportChatStatus.open.name,
-            SupportChatStatus.assigned.name,
-          ],
-        )
         .orderBy('createdAt', descending: false)
         .snapshots()
-        .map((snap) => snap.docs.map(SupportChat.fromDoc).toList());
+        .map(
+          (snap) => snap.docs
+              .map(SupportChat.fromDoc)
+              .where((c) => openStatuses.contains(c.status))
+              .toList(),
+        );
   }
 
   @override
@@ -53,13 +64,14 @@ class SupportChatRepositoryImpl implements SupportChatRepository {
     required String userName,
     required String userRole,
   }) async {
-    final existing = await _chats
-        .where('userId', isEqualTo: userId)
-        .where('status', isNotEqualTo: SupportChatStatus.closed.name)
-        .limit(1)
-        .get();
-    if (existing.docs.isNotEmpty) {
-      return SupportChat.fromDoc(existing.docs.first);
+    // Tek eşitlik filtresi (userId) — otomatik indekslenir, composite
+    // index gerekmez. `status != closed` filtresi Dart tarafında.
+    final existing = await _chats.where('userId', isEqualTo: userId).get();
+    final open = existing.docs
+        .map(SupportChat.fromDoc)
+        .where((c) => c.status != SupportChatStatus.closed);
+    if (open.isNotEmpty) {
+      return open.first;
     }
     final doc = _chats.doc();
     final chat = SupportChat(

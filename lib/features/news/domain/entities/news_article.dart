@@ -90,14 +90,6 @@ class NewsArticle extends Equatable {
 
   Duration get age => DateTime.now().difference(publishedAt);
 
-  String get ageLabel {
-    final a = age;
-    if (a.inMinutes < 60) return '${a.inMinutes} dk önce';
-    if (a.inHours < 24) return '${a.inHours} sa önce';
-    if (a.inDays < 7) return '${a.inDays} gün önce';
-    return '${(a.inDays / 7).floor()} hafta önce';
-  }
-
   @override
   List<Object?> get props => [
     id,

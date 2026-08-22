@@ -51,6 +51,7 @@ class LearningIsland extends Equatable {
     double? x,
     double? y,
     double? z,
+    List<LearningNode>? nodes,
   }) => LearningIsland(
     id: id,
     title: title,
@@ -60,7 +61,7 @@ class LearningIsland extends Equatable {
     color: color,
     gradient: gradient,
     order: order,
-    nodes: nodes,
+    nodes: nodes ?? this.nodes,
     size: size ?? this.size,
     unlocked: unlocked ?? this.unlocked,
     x: x ?? this.x,

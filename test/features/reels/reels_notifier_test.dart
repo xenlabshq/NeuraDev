@@ -3,6 +3,10 @@ import 'package:neuroup/features/reels/data/in_memory_reels_repository.dart';
 import 'package:neuroup/features/reels/domain/entities/game_reel.dart';
 import 'package:neuroup/features/reels/presentation/providers/reels_providers.dart';
 
+// `uploaderId` gerçek bir gönderimde her zaman dolu olur (bkz.
+// ReelSubmitPage._submit) — `mergeSubmitted` seed reels'i (uploaderId ==
+// null) submission'lardan bu alana bakarak ayırt ediyor, bu yüzden test
+// fikstürü de gerçekçi olmalı.
 GameReel _submitted(String id) => GameReel(
   id: id,
   devName: 'Test Dev',
@@ -15,6 +19,7 @@ GameReel _submitted(String id) => GameReel(
   hud: 'Yeni',
   likes: 0,
   gameUrl: 'https://example.com/game',
+  uploaderId: 'submitter_$id',
   comments: const [],
 );
 
@@ -63,5 +68,83 @@ void main() {
 
     final reel = notifier.state.firstWhere((r) => r.id == 'user_1');
     expect(reel.comments.first.text, 'harika fikir!');
+  });
+
+  test(
+    'mergeSubmitted drops a submission that disappeared from the stream '
+    '(deleted)',
+    () {
+      final notifier = ReelsNotifier(InMemoryReelsRepository());
+      final seedCount = notifier.state.length;
+      notifier.mergeSubmitted([_submitted('user_1'), _submitted('user_2')]);
+      expect(notifier.state.length, seedCount + 2);
+
+      // Silinmiş gibi — akışta artık sadece 'user_2' var.
+      notifier.mergeSubmitted([_submitted('user_2')]);
+
+      expect(notifier.state.length, seedCount + 1);
+      expect(notifier.state.any((r) => r.id == 'user_1'), isFalse);
+    },
+  );
+
+  test('removeReel deletes the reel immediately without waiting for a '
+      'stream round-trip', () {
+    final notifier = ReelsNotifier(InMemoryReelsRepository());
+    notifier.mergeSubmitted([_submitted('user_1')]);
+    expect(notifier.state.any((r) => r.id == 'user_1'), isTrue);
+
+    notifier.removeReel('user_1');
+
+    expect(notifier.state.any((r) => r.id == 'user_1'), isFalse);
+  });
+
+  test(
+    'mergeSubmitted updates edited content but preserves local '
+    'like/save/comment state',
+    () {
+      final notifier = ReelsNotifier(InMemoryReelsRepository());
+      notifier.mergeSubmitted([_submitted('user_1')]);
+      notifier.toggleLike('user_1');
+      notifier.toggleSave('user_1');
+      notifier.addComment('user_1', 'ilk yorum');
+      final beforeEdit = notifier.state.firstWhere((r) => r.id == 'user_1');
+      expect(beforeEdit.liked, isTrue);
+      expect(beforeEdit.saved, isTrue);
+      expect(beforeEdit.comments, hasLength(1));
+
+      final edited = GameReel(
+        id: 'user_1',
+        devName: 'Test Dev',
+        devTag: '@testdev',
+        title: 'Güncellenmiş Başlık',
+        caption: 'caption',
+        tags: '#test',
+        accent: ReelAccent.gold,
+        symbols: const ['🎮'],
+        hud: 'Yeni',
+        likes: 0,
+        gameUrl: 'https://example.com/game',
+        uploaderId: 'submitter_user_1',
+        comments: const [],
+      );
+      notifier.mergeSubmitted([edited]);
+
+      final afterEdit = notifier.state.firstWhere((r) => r.id == 'user_1');
+      expect(afterEdit.title, 'Güncellenmiş Başlık');
+      expect(afterEdit.liked, isTrue);
+      expect(afterEdit.saved, isTrue);
+      expect(afterEdit.comments, hasLength(1));
+    },
+  );
+
+  test('loadMore has nothing left after the seed is exhausted', () async {
+    final notifier = ReelsNotifier(InMemoryReelsRepository());
+    final seedCount = notifier.state.length;
+    expect(notifier.hasMore, isTrue);
+
+    await notifier.loadMore();
+
+    expect(notifier.state.length, seedCount);
+    expect(notifier.hasMore, isFalse);
   });
 }

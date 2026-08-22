@@ -5,15 +5,16 @@ import 'package:intl/intl.dart';
 
 import '../../../../app/theme/colors.dart';
 import '../../../../app/router/home_shell.dart' show kBottomBarHeight;
+import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../shared/models/user_profile.dart';
 import '../../domain/entities/support_chat.dart';
 import '../providers/chat_controller.dart';
 import '../providers/chat_providers.dart';
 
-const _quickMessages = [
-  'Yardım istiyorum',
-  'Bir sorum var',
-  'Hata aldım',
+List<String> _quickMessages(AppLocalizations l10n) => [
+  l10n.supportQuickMsgHelp,
+  l10n.supportQuickMsgQuestion,
+  l10n.supportQuickMsgError,
 ];
 
 /// Destek sohbet listesi — açık sohbetler, hızlı mesaj CTA'ları
@@ -49,7 +50,7 @@ class _SupportChatPanelState extends ConsumerState<SupportChatPanel> {
   Widget build(BuildContext context) {
     final user = ref.watch(currentAuthUserProvider);
     if (user == null) {
-      return _CenteredMessage(text: 'Giriş yapılmadı');
+      return _CenteredMessage(text: AppLocalizations.of(context).notSignedIn);
     }
     if (user.role.isSupportStaff) {
       return const _ModeratorListView();
@@ -86,12 +87,14 @@ class _StudentView extends ConsumerWidget {
     final user = ref.watch(currentAuthUserProvider);
     final asyncChats = ref.watch(mySupportChatStreamProvider);
     final tokens = AppColors.tokensOf(context);
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       color: tokens.surface,
       child: asyncChats.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => _CenteredMessage(text: 'Hata: $e'),
+        error: (e, _) =>
+            _CenteredMessage(text: '${l10n.genericErrorPrefix}: $e'),
         data: (chats) {
           if (chats.isEmpty && activeChat == null) {
             return _EmptySupport(
@@ -107,14 +110,14 @@ class _StudentView extends ConsumerWidget {
             ),
             children: [
               if (chats.isNotEmpty) ...[
-                _SectionLabel(label: 'Açık sohbetler', tokens: tokens),
+                _SectionLabel(label: l10n.supportOpenChatsLabel, tokens: tokens),
                 const SizedBox(height: 12),
                 ...chats.map(
                   (chat) => Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: _SupportTile(
-                      title: 'Destek Ekibi',
-                      subtitle: chat.lastMessage ?? 'Henüz mesaj yok',
+                      title: l10n.supportTeamName,
+                      subtitle: chat.lastMessage ?? l10n.supportNoMessagesYet,
                       time: chat.lastMessageAt,
                       color: AppColors.success,
                       onTap: () => context.push('/support/${chat.id}'),
@@ -124,7 +127,7 @@ class _StudentView extends ConsumerWidget {
                 ),
                 const SizedBox(height: 20),
               ],
-              _SectionLabel(label: 'Hızlı başlat', tokens: tokens),
+              _SectionLabel(label: l10n.supportQuickStartLabel, tokens: tokens),
               const SizedBox(height: 12),
               _QuickMessageRow(
                 user: user!,
@@ -193,7 +196,7 @@ class _QuickMessageRow extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: _quickMessages
+      children: _quickMessages(AppLocalizations.of(context))
           .map(
             (m) => _QuickMessageChip(
               label: m,
@@ -248,6 +251,7 @@ class _EmptySupport extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = AppColors.tokensOf(context);
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -281,7 +285,7 @@ class _EmptySupport extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Yardım ister misin?',
+              l10n.supportEmptyTitle,
               style: TextStyle(
                 color: tokens.textPrimary,
                 fontSize: 22,
@@ -291,7 +295,7 @@ class _EmptySupport extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Destek ekibimizle sohbet başlat. Sorularını yanıtlamak için buradayız.',
+              l10n.supportEmptyMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: tokens.textSecondary,
@@ -318,7 +322,7 @@ class _EmptySupport extends StatelessWidget {
                 ),
               ),
               icon: const Icon(Icons.chat_bubble_rounded, size: 18),
-              label: const Text('Yeni sohbet başlat'),
+              label: Text(l10n.supportStartNewChat),
             ),
           ],
         ),
@@ -410,7 +414,7 @@ class _SupportTile extends StatelessWidget {
               ),
               if (time != null)
                 Text(
-                  _formatTime(time!),
+                  _formatTime(context, time!),
                   style: TextStyle(
                     color: tokens.textTertiary,
                     fontSize: 11,
@@ -430,12 +434,13 @@ class _SupportTile extends StatelessWidget {
     );
   }
 
-  String _formatTime(DateTime dt) {
+  String _formatTime(BuildContext context, DateTime dt) {
+    final locale = Localizations.localeOf(context).languageCode;
     final now = DateTime.now();
     if (dt.year == now.year && dt.month == now.month && dt.day == now.day) {
-      return DateFormat.Hm().format(dt);
+      return DateFormat.Hm(locale).format(dt);
     }
-    return DateFormat('d MMM').format(dt);
+    return DateFormat('d MMM', locale).format(dt);
   }
 }
 
@@ -446,14 +451,16 @@ class _ModeratorListView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncChats = ref.watch(openChatsForModeratorsProvider);
     final tokens = AppColors.tokensOf(context);
+    final l10n = AppLocalizations.of(context);
     return Container(
       color: tokens.surface,
       child: asyncChats.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => _CenteredMessage(text: 'Hata: $e'),
+        error: (e, _) =>
+            _CenteredMessage(text: '${l10n.genericErrorPrefix}: $e'),
         data: (chats) {
           if (chats.isEmpty) {
-            return _CenteredMessage(text: 'Şu an bekleyen sohbet yok.');
+            return _CenteredMessage(text: l10n.supportNoPendingChats);
           }
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
@@ -463,7 +470,7 @@ class _ModeratorListView extends ConsumerWidget {
               final chat = chats[i];
               return _SupportTile(
                 title: chat.userName,
-                subtitle: chat.lastMessage ?? 'Yeni sohbet',
+                subtitle: chat.lastMessage ?? l10n.supportNewChat,
                 time: chat.lastMessageAt,
                 color: AppColors.info,
                 onTap: () => context.push('/support/${chat.id}'),

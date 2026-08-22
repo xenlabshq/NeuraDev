@@ -4,12 +4,13 @@ import 'package:intl/intl.dart';
 import 'package:neuroup/app/router/home_shell.dart' show kBottomBarHeight;
 
 import '../../../../app/theme/colors.dart';
+import '../../../../l10n/gen/app_localizations.dart';
 
-const _aiSuggestions = [
-  'Dersler nasıl çalışır?',
-  'XP kazanma yolları',
-  'Oyunları nasıl oynarım?',
-  'Rozetler ne işe yarar?',
+List<String> _aiSuggestions(AppLocalizations l10n) => [
+  l10n.aiSuggestionLessons,
+  l10n.aiSuggestionXp,
+  l10n.aiSuggestionGames,
+  l10n.aiSuggestionBadges,
 ];
 
 /// AI Asistan paneli — yerel echo cevaplar (8 hazır intent).
@@ -25,14 +26,23 @@ class AiAssistantPanel extends ConsumerStatefulWidget {
 class _AiAssistantPanelState extends ConsumerState<AiAssistantPanel> {
   final _input = TextEditingController();
   final _scroll = ScrollController();
-  final List<_AiMessage> _messages = [
-    _AiMessage(
-      text:
-          'Merhaba! Ben Neuroup AI asistanıyım. Öğrenme, dersler, oyunlar veya hesap ile ilgili sorularına yardımcı olabilirim.',
-      isMe: false,
-      createdAt: DateTime.now(),
-    ),
-  ];
+  final List<_AiMessage> _messages = [];
+  bool _greeted = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_greeted) {
+      _greeted = true;
+      _messages.add(
+        _AiMessage(
+          text: AppLocalizations.of(context).aiGreeting,
+          isMe: false,
+          createdAt: DateTime.now(),
+        ),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -50,7 +60,7 @@ class _AiAssistantPanelState extends ConsumerState<AiAssistantPanel> {
       _messages.add(_AiMessage(text: trimmed, isMe: true, createdAt: now));
       _messages.add(
         _AiMessage(
-          text: _generateResponse(trimmed),
+          text: _generateResponse(AppLocalizations.of(context), trimmed),
           isMe: false,
           createdAt: now.add(const Duration(seconds: 1)),
         ),
@@ -68,32 +78,41 @@ class _AiAssistantPanelState extends ConsumerState<AiAssistantPanel> {
     });
   }
 
-  String _generateResponse(String input) {
+  // Anahtar kelime eşleştirmesi hem Türkçe hem İngilizce girdi kabul
+  // eder — kullanıcı arayüzü İngilizce'ye çevrilse bile yazdığı soru
+  // İngilizce olabileceğinden niyet tespiti iki dilde de çalışmalı.
+  String _generateResponse(AppLocalizations l10n, String input) {
     final lower = input.toLowerCase();
-    if (lower.contains('merhaba') || lower.contains('selam')) {
-      return 'Merhaba! Sana nasıl yardımcı olabilirim? Dersler, oyunlar veya hesap ayarları hakkında soru sorabilirsin.';
+    if (lower.contains('merhaba') ||
+        lower.contains('selam') ||
+        lower.contains('hello') ||
+        lower.contains('hi')) {
+      return l10n.aiResponseGreeting;
     }
-    if (lower.contains('ders') || lower.contains('öğren')) {
-      return 'Dersler sekmesine gidip "Python Adaları" haritasını açabilirsin. Her ada bir Python konusu öğretir. Şu an Başlangıç Adası tamamlandı.';
+    if (lower.contains('ders') ||
+        lower.contains('öğren') ||
+        lower.contains('lesson') ||
+        lower.contains('learn')) {
+      return l10n.aiResponseLessons;
     }
-    if (lower.contains('oyun')) {
-      return 'Oyunlar sekmesinde Kelime Avı, Quick Math ve Renk Eşleştir var. Hepsini deneyebilirsin!';
+    if (lower.contains('oyun') || lower.contains('game')) {
+      return l10n.aiResponseGames;
     }
     if (lower.contains('seviye') ||
         lower.contains('xp') ||
         lower.contains('level')) {
-      return 'XP kazanmak için ders tamamla veya oyun oyna. Her 200 XP\'de level atlıyorsun. Profil\'de ilerlemeni görebilirsin.';
+      return l10n.aiResponseXp;
     }
     if (lower.contains('rozet') || lower.contains('badge')) {
-      return 'Toplam 8 rozet var. Quiz tamamladıkça ve görevleri yerine getirdikçe kazanırsın. Profil\'den kontrol et!';
+      return l10n.aiResponseBadges;
     }
-    if (lower.contains('profil')) {
-      return 'Profil\'de seviye, XP, rozetler ve ayarların var. Avatar çerçeven seviyene göre değişir.';
+    if (lower.contains('profil') || lower.contains('profile')) {
+      return l10n.aiResponseProfile;
     }
     if (lower.contains('yardım') || lower.contains('help')) {
-      return 'Yardım için:\n• "Dersler nasıl çalışır?"\n• "Oyunları nasıl oynarım?"\n• "Seviye sistemi nedir?"\n• "Nasıl rozet kazanırım?"\n\nBirini seç veya kendi sorunu yaz!';
+      return l10n.aiResponseHelp;
     }
-    return 'İlginç bir soru! Şu an yerel moddayım, bazı sorulara cevap verebilirim. "yardım" yazarak neler sorabileceğini görebilirsin.';
+    return l10n.aiResponseFallback;
   }
 
   @override
@@ -168,6 +187,7 @@ class _AiEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
       child: Column(
@@ -199,7 +219,7 @@ class _AiEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'Neuroup AI',
+            l10n.aiPanelTitle,
             style: TextStyle(
               color: tokens.textPrimary,
               fontSize: 22,
@@ -209,7 +229,7 @@ class _AiEmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Aşağıdaki önerilerden birini seç ya da kendi sorunu yaz.',
+            l10n.aiPanelSubtitle,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: tokens.textSecondary,
@@ -222,7 +242,7 @@ class _AiEmptyState extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             alignment: WrapAlignment.center,
-            children: _aiSuggestions
+            children: _aiSuggestions(l10n)
                 .map(
                   (s) => _SuggestionChip(
                     label: s,
@@ -308,7 +328,7 @@ class _AiInputBar extends StatelessWidget {
               controller: controller,
               style: TextStyle(color: tokens.textPrimary, fontSize: 14),
               decoration: InputDecoration(
-                hintText: 'AI\'a sor...',
+                hintText: AppLocalizations.of(context).aiInputHint,
                 hintStyle: TextStyle(
                   color: tokens.textTertiary,
                   fontSize: 14,
@@ -422,7 +442,9 @@ class _AiBubble extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              DateFormat.Hm().format(time),
+              DateFormat.Hm(
+                Localizations.localeOf(context).languageCode,
+              ).format(time),
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,

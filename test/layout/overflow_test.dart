@@ -13,18 +13,37 @@
 
 import 'dart:io';
 
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
-import 'package:neuroup/app/pages/demo_landing_page.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:neuroup/l10n/gen/app_localizations.dart';
 import 'package:neuroup/core/providers/app_settings_provider.dart';
 import 'package:neuroup/core/providers/core_providers.dart';
+import 'package:neuroup/features/auth/domain/repositories/auth_repository.dart';
+import 'package:neuroup/features/auth/presentation/providers/auth_providers.dart';
 import 'package:neuroup/features/learning/presentation/pages/island_map_page.dart';
+import 'package:neuroup/features/news/data/services/messaging_service.dart';
 import 'package:neuroup/features/news/presentation/pages/news_page.dart';
 import 'package:neuroup/features/profile/profile_page.dart';
+import 'package:neuroup/features/reels/data/in_memory_reel_submission_repository.dart';
 import 'package:neuroup/features/reels/presentation/pages/reels_page.dart';
+import 'package:neuroup/features/reels/presentation/providers/reels_providers.dart';
+import 'package:neuroup/shared/models/user_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class _MockAuthRepository extends Mock implements AuthRepository {}
+
+/// Testte gerçek FCM'e dokunmadan NewsPage.initState()'in
+/// `subscribeToDefaultTopics()` çağrısını yutar.
+class _FakeMessagingService extends MessagingService {
+  _FakeMessagingService(super.ref);
+  @override
+  Future<void> subscribeToDefaultTopics() async {}
+}
 
 const Size kCompactSize = Size(320, 568); // iPhone SE — küçük telefon
 const Size kPhoneSize = Size(393, 851);
@@ -38,6 +57,17 @@ Widget _wrap(
 }) => ProviderScope(
   overrides: overrides,
   child: MaterialApp(
+    // Uygulamanın varsayılan dili Türkçe — test ortamının locale'i
+    // farklıysa (genelde en_US) metin uzunlukları değişip yanlış
+    // overflow'lar tetikler.
+    locale: const Locale('tr'),
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
     home: MediaQuery(
       data: MediaQueryData(
         size: size ?? kPhoneSize,
@@ -91,9 +121,25 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
 
+    final mockAuthRepo = _MockAuthRepository();
+    when(
+      () => mockAuthRepo.authStateChanges(),
+    ).thenAnswer((_) => Stream<UserProfile?>.value(null));
+
     learningOverrides = [
       learningProgressBoxProvider.overrideWithValue(box),
       appSettingsProvider.overrideWith((ref) => AppSettingsNotifier(prefs)),
+      authRepositoryProvider.overrideWithValue(mockAuthRepo),
+      firestoreProvider.overrideWithValue(FakeFirebaseFirestore()),
+      firebaseMessagingServiceProvider.overrideWith(
+        (ref) => _FakeMessagingService(ref),
+      ),
+      // reelsProvider, ReelsPage hiç ekrana gelmeden reelSubmissionRepository
+      // Firestore/Storage'a bağlanır (bkz. reels_providers.dart) — testte
+      // gerçek Firebase Storage olmadığı için in-memory'ye override ediyoruz.
+      reelSubmissionRepositoryProvider.overrideWithValue(
+        InMemoryReelSubmissionRepository(),
+      ),
     ];
   });
 
@@ -103,15 +149,6 @@ void main() {
   });
 
   // iPhone SE gibi çok küçük telefon — kompakt.
-  testWidgets(
-    'DemoLandingNoOverflow_Compact',
-    (tester) async => _overflowTest(
-      tester,
-      'DemoLandingPage',
-      const DemoLandingPage(),
-      size: kCompactSize,
-    ),
-  );
   testWidgets(
     'ProfileNoOverflow_Compact',
     (tester) async => _overflowTest(
@@ -129,6 +166,7 @@ void main() {
       'ReelsPage',
       const ReelsPage(),
       size: kCompactSize,
+      overrides: learningOverrides,
     ),
   );
   testWidgets(
@@ -152,6 +190,14 @@ void main() {
         ProviderScope(
           overrides: learningOverrides,
           child: MaterialApp(
+            locale: const Locale('tr'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
             home: MediaQuery(
               data: const MediaQueryData(
                 size: kCompactSize,
@@ -188,6 +234,14 @@ void main() {
         ProviderScope(
           overrides: learningOverrides,
           child: MaterialApp(
+            locale: const Locale('tr'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
             home: MediaQuery(
               data: const MediaQueryData(
                 size: kCompactSize,
@@ -235,8 +289,13 @@ void main() {
   );
   testWidgets(
     'ReelsNoOverflow_Phone',
-    (tester) async =>
-        _overflowTest(tester, 'ReelsPage', const ReelsPage(), size: kPhoneSize),
+    (tester) async => _overflowTest(
+      tester,
+      'ReelsPage',
+      const ReelsPage(),
+      size: kPhoneSize,
+      overrides: learningOverrides,
+    ),
   );
   testWidgets(
     'NewsNoOverflow_Phone',
@@ -261,15 +320,6 @@ void main() {
 
   // Tablet portrait — iPad benzeri
   testWidgets(
-    'DemoLandingNoOverflow_Tablet',
-    (tester) async => _overflowTest(
-      tester,
-      'DemoLandingPage',
-      const DemoLandingPage(),
-      size: kTabletSize,
-    ),
-  );
-  testWidgets(
     'ProfileNoOverflow_Tablet',
     (tester) async => _overflowTest(
       tester,
@@ -286,6 +336,7 @@ void main() {
       'ReelsPage',
       const ReelsPage(),
       size: kTabletSize,
+      overrides: learningOverrides,
     ),
   );
   testWidgets(
@@ -322,8 +373,13 @@ void main() {
   );
   testWidgets(
     'ReelsNoOverflow_Wide',
-    (tester) async =>
-        _overflowTest(tester, 'ReelsPage', const ReelsPage(), size: kWideSize),
+    (tester) async => _overflowTest(
+      tester,
+      'ReelsPage',
+      const ReelsPage(),
+      size: kWideSize,
+      overrides: learningOverrides,
+    ),
   );
   testWidgets(
     'NewsNoOverflow_Wide',

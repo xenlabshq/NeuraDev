@@ -10,6 +10,7 @@ import 'package:neuroup/features/learning/presentation/painters/isometric_camera
 import 'package:neuroup/features/learning/presentation/providers/adaptive_providers.dart';
 import 'package:neuroup/features/learning/presentation/providers/learning_providers.dart';
 import 'package:neuroup/features/learning/presentation/pages/island_detail_page.dart';
+import 'package:neuroup/l10n/gen/app_localizations.dart';
 
 /// Fancade tarzı izometrik ada haritası.
 /// 3D blok platformlar üzerinde emoji + durum + ahşap yol çizgileri.
@@ -46,6 +47,7 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
     _introShown = true;
     showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       // Bottom sheet içeriği floating barın altına sızmasın.
@@ -126,7 +128,9 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
         setState(() => _pressedIslandId = null);
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bu ada kilitli. Önceki adayı tamamla!')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).islandLockedMessage),
+        ),
       );
     }
   }
@@ -151,6 +155,7 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
 
     showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       // Küçük ekranda taşmayı önlemek için içeriği viewport'un
@@ -164,6 +169,7 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
         // altına sızmasını engelle.
         final bottomClearance =
             MediaQuery.viewPaddingOf(sheetCtx).bottom + kBottomBarHeight;
+        final l10n = AppLocalizations.of(sheetCtx);
         return SafeArea(
           child: SingleChildScrollView(
             child: Container(
@@ -219,7 +225,7 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Odaklanman Gereken Dersler',
+                              l10n.focusSheetTitle,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
@@ -242,11 +248,11 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
                   ),
                   const SizedBox(height: 14),
                   if (focused.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Text(
-                        'Tüm dersler öğrenilmiş görünüyor!',
-                        style: TextStyle(color: Colors.white70),
+                        l10n.focusSheetAllLearned,
+                        style: const TextStyle(color: Colors.white70),
                       ),
                     )
                   else
@@ -284,7 +290,7 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
                               ),
                             );
                           },
-                          child: const Text('Tüm Dersleri Gör'),
+                          child: Text(l10n.focusSheetViewAllLessons),
                         ),
                       ),
                       if (recommendedId != null) ...[
@@ -311,7 +317,7 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
                               Icons.play_arrow_rounded,
                               size: 18,
                             ),
-                            label: const Text('Önerilenle Başla'),
+                            label: Text(l10n.focusSheetStartRecommended),
                           ),
                         ),
                       ],
@@ -610,6 +616,7 @@ class _TopHud extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final completed = islands.where((i) => i.allCompleted).length;
     final total = islands.length;
     final totalNodes = islands.fold<int>(0, (s, i) => s + i.totalNodes);
@@ -660,9 +667,9 @@ class _TopHud extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Python Adaları',
-                      style: TextStyle(
+                    Text(
+                      l10n.pythonIslandsTitle,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -670,7 +677,12 @@ class _TopHud extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '$completedNodes / $totalNodes ders · $completed / $total ada',
+                      l10n.islandsMapSummary(
+                        completedNodes,
+                        totalNodes,
+                        completed,
+                        total,
+                      ),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.85),
                         fontSize: 12,
@@ -701,12 +713,12 @@ class _HintChip extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: const [
-          Icon(Icons.touch_app_rounded, color: Colors.white, size: 14),
-          SizedBox(width: 6),
+        children: [
+          const Icon(Icons.touch_app_rounded, color: Colors.white, size: 14),
+          const SizedBox(width: 6),
           Text(
-            'Ada için tıkla · sürükle',
-            style: TextStyle(
+            AppLocalizations.of(context).islandMapHint,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -753,6 +765,7 @@ class _MapIntroSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SafeArea(
       // Compact boyut (≤360 px width) için kalan yükseklik küçük olur;
       // SingleChildScrollView ile içerik taşma yapmaz.
@@ -808,13 +821,13 @@ class _MapIntroSheet extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Python Adaları',
-                          style: TextStyle(
+                          l10n.pythonIslandsTitle,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
@@ -822,8 +835,8 @@ class _MapIntroSheet extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '10 ada · 50+ interaktif ders',
-                          style: TextStyle(
+                          l10n.introSheetIslandCount,
+                          style: const TextStyle(
                             color: AppColors.textTertiary,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -837,22 +850,20 @@ class _MapIntroSheet extends StatelessWidget {
               const SizedBox(height: 18),
               _IntroStep(
                 emoji: '🗺️',
-                title: 'Sürükle & Yakınlaştır',
-                desc: 'Haritayı parmağınla kaydır, iki parmakla yakınlaştır.',
+                title: l10n.introStepDragTitle,
+                desc: l10n.introStepDragDesc,
                 color: AppColors.primary,
               ),
               _IntroStep(
                 emoji: '🔓',
-                title: 'Kilidi Açmak İçin Sırayla Git',
-                desc:
-                    'Her ada bir öncekinin tüm derslerini tamamlayınca açılır.',
+                title: l10n.introStepUnlockTitle,
+                desc: l10n.introStepUnlockDesc,
                 color: AppColors.success,
               ),
               _IntroStep(
                 emoji: '💎',
-                title: 'Kristalleri Yakala',
-                desc:
-                    'Her ders bir hex kristal. Tamamladıkça altına döner ve ⭐ alırsın.',
+                title: l10n.introStepCrystalsTitle,
+                desc: l10n.introStepCrystalsDesc,
                 color: AppColors.gold,
               ),
               const SizedBox(height: 18),
@@ -874,9 +885,9 @@ class _MapIntroSheet extends StatelessWidget {
                     // yol açıyordu.
                     onDismiss();
                   },
-                  child: const Text(
-                    'Keşfe Başla',
-                    style: TextStyle(
+                  child: Text(
+                    l10n.introSheetStartExploring,
+                    style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 15,
                     ),
@@ -1014,11 +1025,11 @@ class _FocusTile extends StatelessWidget {
                       ),
                     ),
                     if (isRecommended)
-                      const Padding(
-                        padding: EdgeInsets.only(left: 6),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6),
                         child: Text(
-                          '⭐ Önerilen',
-                          style: TextStyle(
+                          '⭐ ${AppLocalizations.of(context).focusTileRecommended}',
+                          style: const TextStyle(
                             color: AppColors.warning,
                             fontSize: 11,
                             fontWeight: FontWeight.w800,
@@ -1043,7 +1054,9 @@ class _FocusTile extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '%$pct',
+                      Localizations.localeOf(context).languageCode == 'en'
+                          ? '$pct%'
+                          : '%$pct',
                       style: TextStyle(
                         color: color,
                         fontSize: 12,

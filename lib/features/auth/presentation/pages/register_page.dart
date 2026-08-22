@@ -6,6 +6,7 @@ import 'package:neuroup/app/theme/app_theme.dart';
 import 'package:neuroup/app/theme/colors.dart';
 import 'package:neuroup/shared/models/user_profile.dart';
 import 'package:neuroup/features/auth/presentation/providers/auth_providers.dart';
+import 'package:neuroup/l10n/gen/app_localizations.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   const RegisterPage({super.key});
@@ -53,6 +54,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authStateProvider.select((s) => s.isLoading));
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -72,7 +74,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 children: [
                   IconButton(
                     onPressed: () => context.pop(),
-                    tooltip: 'Geri',
+                    tooltip: l10n.actionBack,
                     icon: const Icon(
                       Icons.arrow_back_rounded,
                       color: Colors.white,
@@ -82,18 +84,18 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Aramıza katıl!',
-                    style: TextStyle(
+                  Text(
+                    l10n.authJoinUsSubtitle,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Hesap oluştur',
-                    style: TextStyle(
+                  Text(
+                    l10n.authCreateAccountTitle,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
@@ -112,25 +114,25 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Ad Soyad',
+                      l10n.authFullNameLabel,
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _name,
-                      decoration: const InputDecoration(
-                        hintText: 'Adın Soyadın',
-                        prefixIcon: Icon(
+                      decoration: InputDecoration(
+                        hintText: l10n.authFullNameHint,
+                        prefixIcon: const Icon(
                           Icons.person_outline_rounded,
                           size: 20,
                         ),
                       ),
                       validator: (v) =>
-                          v == null || v.isEmpty ? 'Ad gerekli' : null,
+                          v == null || v.isEmpty ? l10n.authNameRequired : null,
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'E-posta',
+                      l10n.emailLabel,
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     const SizedBox(height: 8),
@@ -145,28 +147,32 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         ),
                       ),
                       validator: (v) => (v == null || !v.contains('@'))
-                          ? 'Geçersiz e-posta'
+                          ? l10n.authInvalidEmail
                           : null,
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Şifre',
+                      l10n.authPasswordLabel,
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _password,
                       obscureText: true,
-                      decoration: const InputDecoration(
-                        hintText: 'En az 6 karakter',
-                        prefixIcon: Icon(Icons.lock_outline_rounded, size: 20),
+                      decoration: InputDecoration(
+                        hintText: l10n.authPasswordTooShort,
+                        prefixIcon: const Icon(
+                          Icons.lock_outline_rounded,
+                          size: 20,
+                        ),
                       ),
-                      validator: (v) =>
-                          v == null || v.length < 6 ? 'En az 6 karakter' : null,
+                      validator: (v) => v == null || v.length < 6
+                          ? l10n.authPasswordTooShort
+                          : null,
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Hesap türü',
+                      l10n.authAccountTypeLabel,
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     const SizedBox(height: 12),
@@ -175,19 +181,19 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       runSpacing: 8,
                       children: [
                         _RoleChip(
-                          label: 'Öğrenci',
+                          label: l10n.authRoleStudent,
                           icon: Icons.school_rounded,
                           selected: _role == UserRole.student,
                           onTap: () => setState(() => _role = UserRole.student),
                         ),
                         _RoleChip(
-                          label: 'Öğretmen',
+                          label: l10n.authRoleTeacher,
                           icon: Icons.co_present_rounded,
                           selected: _role == UserRole.teacher,
                           onTap: () => setState(() => _role = UserRole.teacher),
                         ),
                         _RoleChip(
-                          label: 'Veli',
+                          label: l10n.authRoleParent,
                           icon: Icons.family_restroom_rounded,
                           selected: _role == UserRole.parent,
                           onTap: () => setState(() => _role = UserRole.parent),
@@ -208,7 +214,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Hesap Oluştur'),
+                            : Text(l10n.authCreateAccountAction),
                       ),
                     ),
                   ],

@@ -23,6 +23,11 @@ class UserAdminRepositoryImpl implements UserAdminRepository {
     await _users.doc(userId).update({'role': role.name});
   }
 
+  @override
+  Future<void> setBanned(String userId, bool banned) async {
+    await _users.doc(userId).update({'banned': banned});
+  }
+
   UserProfile _fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() ?? <String, dynamic>{};
     return UserProfile(
@@ -33,6 +38,7 @@ class UserAdminRepositoryImpl implements UserAdminRepository {
         (r) => r.name == data['role'],
         orElse: () => UserRole.student,
       ),
+      banned: data['banned'] as bool? ?? false,
     );
   }
 }

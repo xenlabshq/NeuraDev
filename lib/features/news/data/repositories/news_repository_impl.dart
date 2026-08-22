@@ -22,12 +22,50 @@ class NewsRepositoryImpl implements NewsRepository {
 
   @override
   Stream<List<NewsArticle>> watchByCategory(NewsCategory category) {
+    // Bilinçli olarak `where('category', ...)` + `orderBy('publishedAt', ...)`
+    // birleşimi kullanılmıyor — Firestore bu kombinasyon için composite
+    // index ister, tanımlı değilse sorgu `failed-precondition` hatasıyla
+    // hemen patlar (kategori sekmesine her tıklamada "Haberler
+    // yüklenemedi" hatası). Bunun yerine tek alanlı `orderBy` (index
+    // gerektirmez, `watchAll()` ile aynı) kullanılıp kategori filtresi
+    // istemci tarafında uygulanıyor.
     return _news
-        .where('category', isEqualTo: category.name)
         .orderBy('publishedAt', descending: true)
-        .limit(50)
+        .limit(100)
         .snapshots()
-        .map((snap) => snap.docs.map(_fromDoc).toList());
+        .map(
+          (snap) => snap.docs
+              .map(_fromDoc)
+              .where((a) => a.category == category)
+              .toList(),
+        );
+  }
+
+  @override
+  Future<List<NewsArticle>> fetchArchivePage({
+    NewsCategory? category,
+    DateTime? before,
+    int pageSize = 20,
+  }) async {
+    // Aynı sebeple (bkz. watchByCategory) burada da composite index
+    // gerektirecek bir `where(category)` + `orderBy` + `where(before)`
+    // birleşimi kullanılmıyor — tek alanlı orderBy + tarih filtresi
+    // (ikisi de aynı alan: publishedAt, index gerektirmez), kategori
+    // filtresi istemci tarafında uygulanır.
+    Query<Map<String, dynamic>> query = _news.orderBy(
+      'publishedAt',
+      descending: true,
+    );
+    if (before != null) {
+      query = query.where(
+        'publishedAt',
+        isLessThan: Timestamp.fromDate(before),
+      );
+    }
+    final snap = await query.limit(pageSize).get();
+    final articles = snap.docs.map(_fromDoc).toList();
+    if (category == null) return articles;
+    return articles.where((a) => a.category == category).toList();
   }
 
   @override

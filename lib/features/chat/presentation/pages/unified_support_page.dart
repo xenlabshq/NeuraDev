@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../l10n/gen/app_localizations.dart';
 import '../widgets/ai_assistant_panel.dart';
 import '../widgets/support_chat_panel.dart';
 
@@ -59,6 +60,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -101,23 +103,23 @@ class _Header extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Destek & AI',
-                          style: TextStyle(
+                          l10n.demoModuleSupportTitle,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 22,
                             fontWeight: FontWeight.w800,
                             letterSpacing: -0.4,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
-                          'Soru sor, destek al',
-                          style: TextStyle(
+                          l10n.supportHeaderSubtitle,
+                          style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -160,15 +162,15 @@ class _Header extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
                   ),
-                  tabs: const [
+                  tabs: [
                     Tab(
                       height: 36,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.support_agent_rounded, size: 16),
-                          SizedBox(width: 6),
-                          Text('Destek'),
+                          const Icon(Icons.support_agent_rounded, size: 16),
+                          const SizedBox(width: 6),
+                          Text(l10n.navSupport),
                         ],
                       ),
                     ),
@@ -177,9 +179,9 @@ class _Header extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.auto_awesome_rounded, size: 16),
-                          SizedBox(width: 6),
-                          Text('AI Asistan'),
+                          const Icon(Icons.auto_awesome_rounded, size: 16),
+                          const SizedBox(width: 6),
+                          Text(l10n.supportAiAssistantTab),
                         ],
                       ),
                     ),

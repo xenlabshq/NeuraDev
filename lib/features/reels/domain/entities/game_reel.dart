@@ -49,6 +49,8 @@ class GameReel extends Equatable {
     required this.likes,
     required this.comments,
     required this.gameUrl,
+    this.videoUrl,
+    this.uploaderId,
     this.liked = false,
     this.saved = false,
     this.following = false,
@@ -68,7 +70,15 @@ class GameReel extends Equatable {
   final bool saved;
   final bool following;
   final List<ReelComment> comments;
+  /// Oyunun gerçek adresi — kullanıcı gönderimlerinde https link (CTA
+  /// butonu bunu tarayıcıda açar), demo seed verisinde uygulama-içi rota
+  /// (`/lessons` gibi, geriye dönük uyumluluk için `context.push` ile açılır).
   final String gameUrl;
+  /// Oynanış videosu — kullanıcı yüklemelerinde dolu (demo modda yerel
+  /// dosya yolu, gerçek modda Firebase Storage indirme linki). `null` ise
+  /// [ReelBackgroundPainter] arka plan olarak kullanılır (demo reels).
+  final String? videoUrl;
+  final String? uploaderId;
 
   GameReel copyWith({
     int? likes,
@@ -92,6 +102,8 @@ class GameReel extends Equatable {
     following: following ?? this.following,
     comments: comments ?? this.comments,
     gameUrl: gameUrl,
+    videoUrl: videoUrl,
+    uploaderId: uploaderId,
   );
 
   String get avatarText =>

@@ -29,6 +29,7 @@ class UserProfile extends Equatable {
     this.level = 1,
     this.xp = 0,
     this.streakDays = 0,
+    this.banned = false,
   });
 
   final String id;
@@ -39,6 +40,9 @@ class UserProfile extends Equatable {
   final int level;
   final int xp;
   final int streakDays;
+  /// Admin tarafından askıya alınmış mı — banlı hesaplar giriş yapamaz
+  /// (bkz. AuthRepositoryImpl._mapWithRole).
+  final bool banned;
 
   int get xpToNextLevel => level * 100;
   double get progressToNextLevel => (xp % 100) / 100.0;
@@ -50,6 +54,7 @@ class UserProfile extends Equatable {
     int? xp,
     int? streakDays,
     UserRole? role,
+    bool? banned,
   }) => UserProfile(
     id: id,
     email: email,
@@ -59,6 +64,7 @@ class UserProfile extends Equatable {
     xp: xp ?? this.xp,
     streakDays: streakDays ?? this.streakDays,
     role: role ?? this.role,
+    banned: banned ?? this.banned,
   );
 
   @override
@@ -71,5 +77,6 @@ class UserProfile extends Equatable {
     level,
     xp,
     streakDays,
+    banned,
   ];
 }

@@ -5,8 +5,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:neuroup/app/router/home_shell.dart';
 import 'package:neuroup/app/theme/app_theme.dart';
 import 'package:neuroup/app/theme/colors.dart';
-import 'package:neuroup/shared/widgets/common_widgets.dart';
 import 'package:neuroup/features/news/presentation/providers/news_providers.dart';
+import 'package:neuroup/features/news/presentation/utils/news_labels.dart';
+import 'package:neuroup/l10n/gen/app_localizations.dart';
+import 'package:neuroup/shared/widgets/common_widgets.dart';
 
 class NewsDetailPage extends ConsumerWidget {
   const NewsDetailPage({required this.newsId, super.key});
@@ -16,16 +18,17 @@ class NewsDetailPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncArticle = ref.watch(newsArticleProvider(newsId));
     final tokens = AppColors.tokensOf(context);
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: asyncArticle.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Hata: $e')),
+        error: (e, _) => Center(child: Text('${l10n.genericErrorPrefix}: $e')),
         data: (article) {
           if (article == null) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.error_outline,
-              title: 'Haber bulunamadı',
-              message: 'Bu haber mevcut değil.',
+              title: l10n.newsNotFoundTitle,
+              message: l10n.newsNotFoundMessage,
             );
           }
           return CustomScrollView(
@@ -73,7 +76,7 @@ class NewsDetailPage extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: 6),
                                 GradientPill(
-                                  label: article.category.label,
+                                  label: article.category.localizedLabel(l10n),
                                   color: Colors.white,
                                 ),
                               ],
@@ -100,18 +103,18 @@ class NewsDetailPage extends ConsumerWidget {
                         ),
                         borderRadius: BorderRadius.circular(AppRadius.full),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.flash_on_rounded,
                             color: Colors.white,
                             size: 16,
                           ),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           Text(
-                            'SON DAKİKA',
-                            style: TextStyle(
+                            l10n.newsBreakingLabel,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
@@ -156,7 +159,7 @@ class NewsDetailPage extends ConsumerWidget {
                       ),
                       Text('•', style: TextStyle(color: tokens.textTertiary)),
                       Text(
-                        article.ageLabel,
+                        article.relativeAge(l10n),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
@@ -208,7 +211,7 @@ class NewsDetailPage extends ConsumerWidget {
                       Expanded(
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                          label: const Text('Kaynakta Oku'),
+                          label: Text(l10n.newsReadAtSourceAction),
                           onPressed: article.sourceUrl.isEmpty
                               ? null
                               : () => launchUrl(
@@ -221,11 +224,11 @@ class NewsDetailPage extends ConsumerWidget {
                       Expanded(
                         child: FilledButton.icon(
                           icon: const Icon(Icons.share_rounded, size: 18),
-                          label: const Text('Paylaş'),
+                          label: Text(l10n.actionShare),
                           onPressed: () =>
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Paylaşım yakında'),
+                                SnackBar(
+                                  content: Text(l10n.shareComingSoon),
                                 ),
                               ),
                         ),

@@ -3,18 +3,23 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
+import 'package:neuroup/core/providers/app_settings_provider.dart';
 import 'package:neuroup/core/providers/core_providers.dart';
 import 'package:neuroup/features/learning/presentation/providers/learning_providers.dart';
 import 'package:neuroup/features/profile/presentation/badge_providers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   late Directory tempDir;
   late Box<dynamic> box;
+  late SharedPreferences prefs;
 
   setUpAll(() async {
     tempDir = await Directory.systemTemp.createTemp('neuroup_hive_test');
     Hive.init(tempDir.path);
     box = await Hive.openBox<dynamic>('badge_providers_test_box');
+    SharedPreferences.setMockInitialValues({});
+    prefs = await SharedPreferences.getInstance();
   });
 
   tearDownAll(() async {
@@ -22,14 +27,21 @@ void main() {
     await tempDir.delete(recursive: true);
   });
 
-  // learningProgressProvider'ın gerçek kurulumu (Hive box) sadece
-  // BadgeUnlockNotifier'ın _ref.listen çağrısının çökmemesi için var —
-  // gerçek değerler her testte userProgressProvider override'ıyla verilir.
+  // BadgeUnlockNotifier artık `learningProgressProvider`'ı (dolayısıyla
+  // Hive box'ı) doğrudan okuyor — `userProgressProvider` üzerinden okumak
+  // reactive listener içinde stale veri döndürebiliyordu (bkz. aşağıdaki
+  // regresyon testi). Bu yüzden istenen progress'i `userProgressProvider`
+  // override'ı yerine gerçek box'a yazıp `LearningProgressNotifier`'ın
+  // kendi cache-yükleme mantığından geçiriyoruz.
   ProviderContainer containerWithProgress(UserLearningProgress progress) {
+    box
+      ..put('completedNodeIds', progress.completedNodeIds.toList())
+      ..put('totalXp', progress.totalXp)
+      ..put('streak', progress.streak);
     return ProviderContainer(
       overrides: [
         learningProgressBoxProvider.overrideWithValue(box),
-        userProgressProvider.overrideWithValue(progress),
+        appSettingsProvider.overrideWith((ref) => AppSettingsNotifier(prefs)),
       ],
     );
   }
@@ -109,5 +121,41 @@ void main() {
 
       expect(container.read(badgeUnlockProvider).unlocks, isEmpty);
     });
+
+    test(
+      'reacts to a real markNodeCompleted() call without overriding '
+      'userProgressProvider (regression: badges never unlocked in the '
+      'running app because the reactive listener read a stale '
+      'userProgressProvider snapshot)',
+      () {
+        box
+          ..put('completedNodeIds', <String>[])
+          ..put('totalXp', 0)
+          ..put('streak', 0);
+        final container = ProviderContainer(
+          overrides: [
+            learningProgressBoxProvider.overrideWithValue(box),
+            appSettingsProvider.overrideWith(
+              (ref) => AppSettingsNotifier(prefs),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        // ProfilePage döngüsünü taklit et: kullanıcı önce Profil'i (0
+        // ilerlemeyle) açar — bu badgeUnlockProvider'ı ilk kez oluşturur.
+        expect(container.read(badgeUnlockProvider).unlocks, isEmpty);
+
+        // Sonra bir ders tamamlar (node_editor_page.dart'taki +XP akışı).
+        container
+            .read(learningProgressProvider.notifier)
+            .markNodeCompleted('n1', xpEarned: 50);
+
+        expect(
+          container.read(badgeUnlockProvider).unlocks.keys,
+          contains('first_step'),
+        );
+      },
+    );
   });
 }

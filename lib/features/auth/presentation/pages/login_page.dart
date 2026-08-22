@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:neuroup/app/theme/colors.dart';
 import 'package:neuroup/features/auth/presentation/providers/auth_providers.dart';
+import 'package:neuroup/l10n/gen/app_localizations.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -55,27 +56,28 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _forgotPassword() async {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController(text: _email.text.trim());
     final email = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Şifremi unuttum'),
+        title: Text(l10n.authForgotPasswordTitle),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            labelText: 'E-posta',
+          decoration: InputDecoration(
+            labelText: l10n.emailLabel,
             hintText: 'ornek@email.com',
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Vazgeç'),
+            child: Text(l10n.actionGiveUp),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-            child: const Text('Sıfırlama linki gönder'),
+            child: Text(l10n.authSendResetLink),
           ),
         ],
       ),
@@ -87,9 +89,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!mounted) return;
     result.when(
       success: (_) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$email adresine şifre sıfırlama linki gönderildi'),
-        ),
+        SnackBar(content: Text(l10n.authResetLinkSent(email))),
       ),
       failure: (f) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(f.message)),
@@ -100,6 +100,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authStateProvider.select((s) => s.isLoading));
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -132,18 +133,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'Tekrar hoş geldin!',
-                    style: TextStyle(
+                  Text(
+                    l10n.authWelcomeBackSubtitle,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Hesabına giriş yap',
-                    style: TextStyle(
+                  Text(
+                    l10n.authLoginTitle,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 32,
                       fontWeight: FontWeight.w800,
@@ -162,7 +163,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'E-posta',
+                      l10n.emailLabel,
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     const SizedBox(height: 8),
@@ -177,14 +178,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                       ),
                       validator: (v) {
-                        if (v == null || v.isEmpty) return 'E-posta gerekli';
-                        if (!v.contains('@')) return 'Geçersiz e-posta';
+                        if (v == null || v.isEmpty) return l10n.authEmailRequired;
+                        if (!v.contains('@')) return l10n.authInvalidEmail;
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Şifre',
+                      l10n.authPasswordLabel,
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     const SizedBox(height: 8),
@@ -199,8 +200,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                         suffixIcon: IconButton(
                           tooltip: _obscure
-                              ? 'Şifreyi göster'
-                              : 'Şifreyi gizle',
+                              ? l10n.authShowPassword
+                              : l10n.authHidePassword,
                           icon: Icon(
                             _obscure
                                 ? Icons.visibility_outlined
@@ -209,15 +210,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           onPressed: () => setState(() => _obscure = !_obscure),
                         ),
                       ),
-                      validator: (v) =>
-                          v == null || v.length < 6 ? 'En az 6 karakter' : null,
+                      validator: (v) => v == null || v.length < 6
+                          ? l10n.authPasswordTooShort
+                          : null,
                     ),
                     const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: isLoading ? null : _forgotPassword,
-                        child: const Text('Şifremi unuttum'),
+                        child: Text(l10n.authForgotPasswordLink),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -234,7 +236,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Giriş Yap'),
+                            : Text(l10n.actionSignIn),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -244,7 +246,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
-                            'veya',
+                            l10n.authOr,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ),
@@ -257,7 +259,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       child: OutlinedButton.icon(
                         onPressed: isLoading ? null : _signInWithGoogle,
                         icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
-                        label: const Text('Google ile devam et'),
+                        label: Text(l10n.authContinueWithGoogle),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -265,12 +267,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Hesabın yok mu?',
+                          l10n.authNoAccount,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         TextButton(
                           onPressed: () => context.push('/register'),
-                          child: const Text('Kayıt ol'),
+                          child: Text(l10n.authSignUp),
                         ),
                       ],
                     ),

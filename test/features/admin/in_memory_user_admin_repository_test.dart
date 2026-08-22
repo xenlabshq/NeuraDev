@@ -29,4 +29,28 @@ void main() {
 
     expect(after, before);
   });
+
+  test('setBanned(true) marks the matching user as banned', () async {
+    final repo = InMemoryUserAdminRepository();
+    final users = await repo.watchAllUsers().first;
+    final target = users.first;
+    expect(target.banned, isFalse);
+
+    await repo.setBanned(target.id, true);
+    final updated = await repo.watchAllUsers().first;
+
+    expect(updated.firstWhere((u) => u.id == target.id).banned, isTrue);
+  });
+
+  test('setBanned(false) lifts a ban', () async {
+    final repo = InMemoryUserAdminRepository();
+    final users = await repo.watchAllUsers().first;
+    final target = users.first;
+    await repo.setBanned(target.id, true);
+
+    await repo.setBanned(target.id, false);
+    final updated = await repo.watchAllUsers().first;
+
+    expect(updated.firstWhere((u) => u.id == target.id).banned, isFalse);
+  });
 }

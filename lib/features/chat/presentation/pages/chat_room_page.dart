@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:neuroup/app/router/home_shell.dart' show kBottomBarHeight;
 
 import '../../../../app/theme/colors.dart';
+import '../../../../l10n/gen/app_localizations.dart';
 import '../../../../shared/models/user_profile.dart';
 import '../providers/chat_controller.dart';
 import '../providers/chat_providers.dart';
@@ -71,8 +72,9 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
       _scrollToBottom();
     });
 
+    final l10n = AppLocalizations.of(context);
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Giriş yapılmadı')));
+      return Scaffold(body: Center(child: Text(l10n.notSignedIn)));
     }
 
     return Scaffold(
@@ -103,12 +105,16 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    user.role.isSupportStaff ? 'Kullanıcı' : 'Destek Ekibi',
+                    user.role.isSupportStaff
+                        ? l10n.chatUserLabel
+                        : l10n.supportTeamName,
                     style: const TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 1),
                   Text(
-                    user.role.isSupportStaff ? 'Yanıtlanmadı' : 'Çevrimiçi',
+                    user.role.isSupportStaff
+                        ? l10n.chatUnansweredLabel
+                        : l10n.chatOnlineLabel,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
@@ -125,7 +131,7 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
         actions: [
           if (user.role.isSupportStaff)
             IconButton(
-              tooltip: 'Sohbeti kapat',
+              tooltip: l10n.chatCloseChatTooltip,
               icon: const Icon(Icons.close_rounded),
               onPressed: () => ref
                   .read(supportChatControllerProvider)
@@ -140,14 +146,15 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
           Positioned.fill(
             child: asyncMessages.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Hata: $e')),
+              error: (e, _) =>
+                  Center(child: Text('${l10n.genericErrorPrefix}: $e')),
               data: (messages) {
                 if (messages.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
-                      padding: EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(24),
                       child: Text(
-                        'Sohbete hoş geldin!\nMesajını aşağıya yaz.',
+                        l10n.chatWelcomeMessage,
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -215,7 +222,7 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
                           fontSize: 14,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Mesaj yaz...',
+                          hintText: l10n.chatMessageHint,
                           hintStyle: TextStyle(
                             color: tokens.textTertiary,
                             fontSize: 14,
@@ -349,9 +356,9 @@ class _Bubble extends StatelessWidget {
                         color: AppColors.success,
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Text(
-                        'MODERATÖR',
-                        style: TextStyle(
+                      child: Text(
+                        AppLocalizations.of(context).chatModeratorBadge,
+                        style: const TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
@@ -372,7 +379,9 @@ class _Bubble extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              DateFormat.Hm().format(time),
+              DateFormat.Hm(
+                Localizations.localeOf(context).languageCode,
+              ).format(time),
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,

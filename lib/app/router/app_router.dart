@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/env/env.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/chat/presentation/pages/chat_room_page.dart';
@@ -13,7 +12,6 @@ import '../../features/news/presentation/pages/news_detail_page.dart';
 import '../../features/news/presentation/pages/news_page.dart';
 import '../../features/profile/profile_page.dart';
 import '../../features/reels/presentation/pages/reels_page.dart';
-import '../pages/demo_landing_page.dart';
 import 'home_shell.dart';
 
 /// go_router'ın `redirect` callback'i senkron çalışır; auth durumu
@@ -34,14 +32,11 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.listen(currentAuthUserProvider, (_, _) => refresh.ping());
   ref.onDispose(refresh.dispose);
 
-  final initial = Env.firebaseConfigured ? '/lessons' : '/demo';
-
   return GoRouter(
-    initialLocation: initial,
+    initialLocation: '/lessons',
     debugLogDiagnostics: false,
     refreshListenable: refresh,
     redirect: (context, state) {
-      if (!Env.firebaseConfigured) return null;
       final isAuthed = ref.read(currentAuthUserProvider) != null;
       final target = state.matchedLocation;
       final isAuthRoute = target == '/login' || target == '/register';
@@ -51,10 +46,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/demo',
-        builder: (_, __) => const DemoLandingPage(),
-      ),
       GoRoute(
         path: '/login',
         builder: (_, __) => const LoginPage(),
