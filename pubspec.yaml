@@ -1,7 +1,7 @@
 name: neuroup
 description: "Neuroup - Eğitim, Haber, Chat ve Oyun uygulaması"
 publish_to: 'none'
-version: 0.6.7+16
+version: 0.6.8+17
 
 environment:
   sdk: ^3.12.2

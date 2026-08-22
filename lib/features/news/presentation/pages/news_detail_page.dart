@@ -12,6 +12,7 @@ import 'package:neuroup/features/news/presentation/providers/news_providers.dart
 import 'package:neuroup/features/news/presentation/utils/news_labels.dart';
 import 'package:neuroup/features/reports/domain/entities/content_report.dart';
 import 'package:neuroup/features/reports/presentation/providers/report_providers.dart';
+import 'package:neuroup/features/reports/presentation/widgets/report_reason_dialog.dart';
 import 'package:neuroup/l10n/gen/app_localizations.dart';
 import 'package:neuroup/shared/widgets/common_widgets.dart';
 
@@ -32,36 +33,11 @@ class NewsDetailPage extends ConsumerWidget {
       ).showSnackBar(SnackBar(content: Text(l10n.reelsSignInFirst)));
       return;
     }
-    final reasonCtl = TextEditingController();
     final reason = await showDialog<String>(
       context: context,
       useRootNavigator: true,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          title: Text(l10n.newsReportDialogTitle),
-          content: TextField(
-            controller: reasonCtl,
-            autofocus: true,
-            maxLines: 3,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(hintText: l10n.reelsReportReasonHint),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(l10n.actionGiveUp),
-            ),
-            FilledButton(
-              onPressed: reasonCtl.text.trim().isEmpty
-                  ? null
-                  : () => Navigator.of(ctx).pop(reasonCtl.text.trim()),
-              child: Text(l10n.reelsReportAction),
-            ),
-          ],
-        ),
-      ),
+      builder: (ctx) => ReportReasonDialog(title: l10n.newsReportDialogTitle),
     );
-    reasonCtl.dispose();
     if (reason == null || !context.mounted) return;
     try {
       await ref

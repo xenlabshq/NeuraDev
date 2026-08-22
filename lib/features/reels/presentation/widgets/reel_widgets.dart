@@ -14,6 +14,7 @@ import '../../../../shared/models/user_profile.dart'
     show UserProfile, UserRole;
 import '../../../reports/domain/entities/content_report.dart';
 import '../../../reports/presentation/providers/report_providers.dart';
+import '../../../reports/presentation/widgets/report_reason_dialog.dart';
 import '../../domain/entities/game_reel.dart';
 import '../providers/reels_providers.dart';
 import '../pages/reel_submit_page.dart';
@@ -512,36 +513,11 @@ class _ActionRail extends ConsumerWidget {
     UserProfile user,
   ) async {
     final l10n = AppLocalizations.of(context);
-    final reasonCtl = TextEditingController();
     final reason = await showDialog<String>(
       context: context,
       useRootNavigator: true,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          title: Text(l10n.reelsReportDialogTitle),
-          content: TextField(
-            controller: reasonCtl,
-            autofocus: true,
-            maxLines: 3,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(hintText: l10n.reelsReportReasonHint),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(l10n.actionGiveUp),
-            ),
-            FilledButton(
-              onPressed: reasonCtl.text.trim().isEmpty
-                  ? null
-                  : () => Navigator.of(ctx).pop(reasonCtl.text.trim()),
-              child: Text(l10n.reelsReportAction),
-            ),
-          ],
-        ),
-      ),
+      builder: (ctx) => ReportReasonDialog(title: l10n.reelsReportDialogTitle),
     );
-    reasonCtl.dispose();
     if (reason == null || !context.mounted) return;
     try {
       await ref
