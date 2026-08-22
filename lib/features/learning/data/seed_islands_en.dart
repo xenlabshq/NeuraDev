@@ -21,7 +21,7 @@ class IslandSeedEn {
       description:
           "Learn Python's basic building blocks. Print your first message "
           'to the screen.',
-      emoji: '🏝️',
+      emoji: '🚀',
       color: const Color(0xFF06B6D4),
       gradient: const [Color(0xFF06B6D4), Color(0xFF3B82F6)],
       order: 1,
@@ -32,7 +32,7 @@ class IslandSeedEn {
           description: 'Print "Hello World" to the screen.',
           tutorial:
               '# The print() function writes text to the screen.\n# Text inside quotes is called a string.\n\nprint("Hello World")',
-          starterCode: '# Print "Hello World" to the screen\n',
+          starterCode: '# Write your code here\n',
           solution: 'print("Hello World")',
           expectedOutput: 'Hello World',
           points: 50,
@@ -50,7 +50,8 @@ class IslandSeedEn {
           description: 'Comments explain code and are never executed.',
           tutorial:
               '# Comment lines start with #.\n# Python ignores comments — they are only for humans.\n\n# This is a comment\nprint("The code below a comment still runs")',
-          starterCode: '# This line is a comment\nprint("This runs")',
+          starterCode:
+              '# Add a comment line here, then on the next line\n# write a print() that prints "This runs"\n',
           solution: '# This line is a comment\nprint("This runs")',
           expectedOutput: 'This runs',
           points: 60,
@@ -69,7 +70,7 @@ class IslandSeedEn {
           tutorial:
               '# Each print() starts a new line.\n# You can stack multiple print calls.\n\nprint("Line 1")\nprint("Line 2")\nprint("Line 3")',
           starterCode:
-              'print("Name: Alex")\nprint("Age: 25")\nprint("City: London")',
+              '# Print your Name, Age, and City using three separate print() calls\n',
           solution:
               'print("Name: Alex")\nprint("Age: 25")\nprint("City: London")',
           expectedOutput: 'Name: Alex\nAge: 25\nCity: London',
@@ -92,7 +93,7 @@ class IslandSeedEn {
       subtitle: 'Store and name your data',
       description:
           'Variables hold data in memory. Name them, then use them.',
-      emoji: '🏝️',
+      emoji: '🧩',
       color: const Color(0xFF8B5CF6),
       gradient: const [Color(0xFF8B5CF6), Color(0xFFEC4899)],
       order: 2,
@@ -103,7 +104,8 @@ class IslandSeedEn {
           description: 'Create a variable and print it.',
           tutorial:
               '# A variable is assigned a value with =.\n# name = "Alex"  →  the variable name holds "Alex".\n\nname = "Alex"\nprint(name)',
-          starterCode: 'name = "Alex"\nprint(name)',
+          starterCode:
+              '# Create a variable named "name" and assign it "Alex"\n# then print it\n',
           solution: 'name = "Alex"\nprint(name)',
           expectedOutput: 'Alex',
           points: 80,
@@ -122,7 +124,7 @@ class IslandSeedEn {
           tutorial:
               '# Numbers in Python are written without quotes.\n# int = whole number, float = decimal number\n\nage = 20\nheight = 1.75\nprint(age)\nprint(height)',
           starterCode:
-              'number = 42\ndecimal = 3.14\nprint(number)\nprint(decimal)',
+              '# Create number = 42 and decimal = 3.14\n# then print both\n',
           solution:
               'number = 42\ndecimal = 3.14\nprint(number)\nprint(decimal)',
           expectedOutput: '42\n3.14',
@@ -142,7 +144,7 @@ class IslandSeedEn {
           tutorial:
               '# The bool type only has two values: True or False.\n# In Python, True/False start with a capital letter.\n\nis_student = True\nis_graduate = False\nprint(is_student)\nprint(is_graduate)',
           starterCode:
-              'active = True\ndeleted = False\nprint(active)\nprint(deleted)',
+              '# Create active = True and deleted = False\n# then print both\n',
           solution:
               'active = True\ndeleted = False\nprint(active)\nprint(deleted)',
           expectedOutput: 'True\nFalse',
@@ -162,7 +164,7 @@ class IslandSeedEn {
           tutorial:
               '# An f-string (f"...") lets you embed {{variable}} inside text.\n# It is the modern, easiest way.\n\nname = "Zoe"\nprint(f"Hello {name}!")',
           starterCode:
-              'name = "Michael"\nage = 30\nprint(f"{name} is {age} years old")',
+              'name = "Michael"\nage = 30\n# Use an f-string to print "Michael is 30 years old"\n',
           solution:
               'name = "Michael"\nage = 30\nprint(f"{name} is {age} years old")',
           expectedOutput: 'Michael is 30 years old',
@@ -184,7 +186,7 @@ class IslandSeedEn {
       title: 'Operators Island',
       subtitle: 'Math and comparisons',
       description: 'Do math with numbers and compare them.',
-      emoji: '🏝️',
+      emoji: '➗',
       color: const Color(0xFFF59E0B),
       gradient: const [Color(0xFFFBBF24), Color(0xFFF97316)],
       order: 3,
@@ -195,7 +197,7 @@ class IslandSeedEn {
           description: 'The + and - operators.',
           tutorial:
               '# + adds, - subtracts.\n# You can print the result directly.\n\nprint(10 + 5)\nprint(20 - 8)',
-          starterCode: 'print(15 + 7)\nprint(100 - 45)',
+          starterCode: '# Write print(15 + 7) and print(100 - 45)\n',
           solution: 'print(15 + 7)\nprint(100 - 45)',
           expectedOutput: '22\n55',
           points: 100,
@@ -213,7 +215,7 @@ class IslandSeedEn {
           description: 'The * and / operators.',
           tutorial:
               '# * multiplies, / divides.\n# In Python, division always returns a decimal (float).\n\nprint(6 * 4)\nprint(20 / 5)',
-          starterCode: 'print(7 * 8)\nprint(81 / 9)',
+          starterCode: '# Write print(7 * 8) and print(81 / 9)\n',
           solution: 'print(7 * 8)\nprint(81 / 9)',
           expectedOutput: '56\n9.0',
           points: 110,
@@ -231,7 +233,8 @@ class IslandSeedEn {
           description: 'The <, >, == operators.',
           tutorial:
               '# Comparisons return True or False.\n# == means equal, != means not equal.\n\nprint(5 > 3)\nprint(10 == 10)\nprint(7 < 4)',
-          starterCode: 'print(15 > 20)\nprint(8 == 8)\nprint(3 != 3)',
+          starterCode:
+              '# Write print(15 > 20), print(8 == 8), and print(3 != 3)\n',
           solution: 'print(15 > 20)\nprint(8 == 8)\nprint(3 != 3)',
           expectedOutput: 'False\nTrue\nFalse',
           points: 130,
@@ -253,7 +256,7 @@ class IslandSeedEn {
       subtitle: 'Learn to make decisions',
       description:
           'Use if/else to do different things based on conditions.',
-      emoji: '🏝️',
+      emoji: '🚦',
       color: const Color(0xFFEF4444),
       gradient: const [Color(0xFFEF4444), Color(0xFFFB7185)],
       order: 4,
@@ -264,7 +267,8 @@ class IslandSeedEn {
           description: 'Run code only if a condition is true.',
           tutorial:
               '# The if condition: structure runs the code when the condition is True.\n# Indentation (4 spaces) matters a lot!\n\nage = 18\nif age >= 18:\n    print("You are an adult")',
-          starterCode: 'number = 10\nif number > 5:\n    print("Big")',
+          starterCode:
+              'number = 10\n# Write an if that prints "Big" when number is greater than 5\n',
           solution: 'number = 10\nif number > 5:\n    print("Big")',
           expectedOutput: 'Big',
           points: 140,
@@ -283,7 +287,7 @@ class IslandSeedEn {
           tutorial:
               '# else: runs when the condition is False.\n\nscore = 45\nif score >= 50:\n    print("Passed")\nelse:\n    print("Failed")',
           starterCode:
-              'number = 3\nif number > 5:\n    print("Big")\nelse:\n    print("Small or equal")',
+              'number = 3\n# Print "Big" if number > 5, otherwise print "Small or equal"\n',
           solution:
               'number = 3\nif number > 5:\n    print("Big")\nelse:\n    print("Small or equal")',
           expectedOutput: 'Small or equal',
@@ -303,7 +307,7 @@ class IslandSeedEn {
           tutorial:
               '# elif = "else if" — checks a new condition if the previous one was False.\n\nscore = 85\nif score >= 90:\n    print("A")\nelif score >= 80:\n    print("B")\nelif score >= 70:\n    print("C")\nelse:\n    print("F")',
           starterCode:
-              'number = 0\nif number > 0:\n    print("Positive")\nelif number < 0:\n    print("Negative")\nelse:\n    print("Zero")',
+              'number = 0\n# Print "Positive" if positive, "Negative" if negative, "Zero" if zero\n',
           solution:
               'number = 0\nif number > 0:\n    print("Positive")\nelif number < 0:\n    print("Negative")\nelse:\n    print("Zero")',
           expectedOutput: 'Zero',
@@ -325,7 +329,7 @@ class IslandSeedEn {
       title: 'Loops Island',
       subtitle: 'Repeating tasks',
       description: 'Automate repeating tasks with for and while.',
-      emoji: '🏝️',
+      emoji: '🔄',
       color: const Color(0xFF10B981),
       gradient: const [Color(0xFF10B981), Color(0xFF14B8A6)],
       order: 5,
@@ -336,7 +340,8 @@ class IslandSeedEn {
           description: 'Print 1 through 5 using range().',
           tutorial:
               '# for i in range(5): loops from 0 to 4.\n# range(1, 6) loops from 1 to 5.\n\nfor i in range(1, 6):\n    print(i)',
-          starterCode: 'for i in range(1, 4):\n    print(i)',
+          starterCode:
+              '# Use range() to count from 1 to 3 and print each number\n',
           solution: 'for i in range(1, 4):\n    print(i)',
           expectedOutput: '1\n2\n3',
           points: 160,
@@ -355,7 +360,7 @@ class IslandSeedEn {
           tutorial:
               '# for item in list: runs the code once per item.\n\nfruits = ["apple", "pear", "banana"]\nfor fruit in fruits:\n    print(fruit)',
           starterCode:
-              'colors = ["red", "blue", "green"]\nfor color in colors:\n    print(color)',
+              'colors = ["red", "blue", "green"]\n# Print every color in the list\n',
           solution:
               'colors = ["red", "blue", "green"]\nfor color in colors:\n    print(color)',
           expectedOutput: 'red\nblue\ngreen',
@@ -375,7 +380,7 @@ class IslandSeedEn {
           tutorial:
               '# while condition: runs as long as the condition is True.\n# It is IMPORTANT to stop it eventually with a counter.\n\nnumber = 1\nwhile number <= 3:\n    print(number)\n    number = number + 1',
           starterCode:
-              'number = 0\nwhile number < 3:\n    print(number)\n    number = number + 1',
+              'number = 0\n# While number is less than 3, print it and increase it by 1\n',
           solution:
               'number = 0\nwhile number < 3:\n    print(number)\n    number = number + 1',
           expectedOutput: '0\n1\n2',
@@ -395,7 +400,7 @@ class IslandSeedEn {
           tutorial:
               '# Nested loops: the outer loop is the row, the inner loop is the column.\n\nfor i in range(1, 4):\n    for j in range(1, 4):\n        print(f"{i}x{j}={i*j}")',
           starterCode:
-              'for i in range(1, 3):\n    for j in range(1, 3):\n        print(f"{i}*{j}={i*j}")',
+              '# Use two nested loops from 1 to 2 to print a multiplication table\n',
           solution:
               'for i in range(1, 3):\n    for j in range(1, 3):\n        print(f"{i}*{j}={i*j}")',
           expectedOutput: '1*1=1\n1*2=2\n2*1=2\n2*2=4',
@@ -417,7 +422,7 @@ class IslandSeedEn {
       title: 'Lists Island',
       subtitle: 'Collections of data',
       description: 'Keep multiple values in one place: lists.',
-      emoji: '🏝️',
+      emoji: '🗂️',
       color: const Color(0xFFFBBF24),
       gradient: const [Color(0xFFFBBF24), Color(0xFFF59E0B)],
       order: 6,
@@ -429,7 +434,7 @@ class IslandSeedEn {
           tutorial:
               '# list = [item1, item2, ...]\n# A list can hold different types together.\n\nnumbers = [1, 2, 3, 4, 5]\nprint(numbers[0])  # First item (index 0)\nprint(numbers[-1]) # Last item',
           starterCode:
-              'fruits = ["apple", "pear", "banana"]\nprint(fruits[0])\nprint(fruits[2])',
+              'fruits = ["apple", "pear", "banana"]\n# Print the first item and the third item\n',
           solution:
               'fruits = ["apple", "pear", "banana"]\nprint(fruits[0])\nprint(fruits[2])',
           expectedOutput: 'apple\nbanana',
@@ -448,7 +453,8 @@ class IslandSeedEn {
           description: 'Add a new item to a list.',
           tutorial:
               '# list.append(new_item) adds to the end.\n\nnumbers = [1, 2, 3]\nnumbers.append(4)\nprint(numbers)',
-          starterCode: 'numbers = [10, 20]\nnumbers.append(30)\nprint(numbers)',
+          starterCode:
+              'numbers = [10, 20]\n# Append 30 to the list, then print it\n',
           solution: 'numbers = [10, 20]\nnumbers.append(30)\nprint(numbers)',
           expectedOutput: '[10, 20, 30]',
           points: 160,
@@ -467,7 +473,7 @@ class IslandSeedEn {
           tutorial:
               '# len(list) returns the length of the list.\n\nfruits = ["apple", "pear", "banana", "grape"]\nprint(len(fruits))',
           starterCode:
-              'numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\nprint(len(numbers))',
+              'numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\n# Print the length of the list using len()\n',
           solution:
               'numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\nprint(len(numbers))',
           expectedOutput: '10',
@@ -490,7 +496,7 @@ class IslandSeedEn {
       subtitle: 'Package your code, reuse it',
       description:
           'Functions: write repeating code once, call it wherever you need it.',
-      emoji: '🏝️',
+      emoji: '🛠️',
       color: const Color(0xFFEC4899),
       gradient: const [Color(0xFFEC4899), Color(0xFF8B5CF6)],
       order: 7,
@@ -501,7 +507,8 @@ class IslandSeedEn {
           description: 'Define a function with def.',
           tutorial:
               '# Defined with def function_name():\n# The body is indented by 4 spaces.\n\ndef greet():\n    print("Hello!")\n\ngreet()',
-          starterCode: 'def greet():\n    print("Hi!")\n\ngreet()',
+          starterCode:
+              '# Define a greet() function that prints "Hi!" and call it\n',
           solution: 'def greet():\n    print("Hi!")\n\ngreet()',
           expectedOutput: 'Hi!',
           points: 180,
@@ -520,7 +527,7 @@ class IslandSeedEn {
           tutorial:
               '# def greet(name): takes a parameter.\n\ndef greet(name):\n    print(f"Hello {name}!")\n\ngreet("Alex")\ngreet("Amy")',
           starterCode:
-              'def square(number):\n    print(number * number)\n\nsquare(5)\nsquare(7)',
+              '# Write a square() function that takes a number and prints its square\n# then call square(5) and square(7)\n',
           solution:
               'def square(number):\n    print(number * number)\n\nsquare(5)\nsquare(7)',
           expectedOutput: '25\n49',
@@ -540,7 +547,7 @@ class IslandSeedEn {
           tutorial:
               '# return gives back a value, which can be stored in a variable.\n\ndef total(a, b):\n    return a + b\n\nresult = total(3, 5)\nprint(result)',
           starterCode:
-              'def square(number):\n    return number * number\n\nprint(square(4))\nprint(square(9))',
+              '# Write a square() function that returns the square of a number\n# then print(square(4)) and print(square(9))\n',
           solution:
               'def square(number):\n    return number * number\n\nprint(square(4))\nprint(square(9))',
           expectedOutput: '16\n81',
@@ -562,7 +569,7 @@ class IslandSeedEn {
       title: 'Strings Island',
       subtitle: 'Work with text',
       description: 'String methods: uppercase, lowercase, and more.',
-      emoji: '🏝️',
+      emoji: '🔠',
       color: const Color(0xFF06B6D4),
       gradient: const [Color(0xFF06B6D4), Color(0xFF0891B2)],
       order: 8,
@@ -574,7 +581,7 @@ class IslandSeedEn {
           tutorial:
               '# text.upper() makes every letter uppercase.\n# text.lower() makes every letter lowercase.\n\nname = "Python"\nprint(name.upper())\nprint(name.lower())',
           starterCode:
-              'word = "Hello"\nprint(word.upper())\nprint(word.lower())',
+              'word = "Hello"\n# Print the uppercase and lowercase versions\n',
           solution:
               'word = "Hello"\nprint(word.upper())\nprint(word.lower())',
           expectedOutput: 'HELLO\nhello',
@@ -593,7 +600,8 @@ class IslandSeedEn {
           description: 'Find the length of a string.',
           tutorial:
               '# len(text) returns the number of characters.\n\nname = "Python"\nprint(len(name))',
-          starterCode: 'sentence = "Hello World"\nprint(len(sentence))',
+          starterCode:
+              'sentence = "Hello World"\n# Print the length of the sentence using len()\n',
           solution: 'sentence = "Hello World"\nprint(len(sentence))',
           expectedOutput: '11',
           points: 150,
@@ -612,7 +620,7 @@ class IslandSeedEn {
           tutorial:
               '# text.replace(old, new) replaces the first argument with the second.\n\nsentence = "I love Java"\nnew_sentence = sentence.replace("Java", "Python")\nprint(new_sentence)',
           starterCode:
-              'text = "The dog runs"\nnew_text = text.replace("dog", "cat")\nprint(new_text)',
+              'text = "The dog runs"\n# Replace "dog" with "cat" and print the result\n',
           solution:
               'text = "The dog runs"\nnew_text = text.replace("dog", "cat")\nprint(new_text)',
           expectedOutput: 'The cat runs',
@@ -634,7 +642,7 @@ class IslandSeedEn {
       title: 'Dictionaries Island',
       subtitle: 'Key-value pairs',
       description: 'Dictionaries: access each value with a key.',
-      emoji: '🏝️',
+      emoji: '🗝️',
       color: const Color(0xFF6366F1),
       gradient: const [Color(0xFF6366F1), Color(0xFF8B5CF6)],
       order: 9,
@@ -646,7 +654,7 @@ class IslandSeedEn {
           tutorial:
               '# dict = {"key": value, ...}\n# Access a value using its key.\n\nperson = {"name": "Alex", "age": 25}\nprint(person["name"])\nprint(person["age"])',
           starterCode:
-              'car = {"brand": "BMW", "year": 2020}\nprint(car["brand"])\nprint(car["year"])',
+              'car = {"brand": "BMW", "year": 2020}\n# Print the "brand" and "year" values\n',
           solution:
               'car = {"brand": "BMW", "year": 2020}\nprint(car["brand"])\nprint(car["year"])',
           expectedOutput: 'BMW\n2020',
@@ -666,7 +674,7 @@ class IslandSeedEn {
           tutorial:
               '# dict["new_key"] = value\n\nperson = {"name": "Alex"}\nperson["city"] = "London"\nprint(person)',
           starterCode:
-              'product = {"name": "Phone"}\nproduct["price"] = 5000\nprint(product)',
+              'product = {"name": "Phone"}\n# Add a "price" key with value 5000, then print the dictionary\n',
           solution:
               'product = {"name": "Phone"}\nproduct["price"] = 5000\nprint(product)',
           expectedOutput: "{'name': 'Phone', 'price': 5000}",
@@ -689,7 +697,7 @@ class IslandSeedEn {
       subtitle: 'Make data permanent',
       description:
           'File reading/writing: save data to disk, then load it back.',
-      emoji: '🏝️',
+      emoji: '🗄️',
       color: const Color(0xFF14B8A6),
       gradient: const [Color(0xFF14B8A6), Color(0xFF06B6D4)],
       order: 10,
@@ -701,7 +709,7 @@ class IslandSeedEn {
           tutorial:
               '# open(file, mode) opens the file.\n# "w" = write, "r" = read, "a" = append.\n# write() writes a string.\n\nfile = open("my_notes.txt", "w")\nfile.write("My first note!")\nfile.close()\nprint("Written")',
           starterCode:
-              'f = open("test.txt", "w")\nf.write("Hello Python!")\nf.close()\nprint("File written")',
+              '# Open "test.txt" in write mode, write "Hello Python!", close it\n# then print "File written"\n',
           solution:
               'f = open("test.txt", "w")\nf.write("Hello Python!")\nf.close()\nprint("File written")',
           expectedOutput: 'File written',
@@ -721,7 +729,7 @@ class IslandSeedEn {
           tutorial:
               '# open(file, "r") opens it in read mode.\n# read() returns the whole content as a string.\n\nfile = open("my_notes.txt", "r")\ncontent = file.read()\nfile.close()\nprint(content)',
           starterCode:
-              'f = open("test.txt", "w")\nf.write("Line 1\\nLine 2")\nf.close()\n\nf = open("test.txt", "r")\ncontent = f.read()\nf.close()\nprint(content)',
+              'f = open("test.txt", "w")\nf.write("Line 1\\nLine 2")\nf.close()\n\n# Now open the file in read mode, read its content, and print it\n',
           solution:
               'f = open("test.txt", "w")\nf.write("Line 1\\nLine 2")\nf.close()\n\nf = open("test.txt", "r")\ncontent = f.read()\nf.close()\nprint(content)',
           expectedOutput: 'Line 1\nLine 2',
@@ -756,7 +764,7 @@ class IslandSeedEn {
           tutorial:
               "# Without a max() function, finding the biggest value works like this: treat the first item as 'the biggest so far', then walk the list and update it whenever you find something bigger.\n\nnumbers = [3, 8, 1, 6]\nbiggest = numbers[0]\nfor n in numbers:\n    if n > biggest:\n        biggest = n\nprint(biggest)",
           starterCode:
-              'numbers = [4, 9, 2, 7, 5]\nbiggest = numbers[0]\nfor n in numbers:\n    if n > biggest:\n        biggest = n\nprint(biggest)',
+              'numbers = [4, 9, 2, 7, 5]\n# Find and print the biggest item without using max()\n',
           solution:
               'numbers = [4, 9, 2, 7, 5]\nbiggest = numbers[0]\nfor n in numbers:\n    if n > biggest:\n        biggest = n\nprint(biggest)',
           expectedOutput: '9',
@@ -776,7 +784,7 @@ class IslandSeedEn {
           tutorial:
               '# To find a total, start a counter variable at zero and add each item to it as you loop. The average is the total divided by the number of items.\n\nscores = [70, 80, 90]\ntotal = 0\nfor s in scores:\n    total = total + s\naverage = total / len(scores)\nprint(total)\nprint(average)',
           starterCode:
-              'scores = [80, 90, 70, 100]\ntotal = 0\nfor s in scores:\n    total = total + s\naverage = total / len(scores)\nprint(total)\nprint(average)',
+              'scores = [80, 90, 70, 100]\n# Calculate and print the total and the average of the list\n',
           solution:
               'scores = [80, 90, 70, 100]\ntotal = 0\nfor s in scores:\n    total = total + s\naverage = total / len(scores)\nprint(total)\nprint(average)',
           expectedOutput: '340\n85.0',
@@ -796,7 +804,7 @@ class IslandSeedEn {
           tutorial:
               '# Start a counter variable at zero, walk the list, and increase the counter every time an item equals the value you\'re looking for.\n\nletters = ["a", "b", "a", "c"]\ncount = 0\nfor l in letters:\n    if l == "a":\n        count = count + 1\nprint(count)',
           starterCode:
-              'words = ["cat", "dog", "cats", "bird", "cat"]\ncount = 0\nfor w in words:\n    if w == "cat":\n        count = count + 1\nprint(count)',
+              'words = ["cat", "dog", "cats", "bird", "cat"]\n# Count how many times "cat" appears and print the count\n',
           solution:
               'words = ["cat", "dog", "cats", "bird", "cat"]\ncount = 0\nfor w in words:\n    if w == "cat":\n        count = count + 1\nprint(count)',
           expectedOutput: '2',
@@ -831,7 +839,7 @@ class IslandSeedEn {
           tutorial:
               '# A function can chain if/elif/else and return something different from each branch.\n\ndef grade(score):\n    if score >= 90:\n        return "A"\n    elif score >= 70:\n        return "B"\n    else:\n        return "F"\n\nprint(grade(95))',
           starterCode:
-              'def grade(score):\n    if score >= 90:\n        return "A"\n    elif score >= 70:\n        return "B"\n    else:\n        return "F"\n\nprint(grade(95))\nprint(grade(75))\nprint(grade(40))',
+              '# Write a grade() function that turns a score into a letter\n# 90+ returns "A", 70+ returns "B", otherwise "F"\n# then print(grade(95)), print(grade(75)), print(grade(40))\n',
           solution:
               'def grade(score):\n    if score >= 90:\n        return "A"\n    elif score >= 70:\n        return "B"\n    else:\n        return "F"\n\nprint(grade(95))\nprint(grade(75))\nprint(grade(40))',
           expectedOutput: 'A\nB\nF',
@@ -851,7 +859,7 @@ class IslandSeedEn {
           tutorial:
               '# If two lists are in the same order (like names and scores), you can access both at once using the same index via range().\n\nnames = ["Alex", "Jamie"]\nscores = [70, 95]\nfor i in range(2):\n    print(f"{names[i]}: {scores[i]}")',
           starterCode:
-              'names = ["Alex", "Jamie", "Sam"]\nscores = [85, 92, 78]\nfor i in range(3):\n    print(f"{names[i]}: {scores[i]}")',
+              'names = ["Alex", "Jamie", "Sam"]\nscores = [85, 92, 78]\n# Walk through both lists with the same index and print "Name: Score"\n',
           solution:
               'names = ["Alex", "Jamie", "Sam"]\nscores = [85, 92, 78]\nfor i in range(3):\n    print(f"{names[i]}: {scores[i]}")',
           expectedOutput: 'Alex: 85\nJamie: 92\nSam: 78',
@@ -872,7 +880,7 @@ class IslandSeedEn {
           tutorial:
               '# You can write a function\'s return value straight back into a dictionary.\n\ndef add_points(current, points):\n    return current + points\n\ntable = {"Alex": 0}\ntable["Alex"] = add_points(table["Alex"], 10)\nprint(table["Alex"])',
           starterCode:
-              'def add_points(current, points):\n    return current + points\n\nscoreboard = {"Alex": 0, "Jamie": 0}\nscoreboard["Alex"] = add_points(scoreboard["Alex"], 10)\nscoreboard["Alex"] = add_points(scoreboard["Alex"], 5)\nscoreboard["Jamie"] = add_points(scoreboard["Jamie"], 8)\nprint(scoreboard["Alex"])\nprint(scoreboard["Jamie"])',
+              'scoreboard = {"Alex": 0, "Jamie": 0}\n# Write an add_points() function taking (current, points)\n# add 10 then 5 to Alex, 8 to Jamie, print both\n',
           solution:
               'def add_points(current, points):\n    return current + points\n\nscoreboard = {"Alex": 0, "Jamie": 0}\nscoreboard["Alex"] = add_points(scoreboard["Alex"], 10)\nscoreboard["Alex"] = add_points(scoreboard["Alex"], 5)\nscoreboard["Jamie"] = add_points(scoreboard["Jamie"], 8)\nprint(scoreboard["Alex"])\nprint(scoreboard["Jamie"])',
           expectedOutput: '15\n8',

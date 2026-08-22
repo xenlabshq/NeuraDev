@@ -222,6 +222,7 @@
   "genericErrorPrefix": "Hata",
   "newsNotFoundTitle": "Haber bulunamadı",
   "newsNotFoundMessage": "Bu haber mevcut değil.",
+  "newsReportDialogTitle": "Bu haberi şikayet et",
   "newsReadAtSourceAction": "Kaynakta Oku",
   "actionShare": "Paylaş",
   "shareComingSoon": "Paylaşım yakında",
@@ -345,10 +346,10 @@
       }
     }
   },
-  "reportsRemoveContentAction": "Gönderiyi Kaldır",
+  "reportsRemoveContentAction": "İçeriği Kaldır",
   "reportsBanUserAction": "Kullanıcıyı Banla",
   "reportsDismissAction": "Asılsız, Kapat",
-  "reportsContentRemoved": "Gönderi kaldırıldı ve şikayet kapatıldı",
+  "reportsContentRemoved": "İçerik kaldırıldı ve şikayet kapatıldı",
   "reportsUserBannedAndDismissed": "Kullanıcı banlandı ve şikayet kapatıldı",
   "reportsDismissed": "Şikayet kapatıldı",
   "reportsActionFailed": "İşlem başarısız: {name}",
@@ -662,6 +663,8 @@
   "nodeEditorRun": "Çalıştır",
   "congratulationsTitle": "Tebrikler!",
   "xpEarnedMessage": "+{xp} XP kazandın!",
+  "nodeEditorNextLesson": "Sonraki Derse Geç",
+  "nodeEditorBackToHome": "Ana Sayfaya Dön",
   "@xpEarnedMessage": {
     "placeholders": {
       "xp": {

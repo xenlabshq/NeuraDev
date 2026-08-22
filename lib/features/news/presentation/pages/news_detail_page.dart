@@ -5,14 +5,86 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:neuroup/app/router/home_shell.dart';
 import 'package:neuroup/app/theme/app_theme.dart';
 import 'package:neuroup/app/theme/colors.dart';
+import 'package:neuroup/features/chat/presentation/providers/chat_providers.dart'
+    show currentAuthUserProvider;
+import 'package:neuroup/features/news/domain/entities/news_article.dart';
 import 'package:neuroup/features/news/presentation/providers/news_providers.dart';
 import 'package:neuroup/features/news/presentation/utils/news_labels.dart';
+import 'package:neuroup/features/reports/domain/entities/content_report.dart';
+import 'package:neuroup/features/reports/presentation/providers/report_providers.dart';
 import 'package:neuroup/l10n/gen/app_localizations.dart';
 import 'package:neuroup/shared/widgets/common_widgets.dart';
 
 class NewsDetailPage extends ConsumerWidget {
   const NewsDetailPage({required this.newsId, super.key});
   final String newsId;
+
+  Future<void> _reportArticle(
+    BuildContext context,
+    WidgetRef ref,
+    NewsArticle article,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final user = ref.read(currentAuthUserProvider);
+    if (user == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.reelsSignInFirst)));
+      return;
+    }
+    final reasonCtl = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      useRootNavigator: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: Text(l10n.newsReportDialogTitle),
+          content: TextField(
+            controller: reasonCtl,
+            autofocus: true,
+            maxLines: 3,
+            onChanged: (_) => setState(() {}),
+            decoration: InputDecoration(hintText: l10n.reelsReportReasonHint),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(l10n.actionGiveUp),
+            ),
+            FilledButton(
+              onPressed: reasonCtl.text.trim().isEmpty
+                  ? null
+                  : () => Navigator.of(ctx).pop(reasonCtl.text.trim()),
+              child: Text(l10n.reelsReportAction),
+            ),
+          ],
+        ),
+      ),
+    );
+    reasonCtl.dispose();
+    if (reason == null || !context.mounted) return;
+    try {
+      await ref
+          .read(reportRepositoryProvider)
+          .submitReport(
+            contentType: ReportedContentType.news,
+            contentId: article.id,
+            contentTitle: article.title,
+            reporterId: user.id,
+            reporterName: user.displayName,
+            reason: reason,
+          );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.reelsReportSubmitted)));
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.reelsReportFailed('$e'))));
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,6 +111,13 @@ class NewsDetailPage extends ConsumerWidget {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 elevation: 0,
+                actions: [
+                  IconButton(
+                    tooltip: l10n.reelsReportAction,
+                    icon: const Icon(Icons.flag_outlined),
+                    onPressed: () => _reportArticle(context, ref, article),
+                  ),
+                ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
                     decoration: const BoxDecoration(

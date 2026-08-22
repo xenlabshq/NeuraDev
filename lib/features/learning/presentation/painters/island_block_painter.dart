@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/learning_island.dart';
 import 'isometric_camera.dart';
 
-/// İzometrik 3B dünyada ada platformu (rhombus blok) çizer.
-/// Fancade tarzı: üst yüz + alt yüz + kenar çizgileri + gölge.
-/// - Tamamlanmış ada altın çerçeveyle parlıyor.
-/// - Aktif (açık ama bitmemiş) ada hafif altın glow altında.
-/// - Kilitli ada: grid overlay, soğuk tonlar, kilit ikonu.
+/// İzometrik 3B dünyada bir öğrenme platformu (rhombus blok) çizer.
+/// Fütüristik/tech tasarım dili: holografik enerji halkası, cam/HUD
+/// parlaklığı, devre izi dokusu, köşe hedefleme parantezleri.
+/// - Tamamlanmış platform enerji rengiyle parlıyor.
+/// - Aktif (açık ama bitmemiş) platform hafif bir güç alanı altında.
+/// - Kilitli platform: grid overlay, soğuk tonlar, kilit ikonu.
 class IslandBlockPainter extends CustomPainter {
   IslandBlockPainter({
     required this.camera,
@@ -34,10 +35,9 @@ class IslandBlockPainter extends CustomPainter {
     final locked = !island.unlocked;
     final completed = island.allCompleted;
 
-    // ----- SU HALKASI (dalga) -----
-    // Adanın yüzen bir kaya değil, suda duran bir ada olduğu hissini
-    // vermek için gölgenin altında ikinci, daha soluk ve geniş bir
-    // dalga halkası çiziyoruz.
+    // ----- ENERJİ HALKASI -----
+    // Platformun suda değil, bir güç alanı üzerinde yüzdüğü hissi için
+    // altında ikinci, geniş ve soluk bir holografik halka.
     final shadowPos = camera.project(island.x, 0, island.z);
     if (!locked) {
       canvas.drawOval(
@@ -47,14 +47,26 @@ class IslandBlockPainter extends CustomPainter {
           height: s * 0.52,
         ),
         Paint()
-          ..color = color.withValues(alpha: 0.10)
+          ..color = color.withValues(alpha: 0.14)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 2
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
       );
+      canvas.drawOval(
+        Rect.fromCenter(
+          center: shadowPos + Offset(0, s * 0.05),
+          width: s * 1.7,
+          height: s * 0.42,
+        ),
+        Paint()
+          ..color = color.withValues(alpha: 0.22)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5),
+      );
     }
 
-    // ----- ZEMİN GÖLGESİ -----
+    // ----- ZEMİN GÖLGESİ (enerji alanı) -----
     canvas.drawOval(
       Rect.fromCenter(
         center: shadowPos + Offset(0, s * 0.05),
@@ -62,13 +74,15 @@ class IslandBlockPainter extends CustomPainter {
         height: s * 0.4,
       ),
       Paint()
-        ..color = Colors.black.withValues(alpha: locked ? 0.08 : 0.22)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+        ..color = locked
+            ? Colors.black.withValues(alpha: 0.1)
+            : color.withValues(alpha: 0.28)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
     );
 
     // ----- ALT YÜZ (yere bakan) -----
     final baseColor = locked
-        ? const Color(0xFF3A3550) // kilitli ada için soğuk koyu
+        ? const Color(0xFF272238) // kilitli platform için soğuk koyu
         : color;
     final basePath = Path()
       ..moveTo(pos.dx, pos.dy - s * 0.1)
@@ -85,7 +99,7 @@ class IslandBlockPainter extends CustomPainter {
               end: Alignment.bottomCenter,
               colors: [
                 baseColor,
-                Color.lerp(baseColor, Colors.black, 0.55)!,
+                Color.lerp(baseColor, Colors.black, 0.6)!,
               ],
             ).createShader(
               Rect.fromCenter(
@@ -98,17 +112,23 @@ class IslandBlockPainter extends CustomPainter {
 
     // ----- ÜST YÜZ (yukarı bakan) -----
     final topColor = locked
-        ? const Color(0xFF5C5778) // kilitli ada: grimsi-mor
-        : Color.lerp(color, Colors.white, 0.3)!;
+        ? const Color(0xFF423C5E) // kilitli platform: grimsi-mor
+        : Color.lerp(color, Colors.white, 0.25)!;
     final topPath = Path()
       ..moveTo(pos.dx, pos.dy - s * 0.6)
       ..lineTo(pos.dx + s * 0.7, pos.dy - s * 0.25)
       ..lineTo(pos.dx, pos.dy + s * 0.1)
       ..lineTo(pos.dx - s * 0.7, pos.dy - s * 0.25)
       ..close();
+    // topPath'in dört köşesi — HUD köşe parantezleri ve devre dokusu için.
+    final corners = [
+      Offset(pos.dx, pos.dy - s * 0.6), // kuzey
+      Offset(pos.dx + s * 0.7, pos.dy - s * 0.25), // doğu
+      Offset(pos.dx, pos.dy + s * 0.1), // güney
+      Offset(pos.dx - s * 0.7, pos.dy - s * 0.25), // batı
+    ];
 
     if (locked) {
-      // Kilitli ada: düz renk, hafif grid overlay
       canvas.drawPath(
         topPath,
         Paint()..color = topColor,
@@ -132,29 +152,36 @@ class IslandBlockPainter extends CustomPainter {
       );
     }
 
-    // ----- ZEMİN DOKUSU (kum/çim benekleri) -----
-    // Düz tek renkli üst yüzü kırmak için birkaç küçük, sabit (deterministik
-    // — her frame'de aynı yerde) doku noktası serpiştiriyoruz. Ada
-    // id'sinden türetilen bir tohum kullanılıyor ki harita her yeniden
-    // çizildiğinde noktalar titremesin/kaymasın.
+    // ----- DEVRE İZİ DOKUSU (circuit traces) -----
+    // Düz tek renkli üst yüzü kırmak için birkaç küçük, sabit
+    // (deterministik) devre kartı izi çiziyoruz — kum/çim yerine
+    // mikroçip yüzeyi hissi. Ada id'sinden türetilen bir tohum
+    // kullanılıyor ki harita her yeniden çizildiğinde kaymasın.
     if (!locked) {
       final rng = math.Random(island.id.hashCode);
-      final texturePaint = Paint()
-        ..color = Color.lerp(topColor, Colors.black, 0.25)!.withValues(
-          alpha: 0.35,
-        );
-      for (var i = 0; i < 7; i++) {
-        final tx = pos.dx + (rng.nextDouble() * 2 - 1) * s * 0.55;
-        final tyBase = pos.dy - s * 0.25;
-        final ty = tyBase + (rng.nextDouble() * 2 - 1) * s * 0.28;
-        canvas.drawCircle(Offset(tx, ty), s * 0.02 + rng.nextDouble() * s * 0.015, texturePaint);
+      final tracePaint = Paint()
+        ..color = Colors.white.withValues(alpha: 0.16)
+        ..strokeWidth = 1.0
+        ..strokeCap = StrokeCap.round;
+      final nodePaint = Paint()
+        ..color = Colors.white.withValues(alpha: 0.32);
+      for (var i = 0; i < 5; i++) {
+        final ox = pos.dx + (rng.nextDouble() * 2 - 1) * s * 0.5;
+        final oy = pos.dy - s * 0.25 + (rng.nextDouble() * 2 - 1) * s * 0.26;
+        final legLen = s * (0.06 + rng.nextDouble() * 0.06);
+        final horizontal = rng.nextBool();
+        final end = horizontal
+            ? Offset(ox + legLen, oy)
+            : Offset(ox, oy + legLen * 0.6);
+        canvas.drawLine(Offset(ox, oy), end, tracePaint);
+        canvas.drawCircle(Offset(ox, oy), 1.4, nodePaint);
+        canvas.drawCircle(end, 1.4, nodePaint);
       }
     }
 
-    // ----- CAM/PARLAKLIK VURGUSU (üst yüz) -----
-    // Profesyonel/cilalı bir görünüm için üst yüzün sol-üst köşesine
-    // (varsayılan ışık kaynağı yönü) yumuşak, oval bir parlaklık lekesi
-    // ekliyoruz — düz gradyanı kırıp yüzeye "cam gibi" bir derinlik verir.
+    // ----- CAM/HUD PARLAKLIĞI (üst yüz) -----
+    // Cilalı/holografik bir yüzey hissi için sol-üst köşeye yumuşak,
+    // oval bir parlaklık lekesi — düz gradyanı kırar.
     if (!locked) {
       canvas.save();
       canvas.clipPath(topPath);
@@ -165,20 +192,19 @@ class IslandBlockPainter extends CustomPainter {
           height: s * 0.22,
         ),
         Paint()
-          ..color = Colors.white.withValues(alpha: 0.28)
+          ..color = Colors.white.withValues(alpha: 0.3)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
       );
       canvas.restore();
     }
 
-    // ----- KİLİTLİ ADA: GRİD OVERLAY -----
+    // ----- KİLİTLİ PLATFORM: GRİD OVERLAY -----
     if (locked) {
       final gridPaint = Paint()
         ..color = Colors.white.withValues(alpha: 0.12)
         ..strokeWidth = 1.0;
-      // Üst yüz üzerinde diyagonal çapraz çizgiler (demir parmaklık hissi)
       final cx = pos.dx;
-      final cy = pos.dy - s * 0.225; // üst yüz merkezi
+      final cy = pos.dy - s * 0.225;
       const step = 14.0;
       for (var i = -6; i <= 6; i++) {
         final off = i * step;
@@ -191,15 +217,12 @@ class IslandBlockPainter extends CustomPainter {
     }
 
     // ----- IŞIK KENARI (rim-light bevel) -----
-    // Sol-üst kenar (batı → kuzey köşesi) ışığa bakan kenar gibi
-    // parlatılıyor — düz tek renkli kontürden daha cilalı/3B bir
-    // "bevel" hissi verir.
     if (!locked) {
       canvas.drawLine(
         Offset(pos.dx - s * 0.7, pos.dy - s * 0.25),
         Offset(pos.dx, pos.dy - s * 0.6),
         Paint()
-          ..color = Colors.white.withValues(alpha: 0.45)
+          ..color = Colors.white.withValues(alpha: 0.5)
           ..strokeWidth = 1.6
           ..strokeCap = StrokeCap.round,
       );
@@ -208,7 +231,7 @@ class IslandBlockPainter extends CustomPainter {
     // ----- KENAR ÇİZİGİLERİ -----
     final edgePaint = Paint()
       ..color = completed
-          ? const Color(0xFFFFC145).withValues(alpha: 0.7)
+          ? const Color(0xFF22D3EE).withValues(alpha: 0.75)
           : (locked
                 ? Colors.black.withValues(alpha: 0.35)
                 : Colors.black.withValues(alpha: 0.2))
@@ -217,10 +240,26 @@ class IslandBlockPainter extends CustomPainter {
     canvas.drawPath(topPath, edgePaint);
     canvas.drawPath(basePath, edgePaint);
 
-    // ----- ZAYIF ADA UYARISI -----
-    // weakCount > 0 ise kırmızı kenarlık + dikkat üçgeni göster.
+    // ----- HUD KÖŞE PARANTEZLERİ -----
+    // Her köşede, birleşen iki kenar boyunca kısa çizgiler — kamera
+    // vizörü / hedefleme reticle görünümü. Bu tek başına "ada" hissini
+    // "tech platform/data node" hissine çeviren en belirgin dokunuş.
+    if (!locked) {
+      final bracketPaint = Paint()
+        ..color = Colors.white.withValues(alpha: 0.55)
+        ..strokeWidth = 1.4
+        ..strokeCap = StrokeCap.round;
+      for (var i = 0; i < corners.length; i++) {
+        final v = corners[i];
+        final a = corners[(i - 1 + corners.length) % corners.length];
+        final b = corners[(i + 1) % corners.length];
+        canvas.drawLine(v, Offset.lerp(v, a, 0.22)!, bracketPaint);
+        canvas.drawLine(v, Offset.lerp(v, b, 0.22)!, bracketPaint);
+      }
+    }
+
+    // ----- ZAYIF DÜĞÜM UYARISI -----
     if (weakCount > 0 && !locked) {
-      // Kırmızı kenarlık glow (kritik ise daha yoğun)
       final alertColor = isCritical
           ? const Color(0xFFEF4444)
           : const Color(0xFFF59E0B);
@@ -237,7 +276,6 @@ class IslandBlockPainter extends CustomPainter {
           ),
       );
 
-      // Kritik ada için ekstra "!" badge sağ üstte
       if (isCritical) {
         final tpBadge = TextPainter(
           text: TextSpan(
@@ -256,7 +294,6 @@ class IslandBlockPainter extends CustomPainter {
         );
       }
 
-      // weakCount göstergesi (küçük sayaç)
       if (weakCount > 0) {
         final tpCount = TextPainter(
           text: TextSpan(
@@ -280,12 +317,12 @@ class IslandBlockPainter extends CustomPainter {
       }
     }
 
-    // ----- HOVER SCALE GÖLGESİ -----
+    // ----- HOVER GÜÇ ALANI -----
     if (hovered && !locked) {
       canvas.drawPath(
         topPath,
         Paint()
-          ..color = const Color(0xFFFFC145).withValues(alpha: 0.35)
+          ..color = color.withValues(alpha: 0.4)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
       );
     }
@@ -307,34 +344,32 @@ class IslandBlockPainter extends CustomPainter {
       Offset(pos.dx - tp.width / 2, pos.dy - s * 0.45 - tp.height / 2),
     );
 
-    // ----- TAMAMLANMIŞ ALTIN ÇERÇEVE -----
+    // ----- TAMAMLANMIŞ ENERJİ ÇERÇEVESİ -----
     if (completed) {
-      final goldPaint = Paint()
-        ..color = const Color(0xFFFFC145)
+      final energyPaint = Paint()
+        ..color = const Color(0xFF22D3EE)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3
         ..maskFilter = const MaskFilter.blur(BlurStyle.outer, 4);
-      canvas.drawPath(topPath, goldPaint);
-      // 5 köşe yıldızı
-      final star = TextPainter(
+      canvas.drawPath(topPath, energyPaint);
+      final spark = TextPainter(
         text: const TextSpan(
-          text: '⭐',
+          text: '⚡',
           style: TextStyle(fontSize: 18),
         ),
         textDirection: TextDirection.ltr,
       );
-      star.layout();
-      star.paint(canvas, Offset(pos.dx - star.width / 2, pos.dy - s * 0.8));
+      spark.layout();
+      spark.paint(canvas, Offset(pos.dx - spark.width / 2, pos.dy - s * 0.8));
     }
 
-    // ----- TAMAMLANMA İLERLEME BAR + RAKAMSAL ROZET -----
+    // ----- İLERLEME BARI + RAKAMSAL ROZET -----
     if (!locked && island.totalNodes > 0 && !completed) {
       final progress = island.completedNodes / island.totalNodes;
       final barWidth = s * 1.0;
       final barHeight = 6.0;
       final barLeft = pos.dx - barWidth / 2;
       final barTop = pos.dy + s * 0.18;
-      // Bara hafif bir gölge — zemine "oturmuş" hissi verir.
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(barLeft, barTop + 1.5, barWidth, barHeight),
@@ -344,7 +379,6 @@ class IslandBlockPainter extends CustomPainter {
           ..color = Colors.black.withValues(alpha: 0.25)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
       );
-      // background
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(barLeft, barTop, barWidth, barHeight),
@@ -352,7 +386,6 @@ class IslandBlockPainter extends CustomPainter {
         ),
         Paint()..color = Colors.white.withValues(alpha: 0.25),
       );
-      // fill
       if (progress > 0) {
         canvas.drawRRect(
           RRect.fromRectAndRadius(
@@ -361,11 +394,10 @@ class IslandBlockPainter extends CustomPainter {
           ),
           Paint()
             ..shader = LinearGradient(
-              colors: const [Color(0xFF66BB6A), Color(0xFF3FA047)],
+              colors: const [Color(0xFF22D3EE), Color(0xFF0891B2)],
             ).createShader(Rect.fromLTWH(barLeft, barTop, barWidth, barHeight)),
         );
       }
-      // Küçük "x/y" rozeti — barın hemen altında, koyu kapsül içinde.
       final badgeText = TextPainter(
         text: TextSpan(
           text: '${island.completedNodes}/${island.totalNodes}',
@@ -399,13 +431,13 @@ class IslandBlockPainter extends CustomPainter {
       );
     }
 
-    // ----- AKTİF PARILTI (sadece açık + bitmemiş) -----
+    // ----- AKTİF GÜÇ ALANI (sadece açık + bitmemiş) -----
     if (!locked && !completed) {
       canvas.drawCircle(
         pos,
         s * 0.65,
         Paint()
-          ..color = const Color(0xFFFFC145).withValues(alpha: 0.22)
+          ..color = color.withValues(alpha: 0.22)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 14),
       );
     }
@@ -421,7 +453,7 @@ class IslandBlockPainter extends CustomPainter {
       old.averageConfidence != averageConfidence;
 }
 
-/// Adalar arası ahşap yol çizgisi çizer.
+/// Platformlar arası holografik enerji hattı çizer.
 class IslandPathPainter extends CustomPainter {
   IslandPathPainter({
     required this.camera,
@@ -437,49 +469,54 @@ class IslandPathPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Zemine oturan bir gölge — köprünün havada asılı değil, adalar
-    // arasında gerçekten döşenmiş gibi görünmesini sağlar.
+    // Zemine oturan bir gölge/glow — hattın havada asılı değil, gerçekten
+    // döşenmiş gibi görünmesini sağlar.
     canvas.drawLine(
       from + const Offset(0, 2),
       to + const Offset(0, 2),
       Paint()
-        ..color = Colors.black.withValues(alpha: active ? 0.28 : 0.14)
-        ..strokeWidth = active ? 6 : 4
+        ..color = (active ? const Color(0xFF22D3EE) : Colors.grey.shade600)
+            .withValues(alpha: active ? 0.35 : 0.14)
+        ..strokeWidth = active ? 7 : 4
         ..strokeCap = StrokeCap.round
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
     );
 
     final paint = Paint()
       ..shader = active
           ? const LinearGradient(
-              colors: [Color(0xFFE0A458), Color(0xFFCD853F)],
+              colors: [Color(0xFF67E8F9), Color(0xFF0891B2)],
             ).createShader(Rect.fromPoints(from, to))
           : null
-      ..color = active ? const Color(0xFFCD853F) : Colors.grey.shade400
-      ..strokeWidth = active ? 4 : 2.5
+      ..color = active ? const Color(0xFF0891B2) : Colors.grey.shade500
+      ..strokeWidth = active ? 3 : 1.5
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(from, to, paint);
 
+    // Hat üzerinde eşit aralıklı, parlayan "enerji düğümleri" — ahşap
+    // köprü tahtaları yerine devre/veri akışı hissi.
     final dx = to.dx - from.dx;
     final dy = to.dy - from.dy;
     final dist = math.sqrt(dx * dx + dy * dy);
     if (dist < 1) return;
-    final nx = -dy / dist * (active ? 8 : 6);
-    final ny = dx / dist * (active ? 8 : 6);
-    final plankCount = (dist / 16).clamp(2, 6).round();
-    for (var i = 1; i < plankCount; i++) {
-      final t = i / plankCount;
-      final pos = Offset(from.dx + dx * t, from.dy + dy * t);
-      canvas.drawLine(
-        Offset(pos.dx + nx, pos.dy + ny),
-        Offset(pos.dx - nx, pos.dy - ny),
-        Paint()
-          ..color = active
-              ? const Color(0xFF8B4513)
-              : Colors.grey.shade500
-          ..strokeWidth = active ? 3.5 : 2.5
-          ..strokeCap = StrokeCap.round,
-      );
+    final nodeCount = (dist / 20).clamp(2, 7).round();
+    final nodePaint = Paint()
+      ..color = active
+          ? const Color(0xFFE0F7FA)
+          : Colors.grey.shade400.withValues(alpha: 0.6);
+    for (var i = 1; i < nodeCount; i++) {
+      final t = i / nodeCount;
+      final p = Offset(from.dx + dx * t, from.dy + dy * t);
+      if (active) {
+        canvas.drawCircle(
+          p,
+          3.2,
+          Paint()
+            ..color = const Color(0xFF22D3EE).withValues(alpha: 0.5)
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+        );
+      }
+      canvas.drawCircle(p, active ? 1.8 : 1.3, nodePaint);
     }
   }
 

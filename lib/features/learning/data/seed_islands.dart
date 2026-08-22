@@ -17,7 +17,7 @@ class IslandSeed {
       subtitle: 'print() ve yorumlar',
       description:
           "Python'un temel yapı taşlarını öğren. Ekranına ilk mesajını yazdır.",
-      emoji: '🏝️',
+      emoji: '🚀',
       color: const Color(0xFF06B6D4),
       gradient: const [Color(0xFF06B6D4), Color(0xFF3B82F6)],
       order: 1,
@@ -28,7 +28,7 @@ class IslandSeed {
           description: 'Ekrana "Merhaba Dünya" yazdır.',
           tutorial:
               '# print() fonksiyonu ekrana metin yazdırır.\n# Tırnak içindeki metin string olarak adlandırılır.\n\nprint("Merhaba Dünya")',
-          starterCode: '# Ekrana "Merhaba Dünya" yazdır\n',
+          starterCode: '# Kodunu buraya yaz\n',
           solution: 'print("Merhaba Dünya")',
           expectedOutput: 'Merhaba Dünya',
           points: 50,
@@ -46,7 +46,8 @@ class IslandSeed {
           description: 'Yorumlar kodun açıklamasıdır, çalıştırılmaz.',
           tutorial:
               '# Yorum satırları # ile başlar.\n# Python yorumları görmezden gelir, sadece insanlar içindir.\n\n# Bu bir yorum\nprint("Yorumun altındaki kod çalışır")',
-          starterCode: '# Bu satır bir yorum\nprint("Bu çalışır")',
+          starterCode:
+              '# Buraya bir yorum satırı ekle, sonra alt satıra\n# ekrana "Bu çalışır" yazdıran bir print() yaz\n',
           solution: '# Bu satır bir yorum\nprint("Bu çalışır")',
           expectedOutput: 'Bu çalışır',
           points: 60,
@@ -65,7 +66,7 @@ class IslandSeed {
           tutorial:
               '# Her print() yeni satıra geçer.\n# Birden fazla print alt alta yazılabilir.\n\nprint("Satır 1")\nprint("Satır 2")\nprint("Satır 3")',
           starterCode:
-              'print("İsim: Ali")\nprint("Yaş: 25")\nprint("Şehir: İstanbul")',
+              '# Üç ayrı print() ile İsim, Yaş ve Şehir bilgini yazdır\n',
           solution:
               'print("İsim: Ali")\nprint("Yaş: 25")\nprint("Şehir: İstanbul")',
           expectedOutput: 'İsim: Ali\nYaş: 25\nŞehir: İstanbul',
@@ -88,7 +89,7 @@ class IslandSeed {
       subtitle: 'Veriyi sakla, isimlendir',
       description:
           'Değişkenler veriyi hafızada tutar. Onlara isim ver, sonra kullan.',
-      emoji: '🏝️',
+      emoji: '🧩',
       color: const Color(0xFF8B5CF6),
       gradient: const [Color(0xFF8B5CF6), Color(0xFFEC4899)],
       order: 2,
@@ -99,7 +100,8 @@ class IslandSeed {
           description: 'Bir değişken oluştur ve yazdır.',
           tutorial:
               '# Değişken = eşittir ile değer atanır.\n# isim = "Ali"  →  isim değişkeni "Ali" değerini tutar.\n\nisim = "Ali"\nprint(isim)',
-          starterCode: 'isim = "Ali"\nprint(isim)',
+          starterCode:
+              '# "isim" adında bir değişken oluştur ve "Ali" değerini ata\n# sonra print() ile yazdır\n',
           solution: 'isim = "Ali"\nprint(isim)',
           expectedOutput: 'Ali',
           points: 80,
@@ -117,7 +119,8 @@ class IslandSeed {
           description: 'Tam sayı ve ondalık sayılar.',
           tutorial:
               "# Python'da sayılar tırnaksız yazılır.\n# int = tam sayı, float = ondalık sayı\n\nyas = 20\nboy = 1.75\nprint(yas)\nprint(boy)",
-          starterCode: 'sayi = 42\nondalik = 3.14\nprint(sayi)\nprint(ondalik)',
+          starterCode:
+              '# sayi = 42 ve ondalik = 3.14 değişkenlerini oluştur\n# sonra ikisini de print() ile yazdır\n',
           solution: 'sayi = 42\nondalik = 3.14\nprint(sayi)\nprint(ondalik)',
           expectedOutput: '42\n3.14',
           points: 90,
@@ -136,7 +139,7 @@ class IslandSeed {
           tutorial:
               "# bool tipi sadece iki değer alır: True veya False.\n# Python'da True/False büyük harfle başlar.\n\nogrenci = True\nmezun = False\nprint(ogrenci)\nprint(mezun)",
           starterCode:
-              'aktif = True\nsilindi = False\nprint(aktif)\nprint(silindi)',
+              '# aktif = True ve silindi = False değişkenlerini oluştur\n# sonra ikisini de print() ile yazdır\n',
           solution:
               'aktif = True\nsilindi = False\nprint(aktif)\nprint(silindi)',
           expectedOutput: 'True\nFalse',
@@ -156,7 +159,7 @@ class IslandSeed {
           tutorial:
               '# f-string (f"...") içinde {{değişken}} kullanarak birleştirme yapılır.\n# Modern ve en kolay yöntem.\n\nisim = "Zeynep"\nprint(f"Merhaba {isim}!")',
           starterCode:
-              'isim = "Mehmet"\nyas = 30\nprint(f"{isim}, {yas} yaşında")',
+              'isim = "Mehmet"\nyas = 30\n# f-string kullanarak "Mehmet, 30 yaşında" yazdır\n',
           solution:
               'isim = "Mehmet"\nyas = 30\nprint(f"{isim}, {yas} yaşında")',
           expectedOutput: 'Mehmet, 30 yaşında',
@@ -178,7 +181,7 @@ class IslandSeed {
       title: 'Operatörler Adası',
       subtitle: 'Matematik ve karşılaştırma',
       description: 'Sayılarla işlem yap, karşılaştırmalar yap.',
-      emoji: '🏝️',
+      emoji: '➗',
       color: const Color(0xFFF59E0B),
       gradient: const [Color(0xFFFBBF24), Color(0xFFF97316)],
       order: 3,
@@ -189,7 +192,7 @@ class IslandSeed {
           description: '+ ve - operatörleri.',
           tutorial:
               '# + toplama, - çıkarma yapar.\n# Sonuç doğrudan print edilebilir.\n\nprint(10 + 5)\nprint(20 - 8)',
-          starterCode: 'print(15 + 7)\nprint(100 - 45)',
+          starterCode: '# print(15 + 7) ve print(100 - 45) satırlarını yaz\n',
           solution: 'print(15 + 7)\nprint(100 - 45)',
           expectedOutput: '22\n55',
           points: 100,
@@ -207,7 +210,7 @@ class IslandSeed {
           description: '* ve / operatörleri.',
           tutorial:
               "# * çarpma, / bölme yapar.\n# Python'da bölme her zaman ondalık verir (float).\n\nprint(6 * 4)\nprint(20 / 5)",
-          starterCode: 'print(7 * 8)\nprint(81 / 9)',
+          starterCode: '# print(7 * 8) ve print(81 / 9) satırlarını yaz\n',
           solution: 'print(7 * 8)\nprint(81 / 9)',
           expectedOutput: '56\n9.0',
           points: 110,
@@ -225,7 +228,8 @@ class IslandSeed {
           description: '<, >, == operatörleri.',
           tutorial:
               '# Karşılaştırma True veya False döner.\n# == eşittir, != eşit değildir.\n\nprint(5 > 3)\nprint(10 == 10)\nprint(7 < 4)',
-          starterCode: 'print(15 > 20)\nprint(8 == 8)\nprint(3 != 3)',
+          starterCode:
+              '# print(15 > 20), print(8 == 8) ve print(3 != 3) satırlarını yaz\n',
           solution: 'print(15 > 20)\nprint(8 == 8)\nprint(3 != 3)',
           expectedOutput: 'False\nTrue\nFalse',
           points: 130,
@@ -246,7 +250,7 @@ class IslandSeed {
       title: 'Koşullar Adası',
       subtitle: 'Karar vermeyi öğren',
       description: 'if/else ile koşullara göre farklı işlemler yap.',
-      emoji: '🏝️',
+      emoji: '🚦',
       color: const Color(0xFFEF4444),
       gradient: const [Color(0xFFEF4444), Color(0xFFFB7185)],
       order: 4,
@@ -257,7 +261,8 @@ class IslandSeed {
           description: 'Koşul doğruysa kodu çalıştır.',
           tutorial:
               '# if koşul: yapısı koşul True ise kodu çalıştırır.\n# Girintileme (4 boşluk) çok önemli!\n\nyas = 18\nif yas >= 18:\n    print("Reşitsiniz")',
-          starterCode: 'sayi = 10\nif sayi > 5:\n    print("Büyük")',
+          starterCode:
+              'sayi = 10\n# sayi 5\'ten büyükse "Büyük" yazdıran bir if yaz\n',
           solution: 'sayi = 10\nif sayi > 5:\n    print("Büyük")',
           expectedOutput: 'Büyük',
           points: 140,
@@ -276,7 +281,7 @@ class IslandSeed {
           tutorial:
               '# else: koşul False olduğunda çalışır.\n\nnot_ = 45\nif not_ >= 50:\n    print("Geçti")\nelse:\n    print("Kaldı")',
           starterCode:
-              'sayi = 3\nif sayi > 5:\n    print("Büyük")\nelse:\n    print("Küçük veya eşit")',
+              'sayi = 3\n# sayi 5\'ten büyükse "Büyük", değilse "Küçük veya eşit" yazdır\n',
           solution:
               'sayi = 3\nif sayi > 5:\n    print("Büyük")\nelse:\n    print("Küçük veya eşit")',
           expectedOutput: 'Küçük veya eşit',
@@ -296,7 +301,7 @@ class IslandSeed {
           tutorial:
               '# elif = "else if", önceki koşul False ise yeni koşulu kontrol eder.\n\npuan = 85\nif puan >= 90:\n    print("AA")\nelif puan >= 80:\n    print("BB")\nelif puan >= 70:\n    print("CC")\nelse:\n    print("FF")',
           starterCode:
-              'sayi = 0\nif sayi > 0:\n    print("Pozitif")\nelif sayi < 0:\n    print("Negatif")\nelse:\n    print("Sıfır")',
+              'sayi = 0\n# sayi pozitifse "Pozitif", negatifse "Negatif", sıfırsa "Sıfır" yazdır\n',
           solution:
               'sayi = 0\nif sayi > 0:\n    print("Pozitif")\nelif sayi < 0:\n    print("Negatif")\nelse:\n    print("Sıfır")',
           expectedOutput: 'Sıfır',
@@ -318,7 +323,7 @@ class IslandSeed {
       title: 'Döngüler Adası',
       subtitle: 'Tekrar eden işler',
       description: 'for ve while ile tekrarlayan işlemleri otomatikleştir.',
-      emoji: '🏝️',
+      emoji: '🔄',
       color: const Color(0xFF10B981),
       gradient: const [Color(0xFF10B981), Color(0xFF14B8A6)],
       order: 5,
@@ -329,7 +334,8 @@ class IslandSeed {
           description: "range() ile 1'den 5'e kadar yazdır.",
           tutorial:
               "# for i in range(5): 0'dan 4'e kadar döner.\n# range(1, 6) ise 1'den 5'e kadar.\n\nfor i in range(1, 6):\n    print(i)",
-          starterCode: 'for i in range(1, 4):\n    print(i)',
+          starterCode:
+              "# range() kullanarak 1'den 3'e kadar say ve her sayıyı yazdır\n",
           solution: 'for i in range(1, 4):\n    print(i)',
           expectedOutput: '1\n2\n3',
           points: 160,
@@ -348,7 +354,7 @@ class IslandSeed {
           tutorial:
               '# for eleman in liste: her eleman için kod çalışır.\n\nmeyveler = ["elma", "armut", "muz"]\nfor meyve in meyveler:\n    print(meyve)',
           starterCode:
-              'renkler = ["kırmızı", "mavi", "yeşil"]\nfor renk in renkler:\n    print(renk)',
+              'renkler = ["kırmızı", "mavi", "yeşil"]\n# Listedeki her rengi tek tek yazdır\n',
           solution:
               'renkler = ["kırmızı", "mavi", "yeşil"]\nfor renk in renkler:\n    print(renk)',
           expectedOutput: 'kırmızı\nmavi\nyeşil',
@@ -368,7 +374,7 @@ class IslandSeed {
           tutorial:
               '# while koşul: koşul True olduğu sürece çalışır.\n# Sayaç ile bir noktada durdurmak ÖNEMLİ.\n\nsayi = 1\nwhile sayi <= 3:\n    print(sayi)\n    sayi = sayi + 1',
           starterCode:
-              'sayi = 0\nwhile sayi < 3:\n    print(sayi)\n    sayi = sayi + 1',
+              "sayi = 0\n# sayi 3'ten küçük olduğu sürece sayi'yı yazdır ve bir artır\n",
           solution:
               'sayi = 0\nwhile sayi < 3:\n    print(sayi)\n    sayi = sayi + 1',
           expectedOutput: '0\n1\n2',
@@ -388,7 +394,7 @@ class IslandSeed {
           tutorial:
               '# İç içe döngü: dış döngü satır, iç döngü sütun.\n\nfor i in range(1, 4):\n    for j in range(1, 4):\n        print(f"{i}x{j}={i*j}")',
           starterCode:
-              'for i in range(1, 3):\n    for j in range(1, 3):\n        print(f"{i}*{j}={i*j}")',
+              "# 1'den 2'ye kadar iç içe iki döngü ile çarpım tablosu yazdır\n",
           solution:
               'for i in range(1, 3):\n    for j in range(1, 3):\n        print(f"{i}*{j}={i*j}")',
           expectedOutput: '1*1=1\n1*2=2\n2*1=2\n2*2=4',
@@ -410,7 +416,7 @@ class IslandSeed {
       title: 'Listeler Adası',
       subtitle: 'Veri koleksiyonları',
       description: 'Birden fazla veriyi tek yerde tut: listeler.',
-      emoji: '🏝️',
+      emoji: '🗂️',
       color: const Color(0xFFFBBF24),
       gradient: const [Color(0xFFFBBF24), Color(0xFFF59E0B)],
       order: 6,
@@ -422,7 +428,7 @@ class IslandSeed {
           tutorial:
               '# liste = [eleman1, eleman2, ...]\n# Liste farklı tipleri bir arada tutabilir.\n\nsayilar = [1, 2, 3, 4, 5]\nprint(sayilar[0])  # İlk eleman (0 indeksi)\nprint(sayilar[-1]) # Son eleman',
           starterCode:
-              'meyveler = ["elma", "armut", "muz"]\nprint(meyveler[0])\nprint(meyveler[2])',
+              'meyveler = ["elma", "armut", "muz"]\n# İlk elemanı ve üçüncü elemanı yazdır\n',
           solution:
               'meyveler = ["elma", "armut", "muz"]\nprint(meyveler[0])\nprint(meyveler[2])',
           expectedOutput: 'elma\nmuz',
@@ -441,7 +447,8 @@ class IslandSeed {
           description: 'Listeye yeni eleman ekle.',
           tutorial:
               '# liste.append(yeni_eleman) sona ekler.\n\notolar = [1, 2, 3]\notolar.append(4)\nprint(otolar)',
-          starterCode: 'sayilar = [10, 20]\nsayilar.append(30)\nprint(sayilar)',
+          starterCode:
+              'sayilar = [10, 20]\n# Listeye 30 ekle, sonra listeyi yazdır\n',
           solution: 'sayilar = [10, 20]\nsayilar.append(30)\nprint(sayilar)',
           expectedOutput: '[10, 20, 30]',
           points: 160,
@@ -460,7 +467,7 @@ class IslandSeed {
           tutorial:
               '# len(liste) listenin uzunluğunu verir.\n\nmeyveler = ["elma", "armut", "muz", "üzüm"]\nprint(len(meyveler))',
           starterCode:
-              'sayilar = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\nprint(len(sayilar))',
+              'sayilar = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\n# len() ile listenin uzunluğunu yazdır\n',
           solution:
               'sayilar = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\nprint(len(sayilar))',
           expectedOutput: '10',
@@ -483,7 +490,7 @@ class IslandSeed {
       subtitle: 'Kodunu paketle, tekrar kullan',
       description:
           'Fonksiyonlar: tekrar eden kodları bir kere yaz, istediğin yerde çağır.',
-      emoji: '🏝️',
+      emoji: '🛠️',
       color: const Color(0xFFEC4899),
       gradient: const [Color(0xFFEC4899), Color(0xFF8B5CF6)],
       order: 7,
@@ -494,7 +501,8 @@ class IslandSeed {
           description: 'def ile fonksiyon tanımla.',
           tutorial:
               '# def fonksiyon_adi(): ile tanımlanır.\n# Gövde 4 boşluk girintili olur.\n\ndef selam():\n    print("Merhaba!")\n\nselam()',
-          starterCode: 'def selam():\n    print("Selam!")\n\nselam()',
+          starterCode:
+              '# "Selam!" yazdıran bir selam() fonksiyonu tanımla ve çağır\n',
           solution: 'def selam():\n    print("Selam!")\n\nselam()',
           expectedOutput: 'Selam!',
           points: 180,
@@ -513,7 +521,7 @@ class IslandSeed {
           tutorial:
               '# def selam(isim): parametre alır.\n\ndef selam(isim):\n    print(f"Merhaba {isim}!")\n\nselam("Ali")\nselam("Ayşe")',
           starterCode:
-              'def kare(sayi):\n    print(sayi * sayi)\n\nkare(5)\nkare(7)',
+              '# sayi parametresi alan ve karesini yazdıran bir kare() fonksiyonu yaz\n# sonra kare(5) ve kare(7) ile çağır\n',
           solution:
               'def kare(sayi):\n    print(sayi * sayi)\n\nkare(5)\nkare(7)',
           expectedOutput: '25\n49',
@@ -533,7 +541,7 @@ class IslandSeed {
           tutorial:
               '# return değer döndürür, sonuç değişkene atanabilir.\n\ndef toplam(a, b):\n    return a + b\n\nsonuc = toplam(3, 5)\nprint(sonuc)',
           starterCode:
-              'def kare(sayi):\n    return sayi * sayi\n\nprint(kare(4))\nprint(kare(9))',
+              '# sayının karesini return eden bir kare() fonksiyonu yaz\n# sonra print(kare(4)) ve print(kare(9)) ile yazdır\n',
           solution:
               'def kare(sayi):\n    return sayi * sayi\n\nprint(kare(4))\nprint(kare(9))',
           expectedOutput: '16\n81',
@@ -555,7 +563,7 @@ class IslandSeed {
       title: 'String Adası',
       subtitle: 'Metinlerle çalış',
       description: 'String metotları: büyük harf, küçük harf, parçalama.',
-      emoji: '🏝️',
+      emoji: '🔠',
       color: const Color(0xFF06B6D4),
       gradient: const [Color(0xFF06B6D4), Color(0xFF0891B2)],
       order: 8,
@@ -567,7 +575,7 @@ class IslandSeed {
           tutorial:
               '# metin.upper() tüm harfleri büyütür.\n# metin.lower() tüm harfleri küçültür.\n\nisim = "Python"\nprint(isim.upper())\nprint(isim.lower())',
           starterCode:
-              'kelime = "Merhaba"\nprint(kelime.upper())\nprint(kelime.lower())',
+              'kelime = "Merhaba"\n# Büyük harfli ve küçük harfli hallerini yazdır\n',
           solution:
               'kelime = "Merhaba"\nprint(kelime.upper())\nprint(kelime.lower())',
           expectedOutput: 'MERHABA\nmerhaba',
@@ -586,7 +594,8 @@ class IslandSeed {
           description: 'String uzunluğu bul.',
           tutorial:
               '# len(metin) string\'in karakter sayısını verir.\n\nisim = "Python"\nprint(len(isim))',
-          starterCode: 'cumle = "Merhaba Dünya"\nprint(len(cumle))',
+          starterCode:
+              'cumle = "Merhaba Dünya"\n# len() ile cümlenin uzunluğunu yazdır\n',
           solution: 'cumle = "Merhaba Dünya"\nprint(len(cumle))',
           expectedOutput: '13',
           points: 150,
@@ -605,7 +614,7 @@ class IslandSeed {
           tutorial:
               '# metin.replace(eski, yeni) ilk argümanı ikincisiyle değiştirir.\n\ncumle = "Ben Java severim"\nyeni = cumle.replace("Java", "Python")\nprint(yeni)',
           starterCode:
-              'metin = "Köpek koşuyor"\nyeni = metin.replace("Köpek", "Kedi")\nprint(yeni)',
+              'metin = "Köpek koşuyor"\n# "Köpek" kelimesini "Kedi" ile değiştirip yazdır\n',
           solution:
               'metin = "Köpek koşuyor"\nyeni = metin.replace("Köpek", "Kedi")\nprint(yeni)',
           expectedOutput: 'Kedi koşuyor',
@@ -627,7 +636,7 @@ class IslandSeed {
       title: 'Sözlükler Adası',
       subtitle: 'Anahtar-değer çiftleri',
       description: 'Sözlükler: her veriye bir anahtarla ulaş.',
-      emoji: '🏝️',
+      emoji: '🗝️',
       color: const Color(0xFF6366F1),
       gradient: const [Color(0xFF6366F1), Color(0xFF8B5CF6)],
       order: 9,
@@ -639,7 +648,7 @@ class IslandSeed {
           tutorial:
               '# sozluk = {"anahtar": değer, ...}\n# Değere anahtarla ulaşılır.\n\nkisi = {"isim": "Ali", "yas": 25}\nprint(kisi["isim"])\nprint(kisi["yas"])',
           starterCode:
-              'araba = {"marka": "BMW", "yil": 2020}\nprint(araba["marka"])\nprint(araba["yil"])',
+              'araba = {"marka": "BMW", "yil": 2020}\n# "marka" ve "yil" değerlerini yazdır\n',
           solution:
               'araba = {"marka": "BMW", "yil": 2020}\nprint(araba["marka"])\nprint(araba["yil"])',
           expectedOutput: 'BMW\n2020',
@@ -659,7 +668,7 @@ class IslandSeed {
           tutorial:
               '# sozluk["yeni_anahtar"] = değer\n\nkisi = {"isim": "Ali"}\nkisi["sehir"] = "İstanbul"\nprint(kisi)',
           starterCode:
-              'urun = {"ad": "Telefon"}\nurun["fiyat"] = 5000\nprint(urun)',
+              'urun = {"ad": "Telefon"}\n# "fiyat" anahtarına 5000 değerini ekle, sonra sözlüğü yazdır\n',
           solution:
               'urun = {"ad": "Telefon"}\nurun["fiyat"] = 5000\nprint(urun)',
           expectedOutput: "{'ad': 'Telefon', 'fiyat': 5000}",
@@ -681,7 +690,7 @@ class IslandSeed {
       title: 'Dosyalar Adası',
       subtitle: 'Veriyi kalıcı kıl',
       description: 'Dosya okuma/yazma: veriyi diske kaydet, sonra geri yükle.',
-      emoji: '🏝️',
+      emoji: '🗄️',
       color: const Color(0xFF14B8A6),
       gradient: const [Color(0xFF14B8A6), Color(0xFF06B6D4)],
       order: 10,
@@ -693,7 +702,7 @@ class IslandSeed {
           tutorial:
               '# open(dosya, mod) dosyayı açar.\n# "w" = yazma, "r" = okuma, "a" = ekleme.\n# write() string yazar.\n\ndosya = open("notlarim.txt", "w")\ndosya.write("İlk notum!")\ndosya.close()\nprint("Yazıldı")',
           starterCode:
-              'f = open("test.txt", "w")\nf.write("Merhaba Python!")\nf.close()\nprint("Dosya yazıldı")',
+              '# "test.txt" dosyasını yazma modunda aç, "Merhaba Python!" yaz, kapat\n# sonra "Dosya yazıldı" yazdır\n',
           solution:
               'f = open("test.txt", "w")\nf.write("Merhaba Python!")\nf.close()\nprint("Dosya yazıldı")',
           expectedOutput: 'Dosya yazıldı',
@@ -713,7 +722,7 @@ class IslandSeed {
           tutorial:
               '# open(dosya, "r") ile okuma modunda aç.\n# read() tüm içeriği string olarak verir.\n\ndosya = open("notlarim.txt", "r")\nicerik = dosya.read()\ndosya.close()\nprint(icerik)',
           starterCode:
-              'f = open("test.txt", "w")\nf.write("Satır 1\\nSatır 2")\nf.close()\n\nf = open("test.txt", "r")\nicerik = f.read()\nf.close()\nprint(icerik)',
+              'f = open("test.txt", "w")\nf.write("Satır 1\\nSatır 2")\nf.close()\n\n# Şimdi dosyayı okuma modunda aç, içeriğini oku ve yazdır\n',
           solution:
               'f = open("test.txt", "w")\nf.write("Satır 1\\nSatır 2")\nf.close()\n\nf = open("test.txt", "r")\nicerik = f.read()\nf.close()\nprint(icerik)',
           expectedOutput: 'Satır 1\nSatır 2',
@@ -748,7 +757,7 @@ class IslandSeed {
           tutorial:
               "# max() fonksiyonu olmadan en büyüğü bulmak için: önce ilk elemanı 'şimdilik en büyük' kabul et, sonra listeyi gezip daha büyüğünü bulunca güncelle.\n\nsayilar = [3, 8, 1, 6]\nen_buyuk = sayilar[0]\nfor sayi in sayilar:\n    if sayi > en_buyuk:\n        en_buyuk = sayi\nprint(en_buyuk)",
           starterCode:
-              'sayilar = [4, 9, 2, 7, 5]\nen_buyuk = sayilar[0]\nfor sayi in sayilar:\n    if sayi > en_buyuk:\n        en_buyuk = sayi\nprint(en_buyuk)',
+              'sayilar = [4, 9, 2, 7, 5]\n# max() kullanmadan listenin en büyük elemanını bul ve yazdır\n',
           solution:
               'sayilar = [4, 9, 2, 7, 5]\nen_buyuk = sayilar[0]\nfor sayi in sayilar:\n    if sayi > en_buyuk:\n        en_buyuk = sayi\nprint(en_buyuk)',
           expectedOutput: '9',
@@ -768,7 +777,7 @@ class IslandSeed {
           tutorial:
               '# Toplamı bulmak için bir sayaç değişkeni sıfırdan başlat, listeyi gezip her elemanı ekle. Ortalama = toplam / eleman sayısı.\n\npuanlar = [70, 80, 90]\ntoplam = 0\nfor p in puanlar:\n    toplam = toplam + p\nortalama = toplam / len(puanlar)\nprint(toplam)\nprint(ortalama)',
           starterCode:
-              'notlar = [80, 90, 70, 100]\ntoplam = 0\nfor n in notlar:\n    toplam = toplam + n\nortalama = toplam / len(notlar)\nprint(toplam)\nprint(ortalama)',
+              'notlar = [80, 90, 70, 100]\n# Listenin toplamını ve ortalamasını hesaplayıp yazdır\n',
           solution:
               'notlar = [80, 90, 70, 100]\ntoplam = 0\nfor n in notlar:\n    toplam = toplam + n\nortalama = toplam / len(notlar)\nprint(toplam)\nprint(ortalama)',
           expectedOutput: '340\n85.0',
@@ -788,7 +797,7 @@ class IslandSeed {
           tutorial:
               '# Bir sayaç değişkeni sıfırdan başlat, listeyi gezip aradığın değere eşit her elemanda sayaç bir artsın.\n\nharfler = ["a", "b", "a", "c"]\nsayac = 0\nfor h in harfler:\n    if h == "a":\n        sayac = sayac + 1\nprint(sayac)',
           starterCode:
-              'kelimeler = ["kedi", "kopek", "kedi", "kus", "kedi"]\nsayac = 0\nfor k in kelimeler:\n    if k == "kedi":\n        sayac = sayac + 1\nprint(sayac)',
+              'kelimeler = ["kedi", "kopek", "kedi", "kus", "kedi"]\n# Listede kaç tane "kedi" olduğunu say ve yazdır\n',
           solution:
               'kelimeler = ["kedi", "kopek", "kedi", "kus", "kedi"]\nsayac = 0\nfor k in kelimeler:\n    if k == "kedi":\n        sayac = sayac + 1\nprint(sayac)',
           expectedOutput: '3',
@@ -823,7 +832,7 @@ class IslandSeed {
           tutorial:
               '# Bir fonksiyon if/elif/else zinciriyle farklı sonuçlar döndürebilir.\n\ndef harf_notu(puan):\n    if puan >= 90:\n        return "AA"\n    elif puan >= 70:\n        return "BB"\n    else:\n        return "FF"\n\nprint(harf_notu(95))',
           starterCode:
-              'def harf_notu(puan):\n    if puan >= 90:\n        return "AA"\n    elif puan >= 70:\n        return "BB"\n    else:\n        return "FF"\n\nprint(harf_notu(95))\nprint(harf_notu(75))\nprint(harf_notu(40))',
+              '# Puanı harf notuna çeviren bir harf_notu() fonksiyonu yaz\n# 90+ ise "AA", 70+ ise "BB", değilse "FF" dönsün\n# sonra harf_notu(95), harf_notu(75), harf_notu(40) ile yazdır\n',
           solution:
               'def harf_notu(puan):\n    if puan >= 90:\n        return "AA"\n    elif puan >= 70:\n        return "BB"\n    else:\n        return "FF"\n\nprint(harf_notu(95))\nprint(harf_notu(75))\nprint(harf_notu(40))',
           expectedOutput: 'AA\nBB\nFF',
@@ -843,7 +852,7 @@ class IslandSeed {
           tutorial:
               '# Aynı sırada duran iki liste varsa (isimler ve puanlar gibi), range() ile index üzerinden ikisine de aynı anda erişebilirsin.\n\nisimler = ["Ali", "Ayşe"]\npuanlar = [70, 95]\nfor i in range(2):\n    print(f"{isimler[i]}: {puanlar[i]}")',
           starterCode:
-              'isimler = ["Ali", "Ayşe", "Can"]\npuanlar = [85, 92, 78]\nfor i in range(3):\n    print(f"{isimler[i]}: {puanlar[i]}")',
+              'isimler = ["Ali", "Ayşe", "Can"]\npuanlar = [85, 92, 78]\n# İki listeyi aynı index ile gezip "İsim: Puan" formatında yazdır\n',
           solution:
               'isimler = ["Ali", "Ayşe", "Can"]\npuanlar = [85, 92, 78]\nfor i in range(3):\n    print(f"{isimler[i]}: {puanlar[i]}")',
           expectedOutput: 'Ali: 85\nAyşe: 92\nCan: 78',
@@ -864,7 +873,7 @@ class IslandSeed {
           tutorial:
               '# Bir fonksiyonun döndürdüğü değeri doğrudan sözlüğe geri yazabilirsin.\n\ndef puan_ekle(mevcut, eklenen):\n    return mevcut + eklenen\n\ntablo = {"Ali": 0}\ntablo["Ali"] = puan_ekle(tablo["Ali"], 10)\nprint(tablo["Ali"])',
           starterCode:
-              'def puan_ekle(mevcut, eklenen):\n    return mevcut + eklenen\n\ntablo = {"Ali": 0, "Ayşe": 0}\ntablo["Ali"] = puan_ekle(tablo["Ali"], 10)\ntablo["Ali"] = puan_ekle(tablo["Ali"], 5)\ntablo["Ayşe"] = puan_ekle(tablo["Ayşe"], 8)\nprint(tablo["Ali"])\nprint(tablo["Ayşe"])',
+              'tablo = {"Ali": 0, "Ayşe": 0}\n# mevcut ve eklenen alan bir puan_ekle() fonksiyonu yaz\n# Ali\'ye 10 sonra 5, Ayşe\'ye 8 puan ekle, ikisini de yazdır\n',
           solution:
               'def puan_ekle(mevcut, eklenen):\n    return mevcut + eklenen\n\ntablo = {"Ali": 0, "Ayşe": 0}\ntablo["Ali"] = puan_ekle(tablo["Ali"], 10)\ntablo["Ali"] = puan_ekle(tablo["Ali"], 5)\ntablo["Ayşe"] = puan_ekle(tablo["Ayşe"], 8)\nprint(tablo["Ali"])\nprint(tablo["Ayşe"])',
           expectedOutput: '15\n8',

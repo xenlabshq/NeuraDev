@@ -12,6 +12,7 @@ import '../../../chat/presentation/providers/chat_providers.dart'
     show currentAuthUserProvider;
 import '../../../../shared/models/user_profile.dart'
     show UserProfile, UserRole;
+import '../../../reports/domain/entities/content_report.dart';
 import '../../../reports/presentation/providers/report_providers.dart';
 import '../../domain/entities/game_reel.dart';
 import '../providers/reels_providers.dart';
@@ -546,9 +547,10 @@ class _ActionRail extends ConsumerWidget {
       await ref
           .read(reportRepositoryProvider)
           .submitReport(
-            reelId: reel.id,
-            reelTitle: reel.title,
-            reelUploaderId: reel.uploaderId!,
+            contentType: ReportedContentType.reel,
+            contentId: reel.id,
+            contentTitle: reel.title,
+            contentOwnerId: reel.uploaderId,
             reporterId: user.id,
             reporterName: user.displayName,
             reason: reason,

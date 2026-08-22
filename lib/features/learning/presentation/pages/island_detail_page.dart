@@ -14,6 +14,10 @@ import '../../domain/entities/learning_island.dart';
 import '../providers/learning_providers.dart';
 import 'node_editor_page.dart';
 
+/// Fütüristik tema aksan rengi — tamamlanmış düğüm/platform enerji
+/// halkası, çerçevesi ve rozetleri için (eski "altın" temayı değiştirir).
+const _energyColor = Color(0xFF22D3EE);
+
 class IslandDetailPage extends ConsumerStatefulWidget {
   const IslandDetailPage({required this.islandId, super.key});
   final String islandId;
@@ -356,13 +360,12 @@ class _SnakeNodesPathPainter extends CustomPainter {
           end.dy,
         );
 
-      // Aktif yol yeşil, kilitli gri dashed
-      // Burada her node'un durumuna göre çizgi rengi değişebilir,
-      // basit tutmak için varsayılan yeşil
+      // Enerji hattı — dış haritadaki holografik bağlantılarla aynı
+      // cyan/tech paleti.
       final paint = Paint()
         ..shader =
             const LinearGradient(
-              colors: [AppColors.success, Color(0xFF66BB6A)],
+              colors: [Color(0xFF67E8F9), Color(0xFF0891B2)],
             ).createShader(
               Rect.fromPoints(
                 Offset(p1.x, p1.y),
@@ -516,7 +519,7 @@ class _NodeCircleState extends State<_NodeCircle>
                     },
                   ),
                 ),
-              // Tamamlanmış: altın ışık halkası
+              // Tamamlanmış: enerji halkası
               if (completed)
                 Positioned(
                   top: 4,
@@ -527,8 +530,8 @@ class _NodeCircleState extends State<_NodeCircle>
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          AppColors.gold.withValues(alpha: 0.4),
-                          AppColors.gold.withValues(alpha: 0),
+                          _energyColor.withValues(alpha: 0.4),
+                          _energyColor.withValues(alpha: 0),
                         ],
                       ),
                     ),
@@ -563,7 +566,7 @@ class _NodeCircleState extends State<_NodeCircle>
                     width: 22,
                     height: 22,
                     decoration: const BoxDecoration(
-                      color: AppColors.gold,
+                      color: _energyColor,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -654,7 +657,7 @@ class _HexCrystal extends StatelessWidget {
             painter: _HexPainter(
               fillColor: fillColor,
               borderColor: completed
-                  ? AppColors.gold
+                  ? _energyColor
                   : (locked ? const Color(0xFF6B6480) : Colors.white),
               borderWidth: completed ? 3 : 2.5,
               shadow: !locked,
@@ -731,7 +734,7 @@ class _HexPainter extends CustomPainter {
             ? [
                 Color.lerp(fillColor, Colors.white, 0.3)!,
                 fillColor,
-                Color.lerp(fillColor, AppColors.gold, 0.4)!,
+                Color.lerp(fillColor, _energyColor, 0.45)!,
               ]
             : [
                 Color.lerp(fillColor, Colors.white, 0.35)!,
@@ -740,6 +743,30 @@ class _HexPainter extends CustomPainter {
               ],
       ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: r));
     canvas.drawPath(path, gradPaint);
+
+    // Tamamlanmış: dıştan ikinci, ince bir "tech frame" halkası —
+    // holografik bir çerçeve gibi hex'in etrafında hafifçe daha geniş.
+    if (completed) {
+      final framePath = Path();
+      for (var i = 0; i < 6; i++) {
+        final angle = -math.pi / 2 + i * math.pi / 3;
+        final x = cx + r * 1.12 * math.cos(angle);
+        final y = cy + r * 1.12 * math.sin(angle);
+        if (i == 0) {
+          framePath.moveTo(x, y);
+        } else {
+          framePath.lineTo(x, y);
+        }
+      }
+      framePath.close();
+      canvas.drawPath(
+        framePath,
+        Paint()
+          ..color = _energyColor.withValues(alpha: 0.5)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2,
+      );
+    }
 
     // Border
     canvas.drawPath(
@@ -770,16 +797,18 @@ class _HexPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
     );
 
-    // Tamamlanmış: altın ışıltı parçacıkları
+    // Tamamlanmış: hex köşelerinde küçük "data port" uçları — devre
+    // kartı üzerindeki bağlantı pinleri gibi, eski ışıltı parçacıkları
+    // yerine.
     if (completed) {
-      final sparkPaint = Paint()
-        ..color = AppColors.gold
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
-      for (var i = 0; i < 3; i++) {
-        final a = i * 2.094;
-        final sparkX = cx + (r + 6) * math.cos(a);
-        final sparkY = cy + (r + 6) * math.sin(a);
-        canvas.drawCircle(Offset(sparkX, sparkY), 2.5, sparkPaint);
+      final portPaint = Paint()
+        ..color = _energyColor
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
+      for (var i = 0; i < 6; i += 2) {
+        final angle = -math.pi / 2 + i * math.pi / 3;
+        final px = cx + (r + 5) * math.cos(angle);
+        final py = cy + (r + 5) * math.sin(angle);
+        canvas.drawCircle(Offset(px, py), 2.2, portPaint);
       }
     }
   }

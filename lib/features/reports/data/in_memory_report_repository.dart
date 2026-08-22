@@ -26,20 +26,22 @@ class InMemoryReportRepository implements ReportRepository {
 
   @override
   Future<void> submitReport({
-    required String reelId,
-    required String reelTitle,
-    required String reelUploaderId,
+    required ReportedContentType contentType,
+    required String contentId,
+    required String contentTitle,
     required String reporterId,
     required String reporterName,
     required String reason,
+    String? contentOwnerId,
   }) async {
     _reports.insert(
       0,
       ContentReport(
         id: 'report_${_nextId++}',
-        reelId: reelId,
-        reelTitle: reelTitle,
-        reelUploaderId: reelUploaderId,
+        contentType: contentType,
+        contentId: contentId,
+        contentTitle: contentTitle,
+        contentOwnerId: contentOwnerId,
         reporterId: reporterId,
         reporterName: reporterName,
         reason: reason,
@@ -55,9 +57,10 @@ class InMemoryReportRepository implements ReportRepository {
     if (i < 0) return;
     _reports[i] = ContentReport(
       id: _reports[i].id,
-      reelId: _reports[i].reelId,
-      reelTitle: _reports[i].reelTitle,
-      reelUploaderId: _reports[i].reelUploaderId,
+      contentType: _reports[i].contentType,
+      contentId: _reports[i].contentId,
+      contentTitle: _reports[i].contentTitle,
+      contentOwnerId: _reports[i].contentOwnerId,
       reporterId: _reports[i].reporterId,
       reporterName: _reports[i].reporterName,
       reason: _reports[i].reason,

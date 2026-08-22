@@ -7,6 +7,7 @@ import '../../../../l10n/gen/app_localizations.dart';
 import '../../../admin/presentation/providers/admin_providers.dart';
 import '../../../chat/presentation/providers/chat_providers.dart'
     show currentAuthUserProvider;
+import '../../../news/presentation/providers/news_providers.dart';
 import '../../../reels/presentation/providers/reels_providers.dart';
 import '../../../../shared/models/user_profile.dart' show UserRole;
 import '../../domain/entities/content_report.dart';
@@ -40,10 +41,16 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
   Future<void> _removeContent(ContentReport report) async {
     final l10n = AppLocalizations.of(context);
     try {
-      await ref
-          .read(reelSubmissionRepositoryProvider)
-          .deleteReel(report.reelId);
-      ref.read(reelsProvider.notifier).removeReel(report.reelId);
+      if (report.contentType == ReportedContentType.reel) {
+        await ref
+            .read(reelSubmissionRepositoryProvider)
+            .deleteReel(report.contentId);
+        ref.read(reelsProvider.notifier).removeReel(report.contentId);
+      } else {
+        await ref
+            .read(newsRepositoryProvider)
+            .deleteArticle(report.contentId);
+      }
       await ref.read(reportRepositoryProvider).dismissReport(report.id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -58,11 +65,11 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
   }
 
   Future<void> _banUser(ContentReport report) async {
+    final ownerId = report.contentOwnerId;
+    if (ownerId == null) return;
     final l10n = AppLocalizations.of(context);
     try {
-      await ref
-          .read(userAdminRepositoryProvider)
-          .setBanned(report.reelUploaderId, true);
+      await ref.read(userAdminRepositoryProvider).setBanned(ownerId, true);
       await ref.read(reportRepositoryProvider).dismissReport(report.id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -114,7 +121,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
             itemBuilder: (context, i) =>
                 _ReportCard(
                   report: reports[i],
-                  isAdmin: isAdmin,
+                  canBan: isAdmin && reports[i].contentOwnerId != null,
                   onRemoveContent: () => _removeContent(reports[i]),
                   onBanUser: () => _banUser(reports[i]),
                   onDismiss: () => _dismiss(reports[i]),
@@ -132,14 +139,14 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 class _ReportCard extends StatelessWidget {
   const _ReportCard({
     required this.report,
-    required this.isAdmin,
+    required this.canBan,
     required this.onRemoveContent,
     required this.onBanUser,
     required this.onDismiss,
   });
 
   final ContentReport report;
-  final bool isAdmin;
+  final bool canBan;
   final VoidCallback onRemoveContent;
   final VoidCallback onBanUser;
   final VoidCallback onDismiss;
@@ -147,6 +154,7 @@ class _ReportCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isNews = report.contentType == ReportedContentType.news;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -158,11 +166,19 @@ class _ReportCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            report.reelTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              Text(isNews ? '📰' : '🎮', style: const TextStyle(fontSize: 15)),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  report.contentTitle,
+                  style: Theme.of(context).textTheme.titleMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
@@ -180,7 +196,7 @@ class _ReportCard extends StatelessWidget {
                 onPressed: onDismiss,
                 child: Text(l10n.reportsDismissAction),
               ),
-              if (isAdmin)
+              if (canBan)
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.error,

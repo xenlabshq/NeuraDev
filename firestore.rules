@@ -135,17 +135,19 @@ service cloud.firestore {
     }
 
     // --- reports/{reportId} ---
-    // Kullanıcıların reels gönderilerini şikayet ettiği kuyruk. Sadece
-    // staff okuyabilir (şikayet edenin kimliğini sıradan kullanıcılardan
-    // gizler); herhangi bir giriş yapmış (ve banlanmamış) kullanıcı KENDİ
-    // adına yeni bir şikayet oluşturabilir. İncelendi/kapatıldı işareti
-    // (update) ve silme sadece staff'a açık.
+    // Kullanıcıların reels gönderilerini ya da haberleri şikayet ettiği
+    // kuyruk (contentType: 'reel' | 'news'). Sadece staff okuyabilir
+    // (şikayet edenin kimliğini sıradan kullanıcılardan gizler); herhangi
+    // bir giriş yapmış (ve banlanmamış) kullanıcı KENDİ adına yeni bir
+    // şikayet oluşturabilir. İncelendi/kapatıldı işareti (update) ve
+    // silme sadece staff'a açık.
     match /reports/{reportId} {
       allow read: if isStaff();
       allow create: if isSignedIn() && !isBanned() &&
         request.resource.data.reporterId == request.auth.uid &&
-        request.resource.data.reelId is string &&
-        request.resource.data.reelId.size() > 0 &&
+        request.resource.data.contentType in ['reel', 'news'] &&
+        request.resource.data.contentId is string &&
+        request.resource.data.contentId.size() > 0 &&
         request.resource.data.reason is string &&
         request.resource.data.reason.size() > 0;
       allow update, delete: if isStaff();

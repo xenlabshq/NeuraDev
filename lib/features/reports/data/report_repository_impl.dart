@@ -13,7 +13,11 @@ class ReportRepositoryImpl implements ReportRepository {
   // `where('status', ...)` + `orderBy('createdAt', ...)` farklı alanlarda
   // composite index isteyip index yoksa tüm akışı çökertir (bu oturumda
   // haberler/destek sohbetinde yaşanan aynı sorun) — tek-alanlı orderBy +
-  // istemci tarafı filtre ile çözülüyor.
+  // istemci tarafı filtre ile çözülüyor. Bu sorgu sadece staff için
+  // güvenlidir (firestore.rules `reports` read kuralı `isStaff()`e bağlı,
+  // `resource.data`'dan bağımsız olduğu için Firestore bunu bir `where`
+  // filtresi olmadan da doğrulayabiliyor — bkz. destek sohbetindeki
+  // benzer ama GÜVENSİZ desenin düzeltmesi, watchChatsForUser).
   @override
   Stream<List<ContentReport>> watchPendingReports() {
     return _reports
@@ -29,17 +33,19 @@ class ReportRepositoryImpl implements ReportRepository {
 
   @override
   Future<void> submitReport({
-    required String reelId,
-    required String reelTitle,
-    required String reelUploaderId,
+    required ReportedContentType contentType,
+    required String contentId,
+    required String contentTitle,
     required String reporterId,
     required String reporterName,
     required String reason,
+    String? contentOwnerId,
   }) async {
     await _reports.add({
-      'reelId': reelId,
-      'reelTitle': reelTitle,
-      'reelUploaderId': reelUploaderId,
+      'contentType': contentType.name,
+      'contentId': contentId,
+      'contentTitle': contentTitle,
+      'contentOwnerId': contentOwnerId,
       'reporterId': reporterId,
       'reporterName': reporterName,
       'reason': reason,
@@ -59,9 +65,13 @@ class ReportRepositoryImpl implements ReportRepository {
     final data = doc.data() ?? <String, dynamic>{};
     return ContentReport(
       id: doc.id,
-      reelId: data['reelId'] as String? ?? '',
-      reelTitle: data['reelTitle'] as String? ?? '',
-      reelUploaderId: data['reelUploaderId'] as String? ?? '',
+      contentType: ReportedContentType.values.firstWhere(
+        (t) => t.name == data['contentType'],
+        orElse: () => ReportedContentType.reel,
+      ),
+      contentId: data['contentId'] as String? ?? '',
+      contentTitle: data['contentTitle'] as String? ?? '',
+      contentOwnerId: data['contentOwnerId'] as String?,
       reporterId: data['reporterId'] as String? ?? '',
       reporterName: data['reporterName'] as String? ?? '',
       reason: data['reason'] as String? ?? '',

@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart' hide ErrorHint;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:neuroup/app/router/home_shell.dart' show LessonOverlayScope;
 
 import '../../../../app/theme/colors.dart';
@@ -180,6 +181,26 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
     );
   }
 
+  /// Aynı ada içinde bir sonraki node'u, o ada bittiyse bir sonraki
+  /// adanın ilk node'unu döner; hiçbiri yoksa (son ders tamamlandıysa)
+  /// null döner — bu durumda "Sonraki Derse Geç" butonu gösterilmez.
+  (String islandId, String nodeId)? _nextNodeRef() {
+    final islands = ref.read(islandsProvider);
+    final islandIdx = islands.indexWhere((i) => i.id == widget.islandId);
+    if (islandIdx < 0) return null;
+    final island = islands[islandIdx];
+    final nodeIdx = island.nodes.indexWhere((n) => n.id == widget.nodeId);
+    if (nodeIdx < 0) return null;
+    if (nodeIdx + 1 < island.nodes.length) {
+      return (island.id, island.nodes[nodeIdx + 1].id);
+    }
+    if (islandIdx + 1 < islands.length &&
+        islands[islandIdx + 1].nodes.isNotEmpty) {
+      return (islands[islandIdx + 1].id, islands[islandIdx + 1].nodes.first.id);
+    }
+    return null;
+  }
+
   void _verify() {
     if (!_success) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -197,21 +218,41 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
           widget.nodeId,
           xpEarned: node.points,
         );
+    // markNodeCompleted az önce bir sonraki node/ada'nın kilidini açtı —
+    // bu yüzden _nextNodeRef() burada, dialog açılmadan HEMEN önce
+    // çağrılıyor ki güncel unlocked durumunu yakalasın.
+    final next = _nextNodeRef();
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (dialogCtx) => _SuccessDialog(
         xp: node.points,
-        onContinue: () {
-          Navigator.of(dialogCtx).pop(); // dialog'u kapat
+        hasNext: next != null,
+        onContinueNext: next == null
+            ? null
+            : () {
+                Navigator.of(dialogCtx).pop();
+                // Ders haritasına dönmeden doğrudan bir sonraki derse
+                // geç — mevcut editörü değiştirerek (replace), geri
+                // tuşu yine haritaya döner.
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute<void>(
+                    builder: (_) => NodeEditorPage(
+                      islandId: next.$1,
+                      nodeId: next.$2,
+                    ),
+                  ),
+                );
+              },
+        onGoHome: () {
+          Navigator.of(dialogCtx).pop();
+          // go_router'ın go()'su, bu sayfanın (ve altındaki ada
+          // detayının) imperative push yığınını temizleyip doğrudan
+          // ana ders haritasına döner.
+          context.go('/lessons');
         },
       ),
-    ).then((_) {
-      // Dialog kapandıktan sonra editor'ı da kapat.
-      // dialogCtx artık defunct olabilir, bu yüzden State's context'ini kullan.
-      if (!mounted) return;
-      Navigator.of(context).pop(); // editor'ı kapat → detail_page'e dön
-    });
+    );
   }
 
   @override
@@ -1119,9 +1160,16 @@ class _ActionBar extends StatelessWidget {
 }
 
 class _SuccessDialog extends StatelessWidget {
-  const _SuccessDialog({required this.xp, required this.onContinue});
+  const _SuccessDialog({
+    required this.xp,
+    required this.hasNext,
+    required this.onGoHome,
+    this.onContinueNext,
+  });
   final int xp;
-  final VoidCallback onContinue;
+  final bool hasNext;
+  final VoidCallback? onContinueNext;
+  final VoidCallback onGoHome;
 
   @override
   Widget build(BuildContext context) {
@@ -1166,14 +1214,34 @@ class _SuccessDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.success,
-                minimumSize: const Size(160, 48),
+            if (hasNext) ...[
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.success,
+                    minimumSize: const Size(160, 48),
+                  ),
+                  onPressed: onContinueNext,
+                  icon: const Icon(Icons.arrow_forward_rounded),
+                  label: Text(l10n.nodeEditorNextLesson),
+                ),
               ),
-              onPressed: onContinue,
-              child: Text(l10n.actionContinue),
+              const SizedBox(height: 10),
+            ],
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white70),
+                  minimumSize: const Size(160, 48),
+                ),
+                onPressed: onGoHome,
+                icon: const Icon(Icons.home_rounded),
+                label: Text(l10n.nodeEditorBackToHome),
+              ),
             ),
           ],
         ),

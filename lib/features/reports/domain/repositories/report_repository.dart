@@ -5,17 +5,18 @@ abstract class ReportRepository {
   Stream<List<ContentReport>> watchPendingReports();
 
   Future<void> submitReport({
-    required String reelId,
-    required String reelTitle,
-    required String reelUploaderId,
+    required ReportedContentType contentType,
+    required String contentId,
+    required String contentTitle,
     required String reporterId,
     required String reporterName,
     required String reason,
+    String? contentOwnerId,
   });
 
-  /// Şikayeti "incelendi" olarak işaretler — staff gönderiyi kaldırdıktan,
+  /// Şikayeti "incelendi" olarak işaretler — staff içeriği kaldırdıktan,
   /// kullanıcıyı banladıktan veya şikayeti asılsız bulup kapattıktan sonra
-  /// çağrılır. Hangi aksiyonun alındığı ayrı ayrı (deleteReel/setBanned)
-  /// yapılır; bu sadece kuyruktan düşürür.
+  /// çağrılır. Hangi aksiyonun alındığı ayrı ayrı (deleteReel/deleteArticle/
+  /// setBanned) yapılır; bu sadece kuyruktan düşürür.
   Future<void> dismissReport(String reportId);
 }

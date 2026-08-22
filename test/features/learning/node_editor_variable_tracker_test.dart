@@ -51,12 +51,20 @@ void main() {
     ),
   );
 
+  // n_var_2'nin starterCode'u artık boş bir şablon (öğrenci yazacak) —
+  // bu test değişken izleyiciyi doğruladığı için, gerçek bir kullanıcının
+  // yazacağı doğru kodu editöre kendimiz giriyoruz.
+  const solutionCode =
+      'sayi = 42\nondalik = 3.14\nprint(sayi)\nprint(ondalik)';
+
   testWidgets(
     'running code shows the variable tracker with the final step',
     (tester) async {
       await tester.pumpWidget(wrap());
       await tester.pump();
 
+      await tester.enterText(find.byType(TextField), solutionCode);
+      await tester.pump();
       await tester.tap(find.text('Çalıştır'));
       await tester.pump(const Duration(milliseconds: 350));
 
@@ -77,6 +85,8 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pump();
 
+    await tester.enterText(find.byType(TextField), solutionCode);
+    await tester.pump();
     await tester.tap(find.text('Çalıştır'));
     await tester.pump(const Duration(milliseconds: 350));
 
