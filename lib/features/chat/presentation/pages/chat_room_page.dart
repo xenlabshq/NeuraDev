@@ -162,11 +162,17 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
                 }
                 return ListView.builder(
                   controller: _scroll,
-                  padding: const EdgeInsets.fromLTRB(
+                  // Input bar'ın kendi konumuyla aynı hesap (bkz. aşağıdaki
+                  // Positioned) — 3 tuşlu navigasyonda gerçek sistem
+                  // çubuğu eklenmezse son mesajlar input bar'ın altında
+                  // kalıyordu.
+                  padding: EdgeInsets.fromLTRB(
                     16,
                     16,
                     16,
-                    120 + kBottomBarHeight,
+                    120 +
+                        kBottomBarHeight +
+                        MediaQuery.viewPaddingOf(context).bottom,
                   ),
                   itemCount: messages.length,
                   itemBuilder: (_, i) {

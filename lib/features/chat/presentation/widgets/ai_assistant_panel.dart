@@ -136,10 +136,13 @@ class _AiAssistantPanelState extends ConsumerState<AiAssistantPanel> {
                     onSuggestion: _sendText,
                   ),
           ),
-          // Input bar — kBottomBarHeight kadar yukarı offsetli,
-          // böylece floating tab bar onu kapatmaz.
+          // Input bar — kBottomBarHeight + gerçek sistem navigasyon
+          // çubuğu yüksekliği kadar yukarı offsetli, böylece floating
+          // tab bar (ve 3 tuşlu navigasyonda sistem çubuğu) onu kapatmaz.
           Padding(
-            padding: const EdgeInsets.only(bottom: kBottomBarHeight),
+            padding: EdgeInsets.only(
+              bottom: kBottomBarHeight + MediaQuery.paddingOf(context).bottom,
+            ),
             child: _AiInputBar(
               controller: _input,
               onSend: _send,

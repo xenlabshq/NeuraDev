@@ -87,11 +87,16 @@ class _IslandDetailPageState extends ConsumerState<IslandDetailPage> {
                   ),
                 ),
               ),
-              // Yüzen alt bar + güvenlik payı — node'lar barın altında
-              // kalmasın.
+              // Yüzen alt bar + gerçek sistem navigasyon çubuğu yüksekliği
+              // kadar güvenlik payı — sabit değer 3 tuşlu navigasyonda
+              // yetersiz kalıp son node'ların barın altında kalmasına
+              // yol açıyordu.
               SliverToBoxAdapter(
                 child: SizedBox(
-                  height: kBottomBarHeight + 36,
+                  height:
+                      kBottomBarHeight +
+                      36 +
+                      MediaQuery.paddingOf(context).bottom,
                 ),
               ),
             ],

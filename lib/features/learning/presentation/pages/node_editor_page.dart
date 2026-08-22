@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart' hide ErrorHint;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:neuroup/app/router/home_shell.dart' show LessonOverlayScope;
 
 import '../../../../app/theme/colors.dart';
@@ -246,10 +245,14 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
               },
         onGoHome: () {
           Navigator.of(dialogCtx).pop();
-          // go_router'ın go()'su, bu sayfanın (ve altındaki ada
-          // detayının) imperative push yığınını temizleyip doğrudan
-          // ana ders haritasına döner.
-          context.go('/lessons');
+          // NodeEditorPage ve altındaki IslandDetailPage, go_router'ın
+          // DEĞİL, düz Navigator.push ile eklendi — context.go() bu
+          // "imperative" yığını hiç görmüyor, sadece go_router'ın kendi
+          // sayfasını değiştiriyordu (bu yüzden "Ana Sayfaya Dön" sadece
+          // diyaloğu kapatıp kullanıcıyı hâlâ ders ekranında bırakıyordu).
+          // Doğrusu: AYNI Navigator'ın yığınını kökteki (ders haritası)
+          // sayfaya kadar POP'lamak.
+          Navigator.of(context).popUntil((route) => route.isFirst);
         },
       ),
     );

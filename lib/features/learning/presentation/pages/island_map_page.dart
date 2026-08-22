@@ -10,6 +10,7 @@ import 'package:neuroup/features/learning/presentation/painters/isometric_camera
 import 'package:neuroup/features/learning/presentation/providers/adaptive_providers.dart';
 import 'package:neuroup/features/learning/presentation/providers/learning_providers.dart';
 import 'package:neuroup/features/learning/presentation/pages/island_detail_page.dart';
+import 'package:neuroup/features/learning/presentation/pages/node_editor_page.dart';
 import 'package:neuroup/l10n/gen/app_localizations.dart';
 
 /// Fancade tarzı izometrik ada haritası.
@@ -306,10 +307,17 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
                             ),
                             onPressed: () {
                               Navigator.of(sheetCtx).pop();
+                              // "Tüm Dersleri Gör" ile karıştırılmasın diye
+                              // burası doğrudan önerilen node'un editörüne
+                              // gitmeli — daha önce yanlışlıkla aynı
+                              // IslandDetailPage'e (tam node haritasına)
+                              // gidiyordu.
                               Navigator.of(context).push<Widget>(
                                 MaterialPageRoute<Widget>(
-                                  builder: (_) =>
-                                      IslandDetailPage(islandId: islandId),
+                                  builder: (_) => NodeEditorPage(
+                                    islandId: islandId,
+                                    nodeId: recommendedId,
+                                  ),
                                 ),
                               );
                             },
@@ -350,7 +358,17 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
             top: false,
             bottom: false,
             child: Padding(
-              padding: EdgeInsets.only(bottom: kBottomBarHeight + 12),
+              // `bottom: false` yukarıda SafeArea'nın sistem çubuğu
+              // boşluğunu otomatik eklemesini kasıtlı olarak kapatıyor,
+              // bu yüzden gerçek sistem navigasyon çubuğu yüksekliğini
+              // burada elle ekliyoruz — yoksa 3 tuşlu navigasyonda
+              // adalar yüzen barın altında kayboluyordu.
+              padding: EdgeInsets.only(
+                bottom:
+                    kBottomBarHeight +
+                    12 +
+                    MediaQuery.paddingOf(context).bottom,
+              ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   _camera = _camera.withViewportSize(
@@ -403,12 +421,15 @@ class _IslandMapPageState extends ConsumerState<IslandMapPage> {
           ),
           // HUD: üstte XP ve ilerleme
           _TopHud(islands: islands),
-          // Bottom info: zoom indicator + hint (kBottomBarHeight + 12
-          // yukarıda — alt barın üstünde).
+          // Bottom info: zoom indicator + hint (kBottomBarHeight + 12 +
+          // gerçek sistem navigasyon çubuğu yüksekliği kadar yukarıda —
+          // alt barın üstünde; sabit değer 3 tuşlu navigasyonda bar ile
+          // çakışıyordu).
           Positioned(
             left: 0,
             right: 0,
-            bottom: kBottomBarHeight + 12,
+            bottom:
+                kBottomBarHeight + 12 + MediaQuery.paddingOf(context).bottom,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Row(

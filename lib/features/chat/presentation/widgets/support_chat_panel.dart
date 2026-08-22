@@ -102,15 +102,22 @@ class _StudentView extends ConsumerWidget {
             );
           }
           return ListView(
-            padding: const EdgeInsets.fromLTRB(
+            // Sabit bir sayı yerine gerçek sistem navigasyon çubuğu
+            // yüksekliğini de ekliyoruz — 3 tuşlu (gesture olmayan)
+            // navigasyonda sabit değer yetersiz kalıp son mesajların
+            // yüzen bar/sistem çubuğunun altında kalmasına yol açıyordu.
+            padding: EdgeInsets.fromLTRB(
               16,
               16,
               16,
-              kBottomBarHeight + 24,
+              kBottomBarHeight + 24 + MediaQuery.paddingOf(context).bottom,
             ),
             children: [
               if (chats.isNotEmpty) ...[
-                _SectionLabel(label: l10n.supportOpenChatsLabel, tokens: tokens),
+                _SectionLabel(
+                  label: l10n.supportOpenChatsLabel,
+                  tokens: tokens,
+                ),
                 const SizedBox(height: 12),
                 ...chats.map(
                   (chat) => Padding(

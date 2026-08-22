@@ -50,9 +50,16 @@ const Size kPhoneSize = Size(393, 851);
 const Size kTabletSize = Size(768, 1024);
 const Size kWideSize = Size(916, 1440);
 
+// Klasik 3 tuşlu (gesture olmayan) Android navigasyonunun tipik sistem
+// çubuğu yüksekliği — gesture nav'da bu değer 0'a yakınken, 3 tuşlu
+// navigasyonda ~48'e çıkabiliyor. `bottomInset` bu senaryoyu simüle
+// etmek için kullanılıyor (bkz. IslandMapNoOverflow_ThreeButtonNav).
+const double kThreeButtonNavInset = 48;
+
 Widget _wrap(
   Widget child, {
   Size? size,
+  double bottomInset = 0,
   List<Override> overrides = const [],
 }) => ProviderScope(
   overrides: overrides,
@@ -73,6 +80,8 @@ Widget _wrap(
         size: size ?? kPhoneSize,
         platformBrightness: Brightness.dark,
         devicePixelRatio: 1.0,
+        padding: EdgeInsets.only(bottom: bottomInset),
+        viewPadding: EdgeInsets.only(bottom: bottomInset),
       ),
       child: child,
     ),
@@ -85,6 +94,7 @@ Future<void> _overflowTest(
   String name,
   Widget child, {
   Size? size,
+  double bottomInset = 0,
   List<Override> overrides = const [],
 }) async {
   final errors = <String>[];
@@ -93,7 +103,9 @@ Future<void> _overflowTest(
     errors.add(details.exceptionAsString());
   };
   try {
-    await tester.pumpWidget(_wrap(child, size: size, overrides: overrides));
+    await tester.pumpWidget(
+      _wrap(child, size: size, bottomInset: bottomInset, overrides: overrides),
+    );
     await tester.pump(const Duration(milliseconds: 50));
   } catch (e) {
     errors.add('PUMP_EX: $e');
@@ -398,6 +410,24 @@ void main() {
       'IslandMapPage',
       const IslandMapPage(),
       size: kWideSize,
+      overrides: learningOverrides,
+    ),
+  );
+
+  // Regresyon: klasik 3 tuşlu Android navigasyonu (gesture değil) —
+  // gerçek bir cihazda yüzen alt bar ile adaların/sistem çubuğuyla
+  // çakıştığı bildirildi. `kBottomBarHeight` + sabit bir sayı yerine
+  // gerçek MediaQuery.paddingOf(context).bottom eklenerek düzeltildi;
+  // bu test o hesaplamanın negatif/çakışan bir boyuta yol açmadığını
+  // (yani sayfanın hâlâ hatasız render edildiğini) doğruluyor.
+  testWidgets(
+    'IslandMapNoOverflow_ThreeButtonNav',
+    (tester) async => _overflowTest(
+      tester,
+      'IslandMapPage',
+      const IslandMapPage(),
+      size: kPhoneSize,
+      bottomInset: kThreeButtonNavInset,
       overrides: learningOverrides,
     ),
   );
