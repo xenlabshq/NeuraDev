@@ -201,79 +201,82 @@ class _ChatRoomPageState extends ConsumerState<ChatRoomPage> {
             // gerçek cihazda (Pixel/Samsung gesture nav) 24-48 px döner.
             // Hesaba katmadan `Positioned(bottom: 84)` cihazda input'u
             // navigation bar'ın altına sıkıştırıyordu.
+            //
+            // ÖNEMLİ: burada içeride AYRICA bir SafeArea(top: false)
+            // KULLANMA — bottom zaten gerçek sistem boşluğunu içeriyor;
+            // bir SafeArea daha eklemek aynı boşluğu İKİNCİ KEZ sayıp
+            // input bar'ı (özellikle 3 tuşlu navigasyonda) gereğinden
+            // çok daha yukarıda bırakıyordu.
             bottom: kBottomBarHeight + MediaQuery.viewPaddingOf(context).bottom,
-            child: SafeArea(
-              top: false,
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-                decoration: BoxDecoration(
-                  color: tokens.surfaceAlt,
-                  border: Border(
-                    top: BorderSide(
-                      color: tokens.border.withValues(alpha: 0.6),
-                    ),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+              decoration: BoxDecoration(
+                color: tokens.surfaceAlt,
+                border: Border(
+                  top: BorderSide(
+                    color: tokens.border.withValues(alpha: 0.6),
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _input,
-                        minLines: 1,
-                        maxLines: 4,
-                        textInputAction: TextInputAction.send,
-                        onSubmitted: (_) => _send(user),
-                        style: TextStyle(
-                          color: tokens.textPrimary,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _input,
+                      minLines: 1,
+                      maxLines: 4,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (_) => _send(user),
+                      style: TextStyle(
+                        color: tokens.textPrimary,
+                        fontSize: 14,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: l10n.chatMessageHint,
+                        hintStyle: TextStyle(
+                          color: tokens.textTertiary,
                           fontSize: 14,
                         ),
-                        decoration: InputDecoration(
-                          hintText: l10n.chatMessageHint,
-                          hintStyle: TextStyle(
-                            color: tokens.textTertiary,
-                            fontSize: 14,
-                          ),
-                          filled: true,
-                          fillColor: tokens.surface,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                            borderSide: BorderSide.none,
-                          ),
+                        filled: true,
+                        fillColor: tokens.surface,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide.none,
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Material(
-                      color: AppColors.primary,
-                      shape: const CircleBorder(),
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: _sending ? null : () => _send(user),
-                        child: SizedBox(
-                          width: 48,
-                          height: 48,
-                          child: _sending
-                              ? const Padding(
-                                  padding: EdgeInsets.all(14),
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Icon(
-                                  Icons.send_rounded,
+                  ),
+                  const SizedBox(width: 8),
+                  Material(
+                    color: AppColors.primary,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: _sending ? null : () => _send(user),
+                      child: SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: _sending
+                            ? const Padding(
+                                padding: EdgeInsets.all(14),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
                                   color: Colors.white,
-                                  size: 20,
                                 ),
-                        ),
+                              )
+                            : const Icon(
+                                Icons.send_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

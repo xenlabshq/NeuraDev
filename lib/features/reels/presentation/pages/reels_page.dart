@@ -106,9 +106,15 @@ class _ReelsPageState extends ConsumerState<ReelsPage> {
             Positioned(
               left: 0,
               right: 0,
-              // Alt navigation bar + safe area (klavye) üzerinde konumlan.
-              // 84 px = HomeShell kBottomBarHeight, + bottom inset klavye.
-              bottom: MediaQuery.viewPaddingOf(context).bottom > 0
+              // Klavye açıksa klavyenin üzerinde, kapalıysa yüzen tab bar +
+              // gerçek sistem navigasyon çubuğunun üzerinde konumlan.
+              // ÖNCEKİ HATA: koşul `viewPaddingOf` (sistem navigasyonu var
+              // mı) kontrol ediyordu — bu neredeyse HER cihazda true
+              // olduğundan, klavye kapalıyken de yanlışlıkla sadece
+              // `viewInsetsOf` (0) kullanılıyor, çekmece barın altına
+              // iniyordu. Doğrusu klavyenin açık olup olmadığını
+              // (`viewInsetsOf`) kontrol etmek.
+              bottom: MediaQuery.viewInsetsOf(context).bottom > 0
                   ? MediaQuery.viewInsetsOf(context).bottom
                   : 84 + MediaQuery.paddingOf(context).bottom,
               child: ReelCommentsDrawer(

@@ -10,8 +10,7 @@ import 'package:video_player/video_player.dart';
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../chat/presentation/providers/chat_providers.dart'
     show currentAuthUserProvider;
-import '../../../../shared/models/user_profile.dart'
-    show UserProfile, UserRole;
+import '../../../../shared/models/user_profile.dart' show UserProfile, UserRole;
 import '../../../reports/domain/entities/content_report.dart';
 import '../../../reports/presentation/providers/report_providers.dart';
 import '../../../reports/presentation/widgets/report_reason_dialog.dart';
@@ -125,6 +124,11 @@ class ReelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
+    // 96/110 yüzen tab bar için varsayılan (sıfıra yakın sistem
+    // boşluğu) pay olarak seçilmişti — gerçek sistem navigasyon çubuğu
+    // yüksekliği eklenmezse 3 tuşlu navigasyonda "Oyunu Dene" butonu ve
+    // aksiyon rayı yüzen barın altında/çok yakınında kalıyordu.
+    final bottomInset = mq.padding.bottom;
     return SizedBox.expand(
       child: Stack(
         fit: StackFit.expand,
@@ -149,7 +153,7 @@ class ReelPage extends StatelessWidget {
           ),
           Positioned(
             right: 12,
-            bottom: 110,
+            bottom: 110 + bottomInset,
             child: _ActionRail(
               reel: reel,
               onOpenComments: onOpenComments,
@@ -158,7 +162,7 @@ class ReelPage extends StatelessWidget {
           Positioned(
             left: 16,
             right: 78,
-            bottom: 96,
+            bottom: 96 + bottomInset,
             child: _BottomInfo(reel: reel),
           ),
         ],
