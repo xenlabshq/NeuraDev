@@ -281,12 +281,20 @@
   "reelsSaveLabel": "Kaydet",
   "reelsLinkFailed": "Link açılamadı",
   "reelsTryGame": "Oyunu Dene",
-  "reelsOpenVideoExternally": "Videoyu Aç",
   "reelsInvalidUrl": "Geçerli bir link gir (https://...)",
   "reelsSignInFirst": "Önce giriş yapmalısın",
-  "reelsPickVideoFirst": "Bir video dosyası seçmeli ya da bir video linki girmelisin",
-  "reelsVideoUrlLabel": "Video linki",
-  "reelsVideoUrlHint": "https://... (YouTube, Google Drive vb.)",
+  "reelsPickMediaFirst": "Önce bir video ya da resim seçmelisin",
+  "reelsDailyLimitReached": "Günde sadece bir kez paylaşım yapabilirsin. {hours} sa {minutes} dk sonra tekrar dene.",
+  "@reelsDailyLimitReached": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "reelsFallbackUserTag": "kullanici",
   "reelsFallbackUserName": "Kullanıcı",
   "reelsNewCommunityHud": "Topluluk · Yeni",
@@ -299,18 +307,21 @@
     }
   },
   "reelsShareYourGame": "Oyununu Paylaş",
-  "reelsGameplayVideoLabel": "Oynanış videosu",
+  "reelsMediaLabel": "Oynanış medyası",
+  "reelsMediaTypeVideo": "Video",
+  "reelsMediaTypeImage": "Resim",
   "reelsGameNameLabel": "Oyun adı",
   "reelsShortDescriptionLabel": "Kısa tanıtım",
   "reelsShortDescriptionHint": "Oyununu bir-iki cümlede anlat",
   "reelsTagsLabel": "Etiketler (opsiyonel)",
   "reelsGameLinkLabel": "Oyun linki",
   "reelsPickVideoPrompt": "Galeriden bir oynanış videosu seç",
+  "reelsPickImagePrompt": "Galeriden bir ekran görüntüsü seç",
   "reelsPickAction": "Seç",
   "reelsChangeAction": "Değiştir",
   "reelsEmpty": "Henüz reel yok",
   "reelsEditYourGame": "Oyununu Düzenle",
-  "reelsVideoKeptHint": "Video değiştirilmeyecek — istersen yeni bir video seçebilirsin",
+  "reelsMediaKeptHint": "Medya değiştirilmeyecek — istersen yeni bir tane seçebilirsin",
   "reelsMoreOptions": "Diğer seçenekler",
   "reelsReportAction": "Şikayet Et",
   "reelsReportDialogTitle": "Bu gönderiyi şikayet et",
@@ -622,7 +633,32 @@
     }
   },
   "nodeEditorNoVariablesYet": "Henüz bir değişken tanımlanmadı.",
-  "nodeEditorSolution": "Çözüm",
+  "nodeEditorHintButton": "İpucu",
+  "nodeEditorHintTitle": "İpucu {current}/{total}",
+  "@nodeEditorHintTitle": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nodeEditorHintGetFirst": "Bana bir ipucu ver",
+  "nodeEditorHintNext": "Sonraki ipucu ({current}/{total})",
+  "@nodeEditorHintNext": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nodeEditorHintsExhausted": "Tüm ipuçlarını kullandın — çözüme hazır mısın?",
+  "nodeEditorShowSolutionAction": "Çözümü Göster",
   "nodeEditorRun": "Çalıştır",
   "congratulationsTitle": "Tebrikler!",
   "xpEarnedMessage": "+{xp} XP kazandın!",

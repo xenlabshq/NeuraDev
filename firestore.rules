@@ -72,16 +72,43 @@ service cloud.firestore {
     // düzenleyemez — içerik değişikliği sadece sahibine ait).
     match /reels/{reelId} {
       allow read: if true;
+      // Storage maliyetini kontrol altında tutmak için kullanıcı başına
+      // günde bir yükleme hakkı var — upload_limits/{uid} belgesindeki
+      // son yükleme zamanı 24 saatten eskiyse (ya da hiç yoksa) izin
+      // verilir. ReelSubmissionRepositoryImpl bu belgeyi aynı batch
+      // içinde yazdığı için kontrol her zaman güncel veriye bakar.
       allow create: if isSignedIn() && !isBanned() &&
         request.resource.data.submittedBy == request.auth.uid &&
         request.resource.data.title is string &&
         request.resource.data.title.size() > 0 &&
         request.resource.data.gameUrl is string &&
-        request.resource.data.gameUrl.size() > 0;
+        request.resource.data.gameUrl.size() > 0 &&
+        (!exists(/databases/$(database)/documents/upload_limits/$(request.auth.uid)) ||
+         request.time > get(/databases/$(database)/documents/upload_limits/$(request.auth.uid)).data.lastUploadAt + duration.value(24, 'h'));
       allow update: if isSignedIn() && !isBanned() &&
         resource.data.submittedBy == request.auth.uid;
+      // Sahibi kendi gönderisini, staff HERHANGİ bir gönderiyi, ve süresi
+      // dolmuş (expiresAt geçmiş) bir gönderiyi HERKES (giriş yapmış
+      // herhangi bir kullanıcı) silebilir — gerçek sunucu tarafı otomatik
+      // silme Cloud Functions (ve Blaze planı) gerektirdiğinden, süresi
+      // dolan içerik ona rastlayan HERHANGİ bir istemci tarafından
+      // (bkz. reels_providers.dart) temizleniyor.
       allow delete: if isStaff() ||
-        (isSignedIn() && resource.data.submittedBy == request.auth.uid);
+        (isSignedIn() && resource.data.submittedBy == request.auth.uid) ||
+        (isSignedIn() && resource.data.expiresAt is timestamp &&
+         resource.data.expiresAt < request.time);
+    }
+
+    // --- upload_limits/{userId} ---
+    // reels'in create kuralının günlük yükleme kotasını kontrol
+    // edebilmesi için her kullanıcının son yükleme zamanını tutar.
+    // Sadece sahibi kendi belgesini okuyup yazabilir; `lastUploadAt`
+    // sahteciliğini önlemek için sunucu saatine (request.time) eşit
+    // olmak zorunda (repository FieldValue.serverTimestamp() kullanıyor).
+    match /upload_limits/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if isSignedIn() && request.auth.uid == userId &&
+        !isBanned() && request.resource.data.lastUploadAt == request.time;
     }
 
     // --- support_chats/{chatId} ---

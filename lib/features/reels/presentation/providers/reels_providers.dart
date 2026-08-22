@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/env/env.dart';
@@ -29,10 +31,22 @@ final reelsProvider = StateNotifierProvider<ReelsNotifier, List<GameReel>>((
   ref,
 ) {
   final notifier = ReelsNotifier(ref.read(reelsRepositoryProvider));
-  final sub = ref
-      .watch(reelSubmissionRepositoryProvider)
-      .watchSubmittedReels()
-      .listen(notifier.mergeSubmitted);
+  final submissionRepo = ref.watch(reelSubmissionRepositoryProvider);
+  final sub = submissionRepo.watchSubmittedReels().listen((list) {
+    notifier.mergeSubmitted(list);
+    // Storage maliyetini kontrol altında tutmak için gönderiler 24
+    // saat sonra süresi dolmuş sayılıyor. Gerçek sunucu tarafı otomatik
+    // silme Cloud Functions (ve Blaze planı) gerektirdiğinden, bu akışa
+    // rastlayan HERHANGİ bir istemci süresi dolmuş gönderileri en iyi
+    // çaba (best effort) ile temizler — firestore.rules bunu herkese
+    // (sadece süresi dolmuş olanlar için) açıyor.
+    final now = DateTime.now();
+    for (final r in list) {
+      if (r.expiresAt != null && r.expiresAt!.isBefore(now)) {
+        unawaited(submissionRepo.deleteReel(r.id).catchError((_) {}));
+      }
+    }
+  });
   ref.onDispose(sub.cancel);
   return notifier;
 });
@@ -126,6 +140,14 @@ class ReelsNotifier extends StateNotifier<List<GameReel>> {
   /// beğeni/kaydet/takip/yorum durumu korunur (bunlar sunucuda tutulmaz).
   /// Seed (demo) reels'e (`uploaderId == null`) hiç dokunulmaz.
   void mergeSubmitted(List<GameReel> submitted) {
+    // Süresi dolmuş (expiresAt geçmiş) gönderiler asıl silinmeyi
+    // (best-effort, bkz. reelsProvider) beklemeden hemen akıştan
+    // çıkarılır — kullanıcı "bir gün sonra otomatik silinsin" derken
+    // en azından GÖRÜNÜRLÜK anlamında anında gerçekleşsin istiyor.
+    final now = DateTime.now();
+    submitted = submitted
+        .where((r) => r.expiresAt == null || r.expiresAt!.isAfter(now))
+        .toList();
     final submittedById = {for (final r in submitted) r.id: r};
     final kept = <GameReel>[];
     final seenIds = <String>{};

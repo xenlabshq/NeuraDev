@@ -184,29 +184,40 @@
   "reelsSaveLabel": "Save",
   "reelsLinkFailed": "Couldn't open link",
   "reelsTryGame": "Try the Game",
-  "reelsOpenVideoExternally": "Open Video",
   "reelsInvalidUrl": "Enter a valid link (https://...)",
   "reelsSignInFirst": "You need to sign in first",
-  "reelsPickVideoFirst": "Pick a video file or enter a video link",
-  "reelsVideoUrlLabel": "Video link",
-  "reelsVideoUrlHint": "https://... (YouTube, Google Drive, etc.)",
+  "reelsPickMediaFirst": "Pick a video or an image first",
+  "reelsDailyLimitReached": "You can only publish once a day. Try again in {hours}h {minutes}m.",
+  "@reelsDailyLimitReached": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "reelsFallbackUserTag": "user",
   "reelsFallbackUserName": "User",
   "reelsNewCommunityHud": "Community · New",
   "reelsSubmitFailed": "Couldn't submit: {name}",
   "reelsShareYourGame": "Share Your Game",
-  "reelsGameplayVideoLabel": "Gameplay video",
+  "reelsMediaLabel": "Gameplay media",
+  "reelsMediaTypeVideo": "Video",
+  "reelsMediaTypeImage": "Image",
   "reelsGameNameLabel": "Game name",
   "reelsShortDescriptionLabel": "Short description",
   "reelsShortDescriptionHint": "Describe your game in a sentence or two",
   "reelsTagsLabel": "Tags (optional)",
   "reelsGameLinkLabel": "Game link",
   "reelsPickVideoPrompt": "Pick a gameplay video from your gallery",
+  "reelsPickImagePrompt": "Pick a screenshot from your gallery",
   "reelsPickAction": "Pick",
   "reelsChangeAction": "Change",
   "reelsEmpty": "No reels yet",
   "reelsEditYourGame": "Edit Your Game",
-  "reelsVideoKeptHint": "The video will stay the same — you can pick a new one if you want",
+  "reelsMediaKeptHint": "The media will stay the same — you can pick a new one if you want",
   "reelsMoreOptions": "More options",
   "reelsReportAction": "Report",
   "reelsReportDialogTitle": "Report this post",
@@ -417,7 +428,32 @@
   "nodeEditorNextStep": "Next step",
   "nodeEditorPrintedOutput": "→ printed: \"{output}\"",
   "nodeEditorNoVariablesYet": "No variables defined yet.",
-  "nodeEditorSolution": "Solution",
+  "nodeEditorHintButton": "Hint",
+  "nodeEditorHintTitle": "Hint {current} of {total}",
+  "@nodeEditorHintTitle": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nodeEditorHintGetFirst": "Show me a hint",
+  "nodeEditorHintNext": "Next hint ({current}/{total})",
+  "@nodeEditorHintNext": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "nodeEditorHintsExhausted": "You've used all the hints — ready for the solution?",
+  "nodeEditorShowSolutionAction": "Show Solution",
   "nodeEditorRun": "Run",
   "congratulationsTitle": "Congratulations!",
   "xpEarnedMessage": "You earned +{xp} XP!",

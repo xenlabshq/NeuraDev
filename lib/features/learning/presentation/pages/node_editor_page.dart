@@ -38,6 +38,7 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
   bool _showTutorial = true;
   ErrorHint? _hint;
   LessonOverlayScope? _overlayScope;
+  int _hintsRevealed = 0;
 
   /// Aktif ada ve node'u tek seferde arar; bulunamazsa null döner.
   /// F-19: Artık `StateError` riski yok.
@@ -140,6 +141,43 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
     setState(() {
       _code.text = node.solution;
     });
+  }
+
+  /// Doğrudan çözümü göstermek yerine önce ilerleyen ipuçları sunar —
+  /// kullanıcı adım adım kendi başına çözmeyi dener, çözüm sadece 3
+  /// ipucunun hepsi görüldükten sonra açılır. Hiç ipucu tanımlı değilse
+  /// (eski/eksik içerik) doğrudan çözüme düşülür.
+  void _openHints() {
+    final (_, node) = _findActive();
+    if (node == null) return;
+    if (node.hints.isEmpty) {
+      _showSolution();
+      return;
+    }
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, setSheetState) => _HintSheet(
+          hints: node.hints,
+          revealedCount: _hintsRevealed,
+          onRevealMore: () {
+            setState(() {
+              _hintsRevealed = (_hintsRevealed + 1).clamp(
+                0,
+                node.hints.length,
+              );
+            });
+            setSheetState(() {});
+          },
+          onShowSolution: () {
+            Navigator.of(sheetContext).pop();
+            _showSolution();
+          },
+        ),
+      ),
+    );
   }
 
   void _verify() {
@@ -290,7 +328,7 @@ class _NodeEditorPageState extends ConsumerState<NodeEditorPage> {
           ),
           _ActionBar(
             onRun: _run,
-            onShowSolution: _showSolution,
+            onShowSolution: _openHints,
             onVerify: _verify,
             running: _running,
             success: _success,
@@ -1020,7 +1058,7 @@ class _ActionBar extends StatelessWidget {
                 onPressed: onShowSolution,
                 icon: const Icon(Icons.lightbulb_outline_rounded, size: 16),
                 label: Text(
-                  l10n.nodeEditorSolution,
+                  l10n.nodeEditorHintButton,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1280,6 +1318,160 @@ class _ErrorHintCardState extends State<_ErrorHintCard> {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// İpucu paneli — çözümü doğrudan göstermek yerine [hints] listesini tek
+/// tek açar. [revealedCount] o ana kadar açılmış ipucu sayısıdır; hepsi
+/// açılana kadar "Çözümü Göster" butonu kilitli kalır — kullanıcı önce
+/// kendi başına denemeye teşvik edilir.
+class _HintSheet extends StatelessWidget {
+  const _HintSheet({
+    required this.hints,
+    required this.revealedCount,
+    required this.onRevealMore,
+    required this.onShowSolution,
+  });
+
+  final List<String> hints;
+  final int revealedCount;
+  final VoidCallback onRevealMore;
+  final VoidCallback onShowSolution;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final allRevealed = revealedCount >= hints.length;
+    return SafeArea(
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 34,
+                  height: 3,
+                  margin: const EdgeInsets.only(bottom: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                const Text('💡', style: TextStyle(fontSize: 20)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    revealedCount == 0
+                        ? l10n.nodeEditorHintButton
+                        : l10n.nodeEditorHintTitle(revealedCount, hints.length),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close_rounded, color: Colors.white60),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            for (var i = 0; i < revealedCount; i++)
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFC145).withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFFFC145).withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${i + 1}.',
+                      style: const TextStyle(
+                        color: Color(0xFFFFC145),
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        hints[i],
+                        style: const TextStyle(
+                          color: Color(0xFFE0E0E0),
+                          fontSize: 13,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: allRevealed
+                  ? FilledButton.icon(
+                      onPressed: onShowSolution,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF2EA043),
+                      ),
+                      icon: const Icon(Icons.check_circle_outline_rounded),
+                      label: Text(l10n.nodeEditorShowSolutionAction),
+                    )
+                  : OutlinedButton.icon(
+                      onPressed: onRevealMore,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFFFC145),
+                        side: const BorderSide(color: Color(0xFFFFC145)),
+                      ),
+                      icon: const Icon(Icons.lightbulb_outline_rounded),
+                      label: Text(
+                        revealedCount == 0
+                            ? l10n.nodeEditorHintGetFirst
+                            : l10n.nodeEditorHintNext(
+                                revealedCount + 1,
+                                hints.length,
+                              ),
+                      ),
+                    ),
+            ),
+            if (allRevealed) ...[
+              const SizedBox(height: 8),
+              Text(
+                l10n.nodeEditorHintsExhausted,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

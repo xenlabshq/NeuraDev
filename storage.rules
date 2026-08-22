@@ -1,0 +1,30 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Reels medya dosyaları — kullanıcı sadece kendi klasörüne
+    // (reels/{uid}/...) yazabilir, herkes okuyabilir (akış herkese
+    // açık). Storage maliyetini kontrol altında tutmak için dosya
+    // boyutu sınırlanıyor ve sadece video/resim content-type'larına
+    // izin veriliyor. Yeni dosya SAYISI (günde 1) ve dosyaların ÖMRÜ
+    // (24 saat) zaten Firestore tarafında sınırlanıyor (bkz.
+    // firestore.rules `reels`/`upload_limits`, ReelSubmissionRepositoryImpl).
+    match /reels/{uid}/{fileName} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == uid &&
+        request.resource.size < 100 * 1024 * 1024 &&
+        (request.resource.contentType.matches('video/.*') ||
+         request.resource.contentType.matches('image/.*'));
+      allow update: if false;
+      // Süresi dolmuş (expiresAt geçmiş) gönderileri temizlemek isteyen
+      // HERHANGİ bir istemci (bkz. reels_providers.dart, best-effort
+      // crowd-sourced temizlik) dosyayı da silebilsin diye silme her
+      // giriş yapmış kullanıcıya açık — Firestore tarafında da aynı
+      // model uygulanıyor.
+      allow delete: if request.auth != null;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

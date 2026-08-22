@@ -19,6 +19,11 @@ extension ReelAccentColors on ReelAccent {
   }
 }
 
+/// Kullanıcı gönderimi bir video mu yoksa bir resim mi? Storage
+/// maliyetini kontrol altında tutmak için kullanıcılar ikisinden
+/// sadece birini yükleyebiliyor (bkz. ReelSubmitPage).
+enum ReelMediaType { video, image }
+
 /// Reel için tek bir yorum.
 class ReelComment extends Equatable {
   const ReelComment({
@@ -50,7 +55,9 @@ class GameReel extends Equatable {
     required this.comments,
     required this.gameUrl,
     this.videoUrl,
+    this.mediaType = ReelMediaType.video,
     this.uploaderId,
+    this.expiresAt,
     this.liked = false,
     this.saved = false,
     this.following = false,
@@ -74,11 +81,19 @@ class GameReel extends Equatable {
   /// butonu bunu tarayıcıda açar), demo seed verisinde uygulama-içi rota
   /// (`/lessons` gibi, geriye dönük uyumluluk için `context.push` ile açılır).
   final String gameUrl;
-  /// Oynanış videosu — kullanıcı yüklemelerinde dolu (demo modda yerel
-  /// dosya yolu, gerçek modda Firebase Storage indirme linki). `null` ise
+  /// Oynanış medyası — kullanıcı yüklemelerinde dolu (demo modda yerel
+  /// dosya yolu, gerçek modda Firebase Storage indirme linki). [mediaType]
+  /// bunun video mu resim mi olduğunu belirtir. `null` ise
   /// [ReelBackgroundPainter] arka plan olarak kullanılır (demo reels).
   final String? videoUrl;
+  final ReelMediaType mediaType;
   final String? uploaderId;
+  /// Storage maliyetini kontrol altında tutmak için kullanıcı
+  /// gönderimleri geçicidir — bu tarihten sonra herhangi bir istemci
+  /// gönderiyi (ve Storage'daki dosyasını) temizleyebilir (bkz.
+  /// firestore.rules `reels` koleksiyonu delete kuralı). Seed/demo
+  /// reels'te `null`, hiç süresi dolmaz.
+  final DateTime? expiresAt;
 
   GameReel copyWith({
     int? likes,
@@ -103,7 +118,9 @@ class GameReel extends Equatable {
     comments: comments ?? this.comments,
     gameUrl: gameUrl,
     videoUrl: videoUrl,
+    mediaType: mediaType,
     uploaderId: uploaderId,
+    expiresAt: expiresAt,
   );
 
   String get avatarText =>
@@ -126,5 +143,9 @@ class GameReel extends Equatable {
     following,
     comments,
     gameUrl,
+    videoUrl,
+    mediaType,
+    uploaderId,
+    expiresAt,
   ];
 }

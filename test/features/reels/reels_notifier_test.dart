@@ -137,6 +137,65 @@ void main() {
     },
   );
 
+  test(
+    'mergeSubmitted hides a submission whose expiresAt has passed',
+    () {
+      final notifier = ReelsNotifier(InMemoryReelsRepository());
+      final seedCount = notifier.state.length;
+      final expired = GameReel(
+        id: 'user_1',
+        devName: 'Test Dev',
+        devTag: '@testdev',
+        title: 'Süresi Dolmuş',
+        caption: 'caption',
+        tags: '#test',
+        accent: ReelAccent.gold,
+        symbols: const ['🎮'],
+        hud: 'Yeni',
+        likes: 0,
+        gameUrl: 'https://example.com/game',
+        uploaderId: 'submitter_user_1',
+        expiresAt: DateTime.now().subtract(const Duration(minutes: 1)),
+        comments: const [],
+      );
+
+      notifier.mergeSubmitted([expired]);
+
+      expect(notifier.state.length, seedCount);
+      expect(notifier.state.any((r) => r.id == 'user_1'), isFalse);
+    },
+  );
+
+  test(
+    'mergeSubmitted keeps a submission whose expiresAt is still in the '
+    'future',
+    () {
+      final notifier = ReelsNotifier(InMemoryReelsRepository());
+      final seedCount = notifier.state.length;
+      final fresh = GameReel(
+        id: 'user_1',
+        devName: 'Test Dev',
+        devTag: '@testdev',
+        title: 'Taze',
+        caption: 'caption',
+        tags: '#test',
+        accent: ReelAccent.gold,
+        symbols: const ['🎮'],
+        hud: 'Yeni',
+        likes: 0,
+        gameUrl: 'https://example.com/game',
+        uploaderId: 'submitter_user_1',
+        expiresAt: DateTime.now().add(const Duration(hours: 23)),
+        comments: const [],
+      );
+
+      notifier.mergeSubmitted([fresh]);
+
+      expect(notifier.state.length, seedCount + 1);
+      expect(notifier.state.any((r) => r.id == 'user_1'), isTrue);
+    },
+  );
+
   test('loadMore has nothing left after the seed is exhausted', () async {
     final notifier = ReelsNotifier(InMemoryReelsRepository());
     final seedCount = notifier.state.length;

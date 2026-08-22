@@ -1,8 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neuroup/features/reels/data/in_memory_reel_submission_repository.dart';
+import 'package:neuroup/features/reels/data/reel_submission_repository_impl.dart'
+    show reelUploadCooldown;
 import 'package:neuroup/features/reels/domain/entities/game_reel.dart';
 
-GameReel _reel({String title = 'Test Oyunu'}) => GameReel(
+GameReel _reel({
+  String title = 'Test Oyunu',
+  ReelMediaType mediaType = ReelMediaType.video,
+}) => GameReel(
   id: '',
   devName: 'Test Dev',
   devTag: '@testdev',
@@ -14,6 +19,7 @@ GameReel _reel({String title = 'Test Oyunu'}) => GameReel(
   hud: 'Yeni',
   likes: 0,
   gameUrl: 'https://example.com/game',
+  mediaType: mediaType,
   comments: const [],
 );
 
@@ -92,5 +98,73 @@ void main() {
     await repo.deleteReel(saved.id);
 
     expect(await repo.watchSubmittedReels().first, isEmpty);
+  });
+
+  test('lastUploadAt is null before any submission', () async {
+    final repo = InMemoryReelSubmissionRepository();
+    expect(await repo.lastUploadAt('uid_1'), isNull);
+  });
+
+  test('lastUploadAt reflects the most recent submission by that uid', () async {
+    final repo = InMemoryReelSubmissionRepository();
+    final before = DateTime.now();
+    await repo.submitReel(_reel(), submittedByUid: 'uid_1');
+    final last = await repo.lastUploadAt('uid_1');
+
+    expect(last, isNotNull);
+    expect(last!.isAfter(before.subtract(const Duration(seconds: 1))), isTrue);
+    expect(await repo.lastUploadAt('uid_2'), isNull);
+  });
+
+  test('submitReel persists the media type', () async {
+    final repo = InMemoryReelSubmissionRepository();
+    await repo.submitReel(
+      _reel(mediaType: ReelMediaType.image),
+      submittedByUid: 'uid_1',
+    );
+    final saved = (await repo.watchSubmittedReels().first).single;
+
+    expect(saved.mediaType, ReelMediaType.image);
+  });
+
+  test('submitReel sets expiresAt roughly one cooldown period ahead', () async {
+    final repo = InMemoryReelSubmissionRepository();
+    final before = DateTime.now();
+    await repo.submitReel(_reel(), submittedByUid: 'uid_1');
+    final saved = (await repo.watchSubmittedReels().first).single;
+
+    expect(saved.expiresAt, isNotNull);
+    final expected = before.add(reelUploadCooldown);
+    expect(
+      saved.expiresAt!.difference(expected).inSeconds.abs() < 2,
+      isTrue,
+    );
+  });
+
+  test('updateReel preserves the original expiresAt', () async {
+    final repo = InMemoryReelSubmissionRepository();
+    await repo.submitReel(_reel(), submittedByUid: 'uid_1');
+    final saved = (await repo.watchSubmittedReels().first).single;
+
+    await repo.updateReel(
+      GameReel(
+        id: saved.id,
+        devName: saved.devName,
+        devTag: saved.devTag,
+        title: 'Yeni',
+        caption: saved.caption,
+        tags: saved.tags,
+        accent: saved.accent,
+        symbols: saved.symbols,
+        hud: saved.hud,
+        likes: saved.likes,
+        gameUrl: saved.gameUrl,
+        uploaderId: saved.uploaderId,
+        comments: saved.comments,
+      ),
+    );
+
+    final updated = (await repo.watchSubmittedReels().first).single;
+    expect(updated.expiresAt, saved.expiresAt);
   });
 }

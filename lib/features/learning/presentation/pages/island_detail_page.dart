@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neuroup/app/router/home_shell.dart'
     show kBottomBarHeight, LessonOverlayScope;
@@ -201,15 +202,25 @@ class _IslandHeader extends StatelessWidget {
                           Expanded(
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: LinearProgressIndicator(
-                                value: progress,
-                                minHeight: 8,
-                                backgroundColor: Colors.white.withValues(
-                                  alpha: 0.3,
-                                ),
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                ),
+                              // Sayfa açılırken ilerleme çubuğu 0'dan gerçek
+                              // değerine doğru canlanarak dolar — sayfanın
+                              // ilk anda "diri" hissettirmesi için.
+                              child: TweenAnimationBuilder<double>(
+                                tween: Tween(begin: 0, end: progress),
+                                duration: const Duration(milliseconds: 900),
+                                curve: Curves.easeOutCubic,
+                                builder: (context, value, _) =>
+                                    LinearProgressIndicator(
+                                      value: value,
+                                      minHeight: 8,
+                                      backgroundColor: Colors.white.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                      valueColor:
+                                          const AlwaysStoppedAnimation<Color>(
+                                            Colors.white,
+                                          ),
+                                    ),
                               ),
                             ),
                           ),
@@ -387,10 +398,17 @@ class _NodeCircle extends StatefulWidget {
 }
 
 class _NodeCircleState extends State<_NodeCircle>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final Animation<double> _pulse;
   late final Animation<double> _rotate;
+  // Dokununca hafifçe küçülüp geri sıçrayan "basılı" hissi — dokunmanın
+  // gerçekten bir şeyi tetiklediğini anında hissettirir.
+  late final AnimationController _pressCtrl;
+  late final Animation<double> _press;
+  // Kilitli bir node'a dokununca sağa-sola sallanarak "hayır" der —
+  // sessizce hiçbir şey olmaması yerine net bir görsel geri bildirim.
+  late final AnimationController _shakeCtrl;
 
   @override
   void initState() {
@@ -406,12 +424,45 @@ class _NodeCircleState extends State<_NodeCircle>
     if (!widget.node.isCompleted && !widget.node.isLocked) {
       _ctrl.repeat(reverse: true);
     }
+    _pressCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 180),
+    );
+    _press = Tween<double>(begin: 1.0, end: 0.88).animate(
+      CurvedAnimation(parent: _pressCtrl, curve: Curves.easeOut),
+    );
+    _shakeCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 420),
+    );
   }
 
   @override
   void dispose() {
     _ctrl.dispose();
+    _pressCtrl.dispose();
+    _shakeCtrl.dispose();
     super.dispose();
+  }
+
+  void _handleTapDown(TapDownDetails _) {
+    if (widget.node.isLocked) return;
+    _pressCtrl.forward();
+  }
+
+  void _handleTapUp(TapUpDetails _) => _pressCtrl.reverse();
+
+  void _handleTapCancel() => _pressCtrl.reverse();
+
+  void _handleTap() {
+    if (widget.node.isLocked) {
+      HapticFeedback.heavyImpact();
+      _shakeCtrl.forward(from: 0);
+    } else {
+      HapticFeedback.selectionClick();
+    }
+    widget.onTap();
   }
 
   @override
@@ -421,130 +472,147 @@ class _NodeCircleState extends State<_NodeCircle>
     final locked = widget.node.isLocked;
 
     return GestureDetector(
-      onTap: widget.onTap,
-      child: SizedBox(
-        width: widget.size + 20,
-        height: widget.size + 36,
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.topCenter,
-          children: [
-            // Pulse glow (aktif node'lar için)
-            if (!completed && !locked)
-              Positioned(
-                top: 8,
-                child: AnimatedBuilder(
-                  animation: _pulse,
-                  builder: (_, __) {
-                    return Container(
-                      width: widget.size * _pulse.value + 24,
-                      height: widget.size * _pulse.value + 24,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: RadialGradient(
-                          colors: [
-                            islandColor.withValues(alpha: 0.35),
-                            islandColor.withValues(alpha: 0),
-                          ],
+      onTapDown: _handleTapDown,
+      onTapUp: _handleTapUp,
+      onTapCancel: _handleTapCancel,
+      onTap: _handleTap,
+      child: AnimatedBuilder(
+        animation: Listenable.merge([_press, _shakeCtrl]),
+        builder: (context, child) {
+          final t = _shakeCtrl.value;
+          final shakeDx = math.sin(t * math.pi * 5) * (1 - t) * 9;
+          return Transform.translate(
+            offset: Offset(shakeDx, 0),
+            child: Transform.scale(scale: _press.value, child: child),
+          );
+        },
+        child: SizedBox(
+          width: widget.size + 20,
+          height: widget.size + 36,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.topCenter,
+            children: [
+              // Pulse glow (aktif node'lar için)
+              if (!completed && !locked)
+                Positioned(
+                  top: 8,
+                  child: AnimatedBuilder(
+                    animation: _pulse,
+                    builder: (_, __) {
+                      return Container(
+                        width: widget.size * _pulse.value + 24,
+                        height: widget.size * _pulse.value + 24,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              islandColor.withValues(alpha: 0.35),
+                              islandColor.withValues(alpha: 0),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            // Tamamlanmış: altın ışık halkası
-            if (completed)
-              Positioned(
-                top: 4,
-                child: Container(
-                  width: widget.size + 24,
-                  height: widget.size + 24,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        AppColors.gold.withValues(alpha: 0.4),
-                        AppColors.gold.withValues(alpha: 0),
-                      ],
+              // Tamamlanmış: altın ışık halkası
+              if (completed)
+                Positioned(
+                  top: 4,
+                  child: Container(
+                    width: widget.size + 24,
+                    height: widget.size + 24,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          AppColors.gold.withValues(alpha: 0.4),
+                          AppColors.gold.withValues(alpha: 0),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            // Ana hexagonal kristal
-            Positioned(
-              top: 12,
-              child: AnimatedBuilder(
-                animation: _rotate,
-                builder: (_, child) {
-                  return Transform.rotate(
-                    angle: locked ? 0 : _rotate.value * 0.05,
-                    child: child,
-                  );
-                },
-                child: _HexCrystal(
-                  size: widget.size,
-                  islandColor: islandColor,
-                  completed: completed,
-                  locked: locked,
-                  emoji: widget.node.emoji,
-                ),
-              ),
-            ),
-            // Tamamlandı rozeti
-            if (completed)
+              // Ana hexagonal kristal
               Positioned(
-                top: 4,
-                right: 4,
+                top: 12,
+                child: AnimatedBuilder(
+                  animation: _rotate,
+                  builder: (_, child) {
+                    return Transform.rotate(
+                      angle: locked ? 0 : _rotate.value * 0.05,
+                      child: child,
+                    );
+                  },
+                  child: _HexCrystal(
+                    size: widget.size,
+                    islandColor: islandColor,
+                    completed: completed,
+                    locked: locked,
+                    emoji: widget.node.emoji,
+                  ),
+                ),
+              ),
+              // Tamamlandı rozeti
+              if (completed)
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: Container(
+                    width: 22,
+                    height: 22,
+                    decoration: const BoxDecoration(
+                      color: AppColors.gold,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                  ),
+                ),
+              // Alt etiket
+              Positioned(
+                bottom: 0,
                 child: Container(
-                  width: 22,
-                  height: 22,
-                  decoration: const BoxDecoration(
-                    color: AppColors.gold,
-                    shape: BoxShape.circle,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
                   ),
-                  child: const Icon(
-                    Icons.check_rounded,
-                    color: Colors.white,
-                    size: 14,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: locked
+                          ? [const Color(0xFFE5E7EB), const Color(0xFFC9C9C9)]
+                          : [Colors.white, Colors.white],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: locked
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: islandColor.withValues(alpha: 0.35),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                  ),
+                  child: Text(
+                    widget.node.title,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: locked ? AppColors.textSecondary : null,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
-            // Alt etiket
-            Positioned(
-              bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: locked
-                        ? [const Color(0xFFE5E7EB), const Color(0xFFC9C9C9)]
-                        : [Colors.white, Colors.white],
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: locked
-                      ? null
-                      : [
-                          BoxShadow(
-                            color: islandColor.withValues(alpha: 0.35),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                ),
-                child: Text(
-                  widget.node.title,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: locked ? AppColors.textSecondary : null,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

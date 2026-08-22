@@ -1,7 +1,7 @@
 name: neuroup
 description: "Neuroup - Eğitim, Haber, Chat ve Oyun uygulaması"
 publish_to: 'none'
-version: 0.6.4+13
+version: 0.6.5+14
 
 environment:
   sdk: ^3.12.2
@@ -59,13 +59,9 @@ dependencies:
   google_sign_in: ^7.2.0
   package_info_plus: ^9.0.1
 
-  # Reels — oyun videosu yükleme/oynatma
+  # Reels — oyun videosu/resmi yükleme
   image_picker: ^1.1.2
   video_player: ^2.9.5
-  # Kullanıcı YouTube linki yapıştırırsa gerçekten uygulama içinde gömülü
-  # oynatabilmek için — video_player ham dosya olmayan sayfa linklerini
-  # oynatamıyor (bkz. _ReelVideoBackground).
-  youtube_player_iframe: ^5.2.1
 
 dev_dependencies:
   flutter_test:

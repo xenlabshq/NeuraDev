@@ -34,8 +34,27 @@ class IslandBlockPainter extends CustomPainter {
     final locked = !island.unlocked;
     final completed = island.allCompleted;
 
-    // ----- ZEMİN GÖLGESİ -----
+    // ----- SU HALKASI (dalga) -----
+    // Adanın yüzen bir kaya değil, suda duran bir ada olduğu hissini
+    // vermek için gölgenin altında ikinci, daha soluk ve geniş bir
+    // dalga halkası çiziyoruz.
     final shadowPos = camera.project(island.x, 0, island.z);
+    if (!locked) {
+      canvas.drawOval(
+        Rect.fromCenter(
+          center: shadowPos + Offset(0, s * 0.05),
+          width: s * 2.05,
+          height: s * 0.52,
+        ),
+        Paint()
+          ..color = color.withValues(alpha: 0.10)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+      );
+    }
+
+    // ----- ZEMİN GÖLGESİ -----
     canvas.drawOval(
       Rect.fromCenter(
         center: shadowPos + Offset(0, s * 0.05),
@@ -113,6 +132,45 @@ class IslandBlockPainter extends CustomPainter {
       );
     }
 
+    // ----- ZEMİN DOKUSU (kum/çim benekleri) -----
+    // Düz tek renkli üst yüzü kırmak için birkaç küçük, sabit (deterministik
+    // — her frame'de aynı yerde) doku noktası serpiştiriyoruz. Ada
+    // id'sinden türetilen bir tohum kullanılıyor ki harita her yeniden
+    // çizildiğinde noktalar titremesin/kaymasın.
+    if (!locked) {
+      final rng = math.Random(island.id.hashCode);
+      final texturePaint = Paint()
+        ..color = Color.lerp(topColor, Colors.black, 0.25)!.withValues(
+          alpha: 0.35,
+        );
+      for (var i = 0; i < 7; i++) {
+        final tx = pos.dx + (rng.nextDouble() * 2 - 1) * s * 0.55;
+        final tyBase = pos.dy - s * 0.25;
+        final ty = tyBase + (rng.nextDouble() * 2 - 1) * s * 0.28;
+        canvas.drawCircle(Offset(tx, ty), s * 0.02 + rng.nextDouble() * s * 0.015, texturePaint);
+      }
+    }
+
+    // ----- CAM/PARLAKLIK VURGUSU (üst yüz) -----
+    // Profesyonel/cilalı bir görünüm için üst yüzün sol-üst köşesine
+    // (varsayılan ışık kaynağı yönü) yumuşak, oval bir parlaklık lekesi
+    // ekliyoruz — düz gradyanı kırıp yüzeye "cam gibi" bir derinlik verir.
+    if (!locked) {
+      canvas.save();
+      canvas.clipPath(topPath);
+      canvas.drawOval(
+        Rect.fromCenter(
+          center: Offset(pos.dx - s * 0.28, pos.dy - s * 0.42),
+          width: s * 0.55,
+          height: s * 0.22,
+        ),
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.28)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8),
+      );
+      canvas.restore();
+    }
+
     // ----- KİLİTLİ ADA: GRİD OVERLAY -----
     if (locked) {
       final gridPaint = Paint()
@@ -130,6 +188,21 @@ class IslandBlockPainter extends CustomPainter {
           gridPaint,
         );
       }
+    }
+
+    // ----- IŞIK KENARI (rim-light bevel) -----
+    // Sol-üst kenar (batı → kuzey köşesi) ışığa bakan kenar gibi
+    // parlatılıyor — düz tek renkli kontürden daha cilalı/3B bir
+    // "bevel" hissi verir.
+    if (!locked) {
+      canvas.drawLine(
+        Offset(pos.dx - s * 0.7, pos.dy - s * 0.25),
+        Offset(pos.dx, pos.dy - s * 0.6),
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.45)
+          ..strokeWidth = 1.6
+          ..strokeCap = StrokeCap.round,
+      );
     }
 
     // ----- KENAR ÇİZİGİLERİ -----
@@ -254,13 +327,23 @@ class IslandBlockPainter extends CustomPainter {
       star.paint(canvas, Offset(pos.dx - star.width / 2, pos.dy - s * 0.8));
     }
 
-    // ----- TAMAMLANMA İLERLEME BAR -----
+    // ----- TAMAMLANMA İLERLEME BAR + RAKAMSAL ROZET -----
     if (!locked && island.totalNodes > 0 && !completed) {
       final progress = island.completedNodes / island.totalNodes;
       final barWidth = s * 1.0;
       final barHeight = 6.0;
       final barLeft = pos.dx - barWidth / 2;
       final barTop = pos.dy + s * 0.18;
+      // Bara hafif bir gölge — zemine "oturmuş" hissi verir.
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(barLeft, barTop + 1.5, barWidth, barHeight),
+          const Radius.circular(3),
+        ),
+        Paint()
+          ..color = Colors.black.withValues(alpha: 0.25)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2),
+      );
       // background
       canvas.drawRRect(
         RRect.fromRectAndRadius(
@@ -276,9 +359,44 @@ class IslandBlockPainter extends CustomPainter {
             Rect.fromLTWH(barLeft, barTop, barWidth * progress, barHeight),
             const Radius.circular(3),
           ),
-          Paint()..color = const Color(0xFF66BB6A),
+          Paint()
+            ..shader = LinearGradient(
+              colors: const [Color(0xFF66BB6A), Color(0xFF3FA047)],
+            ).createShader(Rect.fromLTWH(barLeft, barTop, barWidth, barHeight)),
         );
       }
+      // Küçük "x/y" rozeti — barın hemen altında, koyu kapsül içinde.
+      final badgeText = TextPainter(
+        text: TextSpan(
+          text: '${island.completedNodes}/${island.totalNodes}',
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 9,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      badgeText.layout();
+      final badgeWidth = badgeText.width + 10;
+      const badgeHeight = 14.0;
+      final badgeTop = barTop + barHeight + 4;
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(
+            pos.dx - badgeWidth / 2,
+            badgeTop,
+            badgeWidth,
+            badgeHeight,
+          ),
+          const Radius.circular(7),
+        ),
+        Paint()..color = Colors.black.withValues(alpha: 0.4),
+      );
+      badgeText.paint(
+        canvas,
+        Offset(pos.dx - badgeText.width / 2, badgeTop + 2.5),
+      );
     }
 
     // ----- AKTİF PARILTI (sadece açık + bitmemiş) -----
@@ -319,9 +437,26 @@ class IslandPathPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Zemine oturan bir gölge — köprünün havada asılı değil, adalar
+    // arasında gerçekten döşenmiş gibi görünmesini sağlar.
+    canvas.drawLine(
+      from + const Offset(0, 2),
+      to + const Offset(0, 2),
+      Paint()
+        ..color = Colors.black.withValues(alpha: active ? 0.28 : 0.14)
+        ..strokeWidth = active ? 6 : 4
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+    );
+
     final paint = Paint()
+      ..shader = active
+          ? const LinearGradient(
+              colors: [Color(0xFFE0A458), Color(0xFFCD853F)],
+            ).createShader(Rect.fromPoints(from, to))
+          : null
       ..color = active ? const Color(0xFFCD853F) : Colors.grey.shade400
-      ..strokeWidth = 3
+      ..strokeWidth = active ? 4 : 2.5
       ..strokeCap = StrokeCap.round;
     canvas.drawLine(from, to, paint);
 
@@ -329,17 +464,21 @@ class IslandPathPainter extends CustomPainter {
     final dy = to.dy - from.dy;
     final dist = math.sqrt(dx * dx + dy * dy);
     if (dist < 1) return;
-    final nx = -dy / dist * 7;
-    final ny = dx / dist * 7;
-    for (var i = 1; i < 4; i++) {
-      final t = i / 4;
+    final nx = -dy / dist * (active ? 8 : 6);
+    final ny = dx / dist * (active ? 8 : 6);
+    final plankCount = (dist / 16).clamp(2, 6).round();
+    for (var i = 1; i < plankCount; i++) {
+      final t = i / plankCount;
       final pos = Offset(from.dx + dx * t, from.dy + dy * t);
       canvas.drawLine(
         Offset(pos.dx + nx, pos.dy + ny),
         Offset(pos.dx - nx, pos.dy - ny),
         Paint()
-          ..color = const Color(0xFF8B4513)
-          ..strokeWidth = 4,
+          ..color = active
+              ? const Color(0xFF8B4513)
+              : Colors.grey.shade500
+          ..strokeWidth = active ? 3.5 : 2.5
+          ..strokeCap = StrokeCap.round,
       );
     }
   }

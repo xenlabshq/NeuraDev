@@ -88,6 +88,7 @@ class LearningNode extends Equatable {
     required this.points,
     required this.emoji,
     required this.order,
+    this.hints = const [],
     this.isCompleted = false,
     this.isLocked = false,
     this.bestScore,
@@ -103,6 +104,10 @@ class LearningNode extends Equatable {
   final int points;
   final String emoji;
   final int order;
+  /// Progressive hints shown before the full solution — the editor
+  /// reveals these one at a time (bkz. `_HintPanel` in node_editor_page),
+  /// only offering the actual solution once all hints have been seen.
+  final List<String> hints;
 
   // Runtime state (sadece UI'da set edilir)
   final bool isCompleted;
@@ -121,6 +126,7 @@ class LearningNode extends Equatable {
     required this.emoji,
     required this.order,
     required this.bestScore,
+    this.hints = const [],
   }) : isCompleted = true,
        isLocked = false;
 
@@ -135,6 +141,7 @@ class LearningNode extends Equatable {
     required this.points,
     required this.emoji,
     required this.order,
+    this.hints = const [],
   }) : isCompleted = false,
        isLocked = true,
        bestScore = null;
@@ -150,6 +157,7 @@ class LearningNode extends Equatable {
     required this.points,
     required this.emoji,
     required this.order,
+    this.hints = const [],
   }) : isCompleted = false,
        isLocked = false,
        bestScore = null;

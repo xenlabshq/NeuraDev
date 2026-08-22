@@ -9,6 +9,7 @@ import '../../../../app/theme/colors.dart';
 import '../../../../core/env/env.dart';
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../chat/presentation/providers/chat_providers.dart';
+import '../../data/reel_submission_repository_impl.dart' show reelUploadCooldown;
 import '../../domain/entities/game_reel.dart';
 import '../providers/reels_providers.dart';
 
@@ -33,9 +34,9 @@ class _ReelSubmitPageState extends ConsumerState<ReelSubmitPage> {
   late final TextEditingController _caption;
   late final TextEditingController _tags;
   late final TextEditingController _gameUrl;
-  late final TextEditingController _videoUrl;
   bool _saving = false;
-  XFile? _video;
+  XFile? _media;
+  late ReelMediaType _mediaType;
   LessonOverlayScope? _overlayScope;
 
   bool get _isEditing => widget.existing != null;
@@ -48,12 +49,7 @@ class _ReelSubmitPageState extends ConsumerState<ReelSubmitPage> {
     _caption = TextEditingController(text: e?.caption ?? '');
     _tags = TextEditingController(text: e?.tags ?? '');
     _gameUrl = TextEditingController(text: e?.gameUrl ?? '');
-    // Storage'a dosya yüklemek yerine kullanıcı hazır bir video linki
-    // (YouTube, Drive vb.) de yapıştırabilir — Storage gerektirmez,
-    // ücretsiz Firebase planında da çalışır.
-    _videoUrl = TextEditingController(
-      text: e != null && e.videoUrl != null ? e.videoUrl! : '',
-    );
+    _mediaType = e?.mediaType ?? ReelMediaType.video;
     // Shell altındaki floating tab bar'ı gizle — aksi halde gönder
     // düğmesi barın altında kalıyordu.
     _overlayScope = LessonOverlayScope(context);
@@ -65,15 +61,17 @@ class _ReelSubmitPageState extends ConsumerState<ReelSubmitPage> {
     _caption.dispose();
     _tags.dispose();
     _gameUrl.dispose();
-    _videoUrl.dispose();
     _overlayScope?.dispose();
     super.dispose();
   }
 
-  Future<void> _pickVideo() async {
-    final picked = await ImagePicker().pickVideo(source: ImageSource.gallery);
+  Future<void> _pickMedia() async {
+    final picker = ImagePicker();
+    final picked = _mediaType == ReelMediaType.video
+        ? await picker.pickVideo(source: ImageSource.gallery)
+        : await picker.pickImage(source: ImageSource.gallery);
     if (picked == null) return;
-    setState(() => _video = picked);
+    setState(() => _media = picked);
   }
 
   String? _requiredField(String? v) =>
@@ -91,17 +89,6 @@ class _ReelSubmitPageState extends ConsumerState<ReelSubmitPage> {
     return null;
   }
 
-  /// Video linki opsiyonel (video dosyası seçilmişse hiç doldurulmayabilir)
-  /// — ama doluysa geçerli bir http(s) link olmalı.
-  String? _validateOptionalUrl(String? v) {
-    if (v == null || v.trim().isEmpty) return null;
-    final uri = Uri.tryParse(v.trim());
-    if (uri == null || !(uri.isScheme('HTTP') || uri.isScheme('HTTPS'))) {
-      return AppLocalizations.of(context).reelsInvalidUrl;
-    }
-    return null;
-  }
-
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     final l10n = AppLocalizations.of(context);
@@ -112,24 +99,41 @@ class _ReelSubmitPageState extends ConsumerState<ReelSubmitPage> {
       );
       return;
     }
-    final videoUrlText = _videoUrl.text.trim();
-    // Düzenlerken video zorunlu değil — mevcut video korunur, sadece
+    // Düzenlerken medya zorunlu değil — mevcut medya korunur, sadece
     // değiştirmek isteyen kullanıcı yeniden seçebilir. Yeni gönderimde
-    // ya bir dosya seçilmiş ya da bir video linki girilmiş olmalı.
-    if (!_isEditing && _video == null && videoUrlText.isEmpty) {
+    // bir dosya (video ya da resim) seçilmiş olmalı.
+    if (!_isEditing && _media == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.reelsPickVideoFirst)),
+        SnackBar(content: Text(l10n.reelsPickMediaFirst)),
       );
       return;
+    }
+    final repo = ref.read(reelSubmissionRepositoryProvider);
+    if (!_isEditing) {
+      // Storage maliyetini kontrol altında tutmak için kullanıcı başına
+      // günde bir yükleme hakkı var — firestore.rules bunu sunucu
+      // tarafında da zorunlu kılar, burası sadece kullanıcıya erken ve
+      // anlaşılır bir mesaj göstermek için.
+      final last = await repo.lastUploadAt(user.id);
+      if (last != null) {
+        final remaining = reelUploadCooldown - DateTime.now().difference(last);
+        if (remaining > Duration.zero) {
+          if (!mounted) return;
+          final hours = remaining.inHours;
+          final minutes = remaining.inMinutes.remainder(60);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.reelsDailyLimitReached(hours, minutes)),
+            ),
+          );
+          return;
+        }
+      }
     }
     setState(() => _saving = true);
     try {
       if (_isEditing) {
         final existing = widget.existing!;
-        // Öncelik: yeni seçilen dosya > girilen link > mevcut video.
-        final videoUrl = _video != null
-            ? existing.videoUrl
-            : (videoUrlText.isNotEmpty ? videoUrlText : existing.videoUrl);
         final updated = GameReel(
           id: existing.id,
           devName: existing.devName,
@@ -142,27 +146,18 @@ class _ReelSubmitPageState extends ConsumerState<ReelSubmitPage> {
           hud: existing.hud,
           likes: existing.likes,
           gameUrl: _gameUrl.text.trim(),
-          videoUrl: videoUrl,
+          videoUrl: existing.videoUrl,
+          mediaType: _mediaType,
           uploaderId: existing.uploaderId,
           comments: existing.comments,
         );
-        await ref
-            .read(reelSubmissionRepositoryProvider)
-            .updateReel(updated, localVideoPath: _video?.path);
+        await repo.updateReel(updated, localMediaPath: _media?.path);
       } else {
         final accents = ReelAccent.values;
         final accent = accents[Random().nextInt(accents.length)];
         final tag = user.displayName.trim().isEmpty
             ? '@${l10n.reelsFallbackUserTag}'
             : '@${user.displayName.trim().toLowerCase().replaceAll(' ', '')}';
-        // Üç video kaynağı önceliği: 1) galeriden seçilen dosya (demo
-        // modda yerel yol doğrudan yazılır, gerçek modda Storage'a
-        // yüklenip indirme linki repository tarafından yazılır — bkz.
-        // `localVideoPath`), 2) kullanıcının yapıştırdığı hazır video
-        // linki (Storage'a hiç dokunmaz, ücretsiz plan için de çalışır),
-        // 3) hiçbiri yoksa `videoUrl` boş kalır (seed reels gibi arka
-        // plan deseni gösterilir).
-        final usingLocalFile = _video != null;
         final reel = GameReel(
           id: '',
           devName: user.displayName.trim().isEmpty
@@ -177,21 +172,19 @@ class _ReelSubmitPageState extends ConsumerState<ReelSubmitPage> {
           hud: l10n.reelsNewCommunityHud,
           likes: 0,
           gameUrl: _gameUrl.text.trim(),
-          videoUrl: usingLocalFile
-              ? (Env.firebaseConfigured ? null : _video!.path)
-              : (videoUrlText.isNotEmpty ? videoUrlText : null),
+          // Demo modda (Storage yok) yerel dosya yolu doğrudan videoUrl'e
+          // yazılır; gerçek modda repository dosyayı Storage'a yükleyip
+          // indirme linkiyle değiştirir (bkz. localMediaPath).
+          videoUrl: Env.firebaseConfigured ? null : _media!.path,
+          mediaType: _mediaType,
           uploaderId: user.id,
           comments: const [],
         );
-        await ref
-            .read(reelSubmissionRepositoryProvider)
-            .submitReel(
-              reel,
-              submittedByUid: user.id,
-              localVideoPath: usingLocalFile && Env.firebaseConfigured
-                  ? _video!.path
-                  : null,
-            );
+        await repo.submitReel(
+          reel,
+          submittedByUid: user.id,
+          localMediaPath: Env.firebaseConfigured ? _media!.path : null,
+        );
       }
       if (!mounted) return;
       Navigator.of(context).pop(true);
@@ -220,42 +213,42 @@ class _ReelSubmitPageState extends ConsumerState<ReelSubmitPage> {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
           children: [
             Text(
-              l10n.reelsGameplayVideoLabel,
+              l10n.reelsMediaLabel,
               style: Theme.of(context).textTheme.labelLarge,
             ),
             const SizedBox(height: 8),
-            _VideoPickerField(video: _video, onPick: _pickVideo),
-            if (_isEditing && _video == null) ...[
+            SegmentedButton<ReelMediaType>(
+              segments: [
+                ButtonSegment(
+                  value: ReelMediaType.video,
+                  label: Text(l10n.reelsMediaTypeVideo),
+                  icon: const Icon(Icons.videocam_rounded),
+                ),
+                ButtonSegment(
+                  value: ReelMediaType.image,
+                  label: Text(l10n.reelsMediaTypeImage),
+                  icon: const Icon(Icons.image_rounded),
+                ),
+              ],
+              selected: {_mediaType},
+              onSelectionChanged: (selection) => setState(() {
+                _mediaType = selection.first;
+                _media = null;
+              }),
+            ),
+            const SizedBox(height: 12),
+            _MediaPickerField(
+              media: _media,
+              mediaType: _mediaType,
+              onPick: _pickMedia,
+            ),
+            if (_isEditing && _media == null) ...[
               const SizedBox(height: 6),
               Text(
-                l10n.reelsVideoKeptHint,
+                l10n.reelsMediaKeptHint,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const Expanded(child: Divider()),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text(
-                    l10n.authOr,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-                const Expanded(child: Divider()),
-              ],
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _videoUrl,
-              decoration: InputDecoration(
-                labelText: l10n.reelsVideoUrlLabel,
-                hintText: l10n.reelsVideoUrlHint,
-              ),
-              keyboardType: TextInputType.url,
-              validator: _validateOptionalUrl,
-            ),
             const SizedBox(height: 20),
             TextFormField(
               controller: _title,
@@ -317,17 +310,23 @@ class _ReelSubmitPageState extends ConsumerState<ReelSubmitPage> {
   }
 }
 
-/// Video seçme alanı — henüz seçim yoksa "seç" kartı, seçiliyse dosya
+/// Medya seçme alanı — henüz seçim yoksa "seç" kartı, seçiliyse dosya
 /// adını ve değiştirme imkanını gösterir. Önizleme oynatmıyor (yalnızca
 /// dosya seçildiğini teyit eder) — akıştaki gerçek oynatma [ReelPage]'de.
-class _VideoPickerField extends StatelessWidget {
-  const _VideoPickerField({required this.video, required this.onPick});
-  final XFile? video;
+class _MediaPickerField extends StatelessWidget {
+  const _MediaPickerField({
+    required this.media,
+    required this.mediaType,
+    required this.onPick,
+  });
+  final XFile? media;
+  final ReelMediaType mediaType;
   final VoidCallback onPick;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isVideo = mediaType == ReelMediaType.video;
     return Material(
       color: Theme.of(context).colorScheme.surfaceContainerHigh,
       borderRadius: BorderRadius.circular(14),
@@ -347,22 +346,28 @@ class _VideoPickerField extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: Icon(
-                  video == null
-                      ? Icons.video_call_outlined
-                      : Icons.videocam_rounded,
+                  media != null
+                      ? (isVideo ? Icons.videocam_rounded : Icons.image_rounded)
+                      : (isVideo
+                            ? Icons.video_call_outlined
+                            : Icons.add_photo_alternate_outlined),
                   color: AppColors.primary,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  video == null ? l10n.reelsPickVideoPrompt : video!.name,
+                  media == null
+                      ? (isVideo
+                            ? l10n.reelsPickVideoPrompt
+                            : l10n.reelsPickImagePrompt)
+                      : media!.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Text(
-                video == null ? l10n.reelsPickAction : l10n.reelsChangeAction,
+                media == null ? l10n.reelsPickAction : l10n.reelsChangeAction,
                 style: TextStyle(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w700,

@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 import '../../../../l10n/gen/app_localizations.dart';
 import '../../../chat/presentation/providers/chat_providers.dart'
@@ -129,7 +128,10 @@ class ReelPage extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           if (reel.videoUrl != null)
-            _ReelVideoBackground(videoUrl: reel.videoUrl!)
+            _ReelMediaBackground(
+              mediaUrl: reel.videoUrl!,
+              mediaType: reel.mediaType,
+            )
           else
             CustomPaint(
               painter: ReelBackgroundPainter(
@@ -163,115 +165,62 @@ class ReelPage extends StatelessWidget {
   }
 }
 
-/// Kullanıcı yüklemesi olan reels için gerçek video arka planı — demo
-/// modda [videoUrl] yerel dosya yolu, gerçek modda Firebase Storage
-/// indirme linki olur. Sessiz + döngülü otomatik oynatma (Reels/TikTok
-/// alışkanlığı); dokununca sesi aç/kapat.
-class _ReelVideoBackground extends StatefulWidget {
-  const _ReelVideoBackground({required this.videoUrl});
-  final String videoUrl;
+/// Kullanıcı yüklemesi olan reels için gerçek medya arka planı — demo
+/// modda [mediaUrl] yerel dosya yolu, gerçek modda Firebase Storage
+/// indirme linki olur. [mediaType]'a göre video (sessiz + döngülü
+/// otomatik oynatma, dokununca sesi aç/kapat) ya da statik resim
+/// gösterilir. YouTube/harici link desteği KASITLI OLARAK yok — Storage
+/// maliyetini kontrol altında tutmak için tüm medya doğrudan
+/// kullanıcının yüklediği dosyadan geliyor (bkz. ReelSubmitPage).
+class _ReelMediaBackground extends StatefulWidget {
+  const _ReelMediaBackground({required this.mediaUrl, required this.mediaType});
+  final String mediaUrl;
+  final ReelMediaType mediaType;
 
   @override
-  State<_ReelVideoBackground> createState() => _ReelVideoBackgroundState();
+  State<_ReelMediaBackground> createState() => _ReelMediaBackgroundState();
 }
 
-class _ReelVideoBackgroundState extends State<_ReelVideoBackground> {
+class _ReelMediaBackgroundState extends State<_ReelMediaBackground> {
   VideoPlayerController? _controller;
-  YoutubePlayerController? _youtubeController;
-  StreamSubscription<YoutubePlayerValue>? _youtubeSub;
   bool _muted = true;
   bool _failed = false;
 
   @override
   void initState() {
     super.initState();
-    _start();
-  }
-
-  @override
-  void didUpdateWidget(covariant _ReelVideoBackground oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Reel düzenlenip video linki değiştirildiğinde bu widget State'i
-    // yeniden kullanılabiliyor (initState tekrar çağrılmaz) — eski
-    // controller'ları kapatıp yeni linkle yeniden başlatmazsak eski
-    // video (veya eski hata durumu) ekranda takılı kalırdı.
-    if (oldWidget.videoUrl != widget.videoUrl) {
-      _disposeControllers();
-      _failed = false;
-      _start();
-    }
-  }
-
-  void _start() {
-    // YouTube linki (izleme sayfası, kısa link, shorts) verilmişse
-    // video_player onu hiç oynatamaz — ham video akışı değil, bir web
-    // sayfası. Gerçekten uygulama içinde gömülü oynatmak için ayrı bir
-    // YouTube iframe player kullanıyoruz; diğer tüm linkler (Storage
-    // indirme linki, doğrudan .mp4 vb.) ve yerel dosyalar video_player'a
-    // gidiyor.
-    final youtubeId = YoutubePlayerController.convertUrlToId(widget.videoUrl);
-    if (youtubeId != null) {
-      _initYoutube(youtubeId);
-    } else {
+    if (widget.mediaType == ReelMediaType.video) {
       _initVideoFile();
     }
   }
 
-  void _disposeControllers() {
-    _controller?.dispose();
-    _controller = null;
-    _youtubeSub?.cancel();
-    _youtubeSub = null;
-    _youtubeController?.close();
-    _youtubeController = null;
-  }
-
-  void _initYoutube(String videoId) {
-    // `YoutubePlayerController.fromVideoId(...)` KASITLI OLARAK
-    // kullanılmıyor — o factory paketin içinde `key: videoId` set
-    // ediyor, ve paketin dahili JS köprüsü bu key'i ham bir JavaScript
-    // tanımlayıcısına ("Youtube$key") gömüyor. YouTube video ID'leri
-    // çoğunlukla tire (-) içerir (ör. "aqz-KE-bpKQ") ki bu geçerli bir
-    // JS tanımlayıcısı değildir — sonuç: "ReferenceError: Youtubeaqz is
-    // not defined" ile oynatıcı hiç yüklenmiyordu. `key` vermeyerek
-    // paketin varsayılanına (hashCode, her zaman JS-güvenli) bırakıyoruz.
-    final controller = YoutubePlayerController(
-      params: const YoutubePlayerParams(
-        mute: true,
-        loop: false,
-        showControls: false,
-        showFullscreenButton: false,
-        playsInline: true,
-        enableKeyboard: false,
-        showVideoAnnotations: false,
-        strictRelatedVideos: true,
-      ),
-    );
-    controller.loadVideoById(videoId: videoId);
-    _youtubeController = controller;
-    // Tek bir videoyu Reels tarzı sonsuz döngüde oynatmak için IFrame
-    // API'nin kendi `loop` parametresi bir playlist gerektiriyor; onun
-    // yerine video bittiğinde başa sarıp yeniden oynatıyoruz.
-    _youtubeSub = controller.stream.listen((value) {
-      if (value.playerState == PlayerState.ended) {
-        controller.seekTo(seconds: 0);
-        controller.playVideo();
+  @override
+  void didUpdateWidget(covariant _ReelMediaBackground oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reel düzenlenip medya değiştirildiğinde bu widget State'i yeniden
+    // kullanılabiliyor (initState tekrar çağrılmaz) — eski controller'ı
+    // kapatıp yeni medyayla yeniden başlatmazsak eski video (veya eski
+    // hata durumu) ekranda takılı kalırdı.
+    if (oldWidget.mediaUrl != widget.mediaUrl ||
+        oldWidget.mediaType != widget.mediaType) {
+      _controller?.dispose();
+      _controller = null;
+      _failed = false;
+      if (widget.mediaType == ReelMediaType.video) {
+        _initVideoFile();
+      } else {
+        setState(() {});
       }
-    });
+    }
   }
 
   Future<void> _initVideoFile() async {
-    final isNetwork = widget.videoUrl.startsWith('http');
+    final isNetwork = widget.mediaUrl.startsWith('http');
     final controller = isNetwork
-        ? VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
-        : VideoPlayerController.file(File(widget.videoUrl));
+        ? VideoPlayerController.networkUrl(Uri.parse(widget.mediaUrl))
+        : VideoPlayerController.file(File(widget.mediaUrl));
     _controller = controller;
     try {
-      // Kullanıcının yapıştırdığı link ham bir video dosyası değil de
-      // bir sayfa linkiyse, initialize() hiç hata fırlatmadan sonsuza
-      // kadar bekleyebiliyor — kullanıcı "sürekli yükleniyor" olarak
-      // görüyordu. Zaman aşımıyla sınırlayıp "Videoyu Aç" düğmesine
-      // düşüyoruz.
       await controller.initialize().timeout(const Duration(seconds: 10));
       if (!mounted) return;
       await controller.setLooping(true);
@@ -279,9 +228,9 @@ class _ReelVideoBackgroundState extends State<_ReelVideoBackground> {
       await controller.play();
       setState(() {});
     } catch (_) {
-      // Bozuk/erişilemez/oynatılamaz video — spinner'da sonsuza kadar
-      // takılı kalmak yerine "Videoyu Aç" düğmesine düş; akışın geri
-      // kalanı (başlık, CTA, etkileşim butonları) yine çalışır.
+      // Bozuk/erişilemez video — spinner'da sonsuza kadar takılı kalmak
+      // yerine bir hata ikonuna düş; akışın geri kalanı (başlık, CTA,
+      // etkileşim butonları) yine çalışır.
       unawaited(controller.dispose());
       if (!mounted) return;
       setState(() {
@@ -292,16 +241,6 @@ class _ReelVideoBackgroundState extends State<_ReelVideoBackground> {
   }
 
   void _toggleMute() {
-    final youtube = _youtubeController;
-    if (youtube != null) {
-      setState(() => _muted = !_muted);
-      if (_muted) {
-        youtube.mute();
-      } else {
-        youtube.unMute();
-      }
-      return;
-    }
     final controller = _controller;
     if (controller == null || !controller.value.isInitialized) return;
     setState(() {
@@ -312,66 +251,47 @@ class _ReelVideoBackgroundState extends State<_ReelVideoBackground> {
 
   @override
   void dispose() {
-    _disposeControllers();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final youtube = _youtubeController;
-    if (youtube != null) {
-      return GestureDetector(
-        onTap: _toggleMute,
-        child: ColoredBox(
-          color: const Color(0xFF0A0812),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // YoutubePlayer bir WebView (platform view) barındırıyor —
-              // bunu FittedBox ile ölçeklemeye çalışmak YouTube'un kendi
-              // oynatıcı script'inde "Cannot read properties of
-              // undefined (reading 'setSize')" hatasına yol açıyordu
-              // (WebView'a beklenmedik ara boyutlar veriliyordu).
-              // Bunun yerine WebView'ın gerçek, stabil boyutlar almasını
-              // sağlayan Center + AspectRatio kullanıyoruz — üstte/altta
-              // ince siyah şeritler kalabilir ama oynatma güvenilir.
-              Center(
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: YoutubePlayer(
-                    controller: youtube,
-                    aspectRatio: 16 / 9,
-                    enableFullScreenOnVerticalDrag: false,
-                  ),
-                ),
-              ),
-              // WebView kendi dokunuşlarını yutuyor — sesi aç/kapat
-              // dokunuşunun her yerden çalışması için şeffaf bir
-              // dokunma katmanı üstüne biniyor.
-              Positioned.fill(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: _toggleMute,
-                ),
-              ),
-              if (_muted)
-                const Positioned(
-                  right: 16,
-                  top: 100,
+    if (widget.mediaType == ReelMediaType.image) {
+      final isNetwork = widget.mediaUrl.startsWith('http');
+      return ColoredBox(
+        color: const Color(0xFF0A0812),
+        child: isNetwork
+            ? Image.network(
+                widget.mediaUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                errorBuilder: (_, __, ___) => const Center(
                   child: Icon(
-                    Icons.volume_off_rounded,
-                    color: Colors.white70,
-                    size: 20,
+                    Icons.broken_image_rounded,
+                    color: Colors.white38,
+                    size: 40,
                   ),
                 ),
-            ],
-          ),
-        ),
+              )
+            : Image.file(
+                File(widget.mediaUrl),
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                errorBuilder: (_, __, ___) => const Center(
+                  child: Icon(
+                    Icons.broken_image_rounded,
+                    color: Colors.white38,
+                    size: 40,
+                  ),
+                ),
+              ),
       );
     }
 
     final controller = _controller;
-    final l10n = AppLocalizations.of(context);
     final Widget body;
     if (controller != null && controller.value.isInitialized) {
       body = Stack(
@@ -398,34 +318,12 @@ class _ReelVideoBackgroundState extends State<_ReelVideoBackground> {
         ],
       );
     } else if (_failed) {
-      // Video oynatılamadı — muhtemelen ham bir video dosyası değil,
-      // bilinmeyen bir web sayfası linki. Sonsuza kadar dönen spinner
-      // yerine dış tarayıcıda açma seçeneği sun.
-      final isNetwork = widget.videoUrl.startsWith('http');
-      body = Center(
-        child: isNetwork
-            ? OutlinedButton.icon(
-                onPressed: () => launchUrl(
-                  Uri.parse(widget.videoUrl),
-                  mode: LaunchMode.externalApplication,
-                ),
-                icon: const Icon(
-                  Icons.open_in_new_rounded,
-                  color: Colors.white,
-                ),
-                label: Text(
-                  l10n.reelsOpenVideoExternally,
-                  style: const TextStyle(color: Colors.white),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.white54),
-                ),
-              )
-            : const Icon(
-                Icons.videocam_off_rounded,
-                color: Colors.white38,
-                size: 40,
-              ),
+      body = const Center(
+        child: Icon(
+          Icons.videocam_off_rounded,
+          color: Colors.white38,
+          size: 40,
+        ),
       );
     } else {
       body = const Center(

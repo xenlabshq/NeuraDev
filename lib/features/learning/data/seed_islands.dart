@@ -34,6 +34,11 @@ class IslandSeed {
           points: 50,
           emoji: '👋',
           order: 1,
+          hints: [
+            'Ekrana yazı yazdırmak için print() fonksiyonunu kullan.',
+            'Yazdırmak istediğin metni çift tırnak içine al: print("...")',
+            'Şöyle yaz: print("Merhaba Dünya") — tırnaklar ve büyük/küçük harfler aynen böyle olmalı.',
+          ],
         ),
         LearningNode(
           id: 'n_intro_2',
@@ -47,6 +52,11 @@ class IslandSeed {
           points: 60,
           emoji: '💬',
           order: 2,
+          hints: [
+            '# ile başlayan satırlar Python tarafından çalıştırılmaz, sadece açıklama içindir.',
+            'Yorum satırının altındaki print() satırı normal şekilde çalışmaya devam eder.',
+            'Kod zaten doğru — Çalıştır\'a basman yeterli, yorum satırı çıktıyı etkilemez.',
+          ],
         ),
         LearningNode(
           id: 'n_intro_3',
@@ -62,6 +72,11 @@ class IslandSeed {
           points: 70,
           emoji: '📝',
           order: 3,
+          hints: [
+            'Her print() çağrısı çıktıda yeni bir satır başlatır.',
+            'Üç ayrı bilgiyi göstermek için üç ayrı print() satırı kullan.',
+            'Kod zaten üç print() içeriyor — her biri kendi satırına yazdırır, sırayla çalıştırılır.',
+          ],
         ),
       ],
     ),
@@ -90,6 +105,11 @@ class IslandSeed {
           points: 80,
           emoji: '📦',
           order: 1,
+          hints: [
+            'Bir değişkene değer atamak için = işaretini kullan: isim = değer',
+            'String (metin) değerler tırnak içine yazılır: isim = "Ali"',
+            'isim = "Ali" satırından sonra print(isim) ile değişkenin içeriğini yazdır.',
+          ],
         ),
         LearningNode(
           id: 'n_var_2',
@@ -103,6 +123,11 @@ class IslandSeed {
           points: 90,
           emoji: '🔢',
           order: 2,
+          hints: [
+            'Sayılar tırnak İÇİNDE değil, doğrudan yazılır: yas = 20',
+            'Nokta içeren sayılar ondalık (float) sayılardır: boy = 1.75',
+            'İki değişkeni de tanımladıktan sonra her birini ayrı print() ile yazdır.',
+          ],
         ),
         LearningNode(
           id: 'n_var_3',
@@ -118,6 +143,11 @@ class IslandSeed {
           points: 100,
           emoji: '✓',
           order: 3,
+          hints: [
+            "Python'da mantıksal değerler sadece True veya False olabilir.",
+            "True ve False'un ilk harfi HER ZAMAN büyük yazılır, tırnak kullanılmaz.",
+            'aktif = True ve silindi = False satırlarını yaz, sonra ikisini de print() ile yazdır.',
+          ],
         ),
         LearningNode(
           id: 'n_var_4',
@@ -133,6 +163,11 @@ class IslandSeed {
           points: 120,
           emoji: '🔗',
           order: 4,
+          hints: [
+            'f-string, metnin başına f harfi koyarak oluşturulur: f"..."',
+            'Süslü parantez {} içine değişken adını yazarsan değeri metne gömülür: f"{isim}"',
+            'print(f"{isim}, {yas} yaşında") gibi bir f-string kullan.',
+          ],
         ),
       ],
     ),
@@ -160,6 +195,11 @@ class IslandSeed {
           points: 100,
           emoji: '➕',
           order: 1,
+          hints: [
+            '+ işareti toplama, - işareti çıkarma yapar.',
+            'İşlemi doğrudan print() içine yazabilirsin: print(15 + 7)',
+            'print(15 + 7) ve print(100 - 45) satırlarını yaz.',
+          ],
         ),
         LearningNode(
           id: 'n_op_2',
@@ -173,6 +213,11 @@ class IslandSeed {
           points: 110,
           emoji: '✖',
           order: 2,
+          hints: [
+            '* çarpma, / bölme işareti.',
+            "Python'da / işlemi SONUCU HER ZAMAN ondalık (float) döner, tam sayı bile olsa .0 eklenir.",
+            'print(7 * 8) ve print(81 / 9) yaz — ikinci sonuç 9.0 olacak, 9 değil.',
+          ],
         ),
         LearningNode(
           id: 'n_op_3',
@@ -186,6 +231,11 @@ class IslandSeed {
           points: 130,
           emoji: '⚖',
           order: 3,
+          hints: [
+            'Karşılaştırma operatörleri (>, <, ==) her zaman True veya False döner.',
+            '== eşitliği kontrol eder (tek eşittir = atama içindir, karıştırma).',
+            'print(15 > 20), print(8 == 8), print(3 != 3) satırlarını sırayla yaz.',
+          ],
         ),
       ],
     ),
@@ -213,6 +263,11 @@ class IslandSeed {
           points: 140,
           emoji: '🔀',
           order: 1,
+          hints: [
+            'if koşul: yapısından sonraki satır MUTLAKA 4 boşluk girintili olmalı.',
+            'Koşul True ise girintili blok çalışır, False ise atlanır.',
+            'if sayi > 5:\n    print("Büyük") — girintiye dikkat et.',
+          ],
         ),
         LearningNode(
           id: 'n_if_2',
@@ -228,6 +283,11 @@ class IslandSeed {
           points: 150,
           emoji: '↔',
           order: 2,
+          hints: [
+            'else: bloğu, if koşulu False olduğunda devreye girer.',
+            'else kendi başına bir koşul almaz, sadece else: yazılır.',
+            'if sayi > 5:\n    print("Büyük")\nelse:\n    print("Küçük veya eşit")',
+          ],
         ),
         LearningNode(
           id: 'n_if_3',
@@ -243,6 +303,11 @@ class IslandSeed {
           points: 170,
           emoji: '🔗',
           order: 3,
+          hints: [
+            "elif, 'else if' demektir — önceki koşullar False olduğunda yeni bir koşulu dener.",
+            'Zincir yukarıdan aşağı kontrol edilir, ilk True olan koşulun bloğu çalışır ve zincir orada durur.',
+            'if sayi > 0: ... elif sayi < 0: ... else: print("Sıfır") — sayi 0 olduğu için son else çalışır.',
+          ],
         ),
       ],
     ),
@@ -270,6 +335,11 @@ class IslandSeed {
           points: 160,
           emoji: '🔁',
           order: 1,
+          hints: [
+            "for i in range(a, b): döngüsü a'dan b-1'e kadar sayar (b dahil değildir).",
+            "1'den 3'e kadar saymak için range(1, 4) yazmalısın (4 dahil değil, 3'te durur).",
+            'for i in range(1, 4):\n    print(i) — çıktı 1, 2, 3 olur.',
+          ],
         ),
         LearningNode(
           id: 'n_loop_2',
@@ -285,6 +355,11 @@ class IslandSeed {
           points: 170,
           emoji: '🍎',
           order: 2,
+          hints: [
+            'for eleman in liste: yapısı listedeki her elemanı sırayla dolaşır.',
+            'Döngü değişkeninin adını istediğin gibi seçebilirsin, önemli olan liste ile eşleşmesi.',
+            'for renk in renkler:\n    print(renk) — her rengi ayrı satırda yazdırır.',
+          ],
         ),
         LearningNode(
           id: 'n_loop_3',
@@ -300,6 +375,11 @@ class IslandSeed {
           points: 180,
           emoji: '⏳',
           order: 3,
+          hints: [
+            'while koşul: koşul True olduğu sürece tekrar eder.',
+            'Sonsuz döngüye girmemek için döngü içinde sayaç değişkenini güncellemeyi unutma.',
+            'while sayi < 3:\n    print(sayi)\n    sayi = sayi + 1 — her turda sayi bir artar.',
+          ],
         ),
         LearningNode(
           id: 'n_loop_4',
@@ -315,6 +395,11 @@ class IslandSeed {
           points: 200,
           emoji: '🧮',
           order: 4,
+          hints: [
+            'İç içe döngüde dış döngünün her adımında, iç döngü baştan sona kadar tam olarak çalışır.',
+            'Dış döngü satırı (i), iç döngü sütunu (j) temsil eder — çarpım i*j ile hesaplanır.',
+            'for i in range(1, 3):\n    for j in range(1, 3):\n        print(f"{i}*{j}={i*j}")',
+          ],
         ),
       ],
     ),
@@ -344,6 +429,11 @@ class IslandSeed {
           points: 150,
           emoji: '📋',
           order: 1,
+          hints: [
+            'Liste köşeli parantez [] içinde, virgülle ayrılmış elemanlarla oluşturulur.',
+            "İndeksler 0'dan başlar — liste[0] ilk elemandır, liste[-1] son elemandır.",
+            "meyveler[0] ilk elemanı ('elma'), meyveler[2] üçüncü elemanı ('muz') verir.",
+          ],
         ),
         LearningNode(
           id: 'n_list_2',
@@ -357,6 +447,11 @@ class IslandSeed {
           points: 160,
           emoji: '➕',
           order: 2,
+          hints: [
+            'liste.append(değer) listenin SONUNA yeni bir eleman ekler.',
+            'append her zaman en sona ekler, listenin ortasına veya başına eklemez.',
+            'sayilar.append(30) satırından sonra print(sayilar) ile [10, 20, 30] görmelisin.',
+          ],
         ),
         LearningNode(
           id: 'n_list_3',
@@ -372,6 +467,11 @@ class IslandSeed {
           points: 150,
           emoji: '📏',
           order: 3,
+          hints: [
+            'len(liste) fonksiyonu listedeki eleman sayısını döner.',
+            'len() bir fonksiyondur, liste.len() değil len(liste) şeklinde çağrılır.',
+            'print(len(sayilar)) — 10 elemanlı listede sonuç 10 olur.',
+          ],
         ),
       ],
     ),
@@ -400,6 +500,11 @@ class IslandSeed {
           points: 180,
           emoji: '⚙',
           order: 1,
+          hints: [
+            'def fonksiyon_adi(): ile yeni bir fonksiyon tanımlanır, gövdesi girintili yazılır.',
+            'Bir fonksiyonu tanımlamak onu ÇALIŞTIRMAZ — çalıştırmak için fonksiyon_adi() ile ÇAĞIRMAN gerekir.',
+            'def selam():\n    print("Selam!")\n\nselam() — son satır fonksiyonu çağırır.',
+          ],
         ),
         LearningNode(
           id: 'n_fn_2',
@@ -415,6 +520,11 @@ class IslandSeed {
           points: 190,
           emoji: '📨',
           order: 2,
+          hints: [
+            'Parantez içine bir isim yazarsan fonksiyon bir parametre alır: def kare(sayi):',
+            'Fonksiyonu çağırırken parantez içine gerçek bir değer verirsin: kare(5)',
+            'def kare(sayi):\n    print(sayi * sayi)\n\nkare(5)\nkare(7) — sırasıyla 25 ve 49 yazdırır.',
+          ],
         ),
         LearningNode(
           id: 'n_fn_3',
@@ -430,6 +540,11 @@ class IslandSeed {
           points: 200,
           emoji: '↩',
           order: 3,
+          hints: [
+            'return, fonksiyonun bir sonucu geri GÖNDERMESİNİ sağlar — print() ile karıştırma, ikisi farklı.',
+            'return ile dönen değeri bir değişkene atayabilir ya da doğrudan print() içine koyabilirsin.',
+            'def kare(sayi):\n    return sayi * sayi\n\nprint(kare(4)) — 16 yazdırır.',
+          ],
         ),
       ],
     ),
@@ -459,6 +574,11 @@ class IslandSeed {
           points: 160,
           emoji: '🔤',
           order: 1,
+          hints: [
+            'metin.upper() tüm harfleri büyük harfe çevirir.',
+            'metin.lower() tüm harfleri küçük harfe çevirir — orijinal değişkeni değiştirmez, yeni bir sonuç döner.',
+            'print(kelime.upper()) ve print(kelime.lower()) satırlarını yaz.',
+          ],
         ),
         LearningNode(
           id: 'n_str_2',
@@ -472,6 +592,11 @@ class IslandSeed {
           points: 150,
           emoji: '📐',
           order: 2,
+          hints: [
+            "len() fonksiyonu listelerde olduğu gibi string'lerde de çalışır.",
+            'len(metin) metindeki karakter sayısını (boşluklar dahil) verir.',
+            "print(len(cumle)) — 'Merhaba Dünya' 13 karakter (boşluk dahil).",
+          ],
         ),
         LearningNode(
           id: 'n_str_3',
@@ -487,6 +612,11 @@ class IslandSeed {
           points: 170,
           emoji: '🔄',
           order: 3,
+          hints: [
+            'metin.replace(eski, yeni) metindeki eski kelimeyi yeni kelimeyle değiştirir.',
+            "replace() orijinal string'i DEĞİŞTİRMEZ, değiştirilmiş YENİ bir string döner — bir değişkene atamalısın.",
+            'yeni = metin.replace("Köpek", "Kedi")\nprint(yeni)',
+          ],
         ),
       ],
     ),
@@ -516,6 +646,11 @@ class IslandSeed {
           points: 180,
           emoji: '📖',
           order: 1,
+          hints: [
+            'Sözlük süslü parantez {} içinde "anahtar": değer çiftleriyle oluşturulur.',
+            'Bir değere erişmek için köşeli parantez ve anahtarını kullanırsın: sozluk["anahtar"]',
+            'araba["marka"] ve araba["yil"] değerlerini ayrı ayrı print() ile yazdır.',
+          ],
         ),
         LearningNode(
           id: 'n_dict_2',
@@ -531,6 +666,11 @@ class IslandSeed {
           points: 190,
           emoji: '➕',
           order: 2,
+          hints: [
+            'Var olmayan bir anahtara değer atarsan, sözlüğe YENİ bir anahtar-değer çifti eklenmiş olur.',
+            'Sözlük["yeni_anahtar"] = değer şeklinde yaz — dict.append() diye bir şey yoktur.',
+            'urun["fiyat"] = 5000 satırından sonra print(urun) ile güncellenmiş sözlüğü gör.',
+          ],
         ),
       ],
     ),
@@ -560,6 +700,11 @@ class IslandSeed {
           points: 200,
           emoji: '💾',
           order: 1,
+          hints: [
+            'open(dosya_adi, "w") dosyayı YAZMA modunda açar (yoksa oluşturur, varsa üzerine yazar).',
+            'dosya.write(metin) ile içeriği dosyaya yazarsın, sonunda dosya.close() ile kapatmayı unutma.',
+            'f = open("test.txt", "w")\nf.write("Merhaba Python!")\nf.close()',
+          ],
         ),
         LearningNode(
           id: 'n_file_2',
@@ -575,6 +720,162 @@ class IslandSeed {
           points: 220,
           emoji: '📂',
           order: 2,
+          hints: [
+            'open(dosya_adi, "r") dosyayı OKUMA modunda açar.',
+            'dosya.read() dosyanın TÜM içeriğini tek bir string olarak döner.',
+            'icerik = dosya.read()\nprint(icerik) — dosyaya yazdığın metni ekrana getirir.',
+          ],
+        ),
+      ],
+    ),
+
+    // ADA 11: Algoritmalar (ileri seviye)
+    LearningIsland(
+      id: 'island_algorithms',
+      title: 'Algoritmalar Adası',
+      subtitle: "Döngülerle gerçek problemler çöz",
+      description:
+          'Hazır fonksiyonlara güvenmeden döngülerle en büyüğü bul, ortalama al, say — gerçek algoritmik düşünmeyi öğren.',
+      emoji: '🧠',
+      color: const Color(0xFF3B82F6),
+      gradient: const [Color(0xFF3B82F6), Color(0xFF1E40AF)],
+      order: 11,
+      nodes: const [
+        LearningNode(
+          id: 'n_algo_1',
+          title: 'En Büyüğü Bul',
+          description: "max() kullanmadan bir listenin en büyük elemanını bul.",
+          tutorial:
+              "# max() fonksiyonu olmadan en büyüğü bulmak için: önce ilk elemanı 'şimdilik en büyük' kabul et, sonra listeyi gezip daha büyüğünü bulunca güncelle.\n\nsayilar = [3, 8, 1, 6]\nen_buyuk = sayilar[0]\nfor sayi in sayilar:\n    if sayi > en_buyuk:\n        en_buyuk = sayi\nprint(en_buyuk)",
+          starterCode:
+              'sayilar = [4, 9, 2, 7, 5]\nen_buyuk = sayilar[0]\nfor sayi in sayilar:\n    if sayi > en_buyuk:\n        en_buyuk = sayi\nprint(en_buyuk)',
+          solution:
+              'sayilar = [4, 9, 2, 7, 5]\nen_buyuk = sayilar[0]\nfor sayi in sayilar:\n    if sayi > en_buyuk:\n        en_buyuk = sayi\nprint(en_buyuk)',
+          expectedOutput: '9',
+          points: 230,
+          emoji: '🔍',
+          order: 1,
+          hints: [
+            "max() gibi hazır bir fonksiyon yok — en büyüğü BULMAK için kendi mantığını kurman gerekiyor.",
+            "İlk elemanı 'şimdilik en büyük' olarak kabul et, sonra listenin geri kalanını gezerken ondan büyük bir sayı bulunca güncelle.",
+            'en_buyuk = sayilar[0]\nfor sayi in sayilar:\n    if sayi > en_buyuk:\n        en_buyuk = sayi',
+          ],
+        ),
+        LearningNode(
+          id: 'n_algo_2',
+          title: 'Toplam ve Ortalama',
+          description: 'Bir listenin toplamını ve ortalamasını hesapla.',
+          tutorial:
+              '# Toplamı bulmak için bir sayaç değişkeni sıfırdan başlat, listeyi gezip her elemanı ekle. Ortalama = toplam / eleman sayısı.\n\npuanlar = [70, 80, 90]\ntoplam = 0\nfor p in puanlar:\n    toplam = toplam + p\nortalama = toplam / len(puanlar)\nprint(toplam)\nprint(ortalama)',
+          starterCode:
+              'notlar = [80, 90, 70, 100]\ntoplam = 0\nfor n in notlar:\n    toplam = toplam + n\nortalama = toplam / len(notlar)\nprint(toplam)\nprint(ortalama)',
+          solution:
+              'notlar = [80, 90, 70, 100]\ntoplam = 0\nfor n in notlar:\n    toplam = toplam + n\nortalama = toplam / len(notlar)\nprint(toplam)\nprint(ortalama)',
+          expectedOutput: '340\n85.0',
+          points: 240,
+          emoji: '📊',
+          order: 2,
+          hints: [
+            'Toplamı bulmak için sıfırdan başlayan bir değişkeni döngü içinde her elemanla topla: toplam = toplam + eleman',
+            "Ortalama, toplamın eleman sayısına bölünmesiyle bulunur — len() ile eleman sayısını al.",
+            'toplam = toplam + n şeklinde döngüde biriktir, sonra ortalama = toplam / len(notlar) hesapla.',
+          ],
+        ),
+        LearningNode(
+          id: 'n_algo_3',
+          title: 'Eşleşmeleri Say',
+          description: 'Bir listede belirli bir değerden kaç tane olduğunu say.',
+          tutorial:
+              '# Bir sayaç değişkeni sıfırdan başlat, listeyi gezip aradığın değere eşit her elemanda sayaç bir artsın.\n\nharfler = ["a", "b", "a", "c"]\nsayac = 0\nfor h in harfler:\n    if h == "a":\n        sayac = sayac + 1\nprint(sayac)',
+          starterCode:
+              'kelimeler = ["kedi", "kopek", "kedi", "kus", "kedi"]\nsayac = 0\nfor k in kelimeler:\n    if k == "kedi":\n        sayac = sayac + 1\nprint(sayac)',
+          solution:
+              'kelimeler = ["kedi", "kopek", "kedi", "kus", "kedi"]\nsayac = 0\nfor k in kelimeler:\n    if k == "kedi":\n        sayac = sayac + 1\nprint(sayac)',
+          expectedOutput: '3',
+          points: 250,
+          emoji: '🔢',
+          order: 3,
+          hints: [
+            'Bir sayacı sıfırdan başlat, aradığın değere her rastladığında sayacı bir artır.',
+            'Karşılaştırma için == operatörünü kullan: if eleman == "aranan":',
+            'sayac = sayac + 1 satırını if bloğunun İÇİNE, girintili şekilde yaz.',
+          ],
+        ),
+      ],
+    ),
+
+    // ADA 12: Mini Projeler (ileri seviye)
+    LearningIsland(
+      id: 'island_projects',
+      title: 'Mini Projeler Adası',
+      subtitle: 'Bildiklerini birleştir',
+      description:
+          'Fonksiyonlar, listeler ve sözlükleri bir araya getirerek gerçek küçük programlar yaz.',
+      emoji: '🏆',
+      color: const Color(0xFFF43F5E),
+      gradient: const [Color(0xFFF43F5E), Color(0xFFBE123C)],
+      order: 12,
+      nodes: const [
+        LearningNode(
+          id: 'n_proj_1',
+          title: 'Not Hesaplayıcı',
+          description: 'Bir fonksiyon yaz: puanı harf notuna çevirsin.',
+          tutorial:
+              '# Bir fonksiyon if/elif/else zinciriyle farklı sonuçlar döndürebilir.\n\ndef harf_notu(puan):\n    if puan >= 90:\n        return "AA"\n    elif puan >= 70:\n        return "BB"\n    else:\n        return "FF"\n\nprint(harf_notu(95))',
+          starterCode:
+              'def harf_notu(puan):\n    if puan >= 90:\n        return "AA"\n    elif puan >= 70:\n        return "BB"\n    else:\n        return "FF"\n\nprint(harf_notu(95))\nprint(harf_notu(75))\nprint(harf_notu(40))',
+          solution:
+              'def harf_notu(puan):\n    if puan >= 90:\n        return "AA"\n    elif puan >= 70:\n        return "BB"\n    else:\n        return "FF"\n\nprint(harf_notu(95))\nprint(harf_notu(75))\nprint(harf_notu(40))',
+          expectedOutput: 'AA\nBB\nFF',
+          points: 260,
+          emoji: '🎓',
+          order: 1,
+          hints: [
+            'Fonksiyon içinde if/elif/else zinciri kurup her koşulda farklı bir return kullanabilirsin.',
+            'Fonksiyonu üç farklı puanla üç kez çağırıp her sonucu ayrı print() ile yazdır.',
+            'if puan >= 90: return "AA" ... elif puan >= 70: return "BB" ... else: return "FF"',
+          ],
+        ),
+        LearningNode(
+          id: 'n_proj_2',
+          title: 'Paralel Listelerle Rapor',
+          description: 'İki listeyi aynı anda, index ile birlikte gez.',
+          tutorial:
+              '# Aynı sırada duran iki liste varsa (isimler ve puanlar gibi), range() ile index üzerinden ikisine de aynı anda erişebilirsin.\n\nisimler = ["Ali", "Ayşe"]\npuanlar = [70, 95]\nfor i in range(2):\n    print(f"{isimler[i]}: {puanlar[i]}")',
+          starterCode:
+              'isimler = ["Ali", "Ayşe", "Can"]\npuanlar = [85, 92, 78]\nfor i in range(3):\n    print(f"{isimler[i]}: {puanlar[i]}")',
+          solution:
+              'isimler = ["Ali", "Ayşe", "Can"]\npuanlar = [85, 92, 78]\nfor i in range(3):\n    print(f"{isimler[i]}: {puanlar[i]}")',
+          expectedOutput: 'Ali: 85\nAyşe: 92\nCan: 78',
+          points: 270,
+          emoji: '📋',
+          order: 2,
+          hints: [
+            'İki liste aynı sırada duruyorsa, aynı index (i) ile ikisine de erişebilirsin: isimler[i] ve puanlar[i]',
+            "for i in range(3): ile 0'dan 2'ye kadar say, listelerin uzunluğu kadar dön.",
+            'for i in range(3):\n    print(f"{isimler[i]}: {puanlar[i]}")',
+          ],
+        ),
+        LearningNode(
+          id: 'n_proj_3',
+          title: 'Skor Takibi',
+          description:
+              'Fonksiyon ve sözlüğü birlikte kullanarak bir skor tablosu güncelle.',
+          tutorial:
+              '# Bir fonksiyonun döndürdüğü değeri doğrudan sözlüğe geri yazabilirsin.\n\ndef puan_ekle(mevcut, eklenen):\n    return mevcut + eklenen\n\ntablo = {"Ali": 0}\ntablo["Ali"] = puan_ekle(tablo["Ali"], 10)\nprint(tablo["Ali"])',
+          starterCode:
+              'def puan_ekle(mevcut, eklenen):\n    return mevcut + eklenen\n\ntablo = {"Ali": 0, "Ayşe": 0}\ntablo["Ali"] = puan_ekle(tablo["Ali"], 10)\ntablo["Ali"] = puan_ekle(tablo["Ali"], 5)\ntablo["Ayşe"] = puan_ekle(tablo["Ayşe"], 8)\nprint(tablo["Ali"])\nprint(tablo["Ayşe"])',
+          solution:
+              'def puan_ekle(mevcut, eklenen):\n    return mevcut + eklenen\n\ntablo = {"Ali": 0, "Ayşe": 0}\ntablo["Ali"] = puan_ekle(tablo["Ali"], 10)\ntablo["Ali"] = puan_ekle(tablo["Ali"], 5)\ntablo["Ayşe"] = puan_ekle(tablo["Ayşe"], 8)\nprint(tablo["Ali"])\nprint(tablo["Ayşe"])',
+          expectedOutput: '15\n8',
+          points: 280,
+          emoji: '🏅',
+          order: 3,
+          hints: [
+            'Bir fonksiyonun return ettiği değeri doğrudan bir sözlük anahtarına geri yazabilirsin: tablo["Ali"] = fonksiyon(...)',
+            'Mevcut değeri okuyup fonksiyona gönder, dönen sonucu aynı anahtara geri ata: tablo["Ali"] = puan_ekle(tablo["Ali"], 10)',
+            'def puan_ekle(mevcut, eklenen):\n    return mevcut + eklenen — sonra bu fonksiyonu sözlük güncellerken çağır.',
+          ],
         ),
       ],
     ),

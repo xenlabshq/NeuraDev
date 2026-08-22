@@ -15,22 +15,31 @@ class SupportChatRepositoryImpl implements SupportChatRepository {
   CollectionReference<Map<String, dynamic>> _messages(String chatId) =>
       _chats.doc(chatId).collection('messages');
 
-  // `where()` + `orderBy()` farklı alanlarda kombine edilirse Firestore
-  // composite index istiyor (bkz. haberler kategorisi ile aynı sorun —
-  // news_repository_impl.dart'taki client-side filtreleme). Burada da
-  // aynı çözüm: tek-alanlı orderBy (otomatik indekslenir) + filtreyi
-  // Dart tarafında uygula.
+  // ÖNEMLİ: burada `orderBy` DEĞİL, `where('userId', ...)` sunucu
+  // tarafında filtreleniyor — sıralamayı client-side yapmanın nedeni bir
+  // composite index'ten kaçınmak değil, firestore.rules'un `support_chats`
+  // için "sadece kendi sohbetini görebilirsin" kuralını doğrulayabilmesi.
+  // Firestore, bir `list` sorgusunun güvenlik kuralını sağladığını ancak
+  // sorgunun KENDİSİ (where filtresiyle) bunu garanti ediyorsa kanıtlayabilir;
+  // filtresiz bir orderBy + sonucu Dart'ta filtrelemek (haberlerde olduğu
+  // gibi, ama haberler herkese açık okunduğu için orada sorun yok) burada
+  // normal bir kullanıcı için HER ZAMAN "permission-denied" ile
+  // sonuçlanırdı — moderatör/admin olmayan biri kendi destek sohbetini
+  // bile göremezdi.
   @override
   Stream<List<SupportChat>> watchChatsForUser(String userId) {
-    return _chats
-        .orderBy('lastMessageAt', descending: true)
-        .snapshots()
-        .map(
-          (snap) => snap.docs
-              .map(SupportChat.fromDoc)
-              .where((c) => c.userId == userId)
-              .toList(),
-        );
+    return _chats.where('userId', isEqualTo: userId).snapshots().map((snap) {
+      final chats = snap.docs.map(SupportChat.fromDoc).toList();
+      chats.sort((a, b) {
+        final at = a.lastMessageAt;
+        final bt = b.lastMessageAt;
+        if (at == null && bt == null) return 0;
+        if (at == null) return 1;
+        if (bt == null) return -1;
+        return bt.compareTo(at);
+      });
+      return chats;
+    });
   }
 
   @override

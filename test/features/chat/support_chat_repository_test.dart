@@ -13,14 +13,17 @@ void main() {
     repo = SupportChatRepositoryImpl(db);
   });
 
-  // Regresyon: gerçek Firestore'da `where()` + farklı alanda `orderBy()`
-  // kombinasyonu composite index istiyor ve index yoksa
-  // `failed-precondition` hatasıyla akışın tamamı çöküyordu (kullanıcı
-  // Destek sekmesini hiç açamıyordu). Çözüm: tek-alanlı orderBy +
-  // istemci tarafı filtre — bkz. news_repository_impl.dart'taki aynı
-  // desen. FakeFirebaseFirestore composite index gereksinimini simüle
-  // etmiyor, bu yüzden bu test doğrudan sorgu SONUCUNU doğruluyor
-  // (userId/status filtrelerinin hâlâ doğru çalıştığını).
+  // Regresyon: bu sorgu MUTLAKA sunucu tarafında `where('userId', ...)`
+  // ile filtrelenmeli — filtresiz bir orderBy + istemci tarafı filtre
+  // (haberlerdeki desenin buraya kopyalanmış hâli) gerçek Firestore'da
+  // firestore.rules'un "sadece kendi sohbetini görebilirsin" kuralını
+  // sağladığını KANITLAYAMADIĞI için normal bir kullanıcı için HER ZAMAN
+  // permission-denied ile sonuçlanıyordu (bkz. support_chat_repository_impl.dart
+  // yorumu). `FakeFirebaseFirestore` güvenlik kurallarını hiç
+  // uygulamadığı için bu regresyon testlerde asla görünmüyordu — sadece
+  // gerçek bir kullanıcı hesabıyla gerçek Firestore'a karşı test edilince
+  // ortaya çıktı. Bu test yine de doğru sorgu SONUCUNU doğruluyor
+  // (userId filtresinin doğru çalıştığını).
   test("watchChatsForUser only returns that user's chats", () async {
     await repo.openOrGetChat(
       userId: 'u1',

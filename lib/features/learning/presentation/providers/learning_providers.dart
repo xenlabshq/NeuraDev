@@ -220,6 +220,7 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
       points: n.points,
       emoji: n.emoji,
       order: n.order,
+      hints: n.hints,
       bestScore: 100,
     );
 
@@ -234,6 +235,7 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
       points: n.points,
       emoji: n.emoji,
       order: n.order,
+      hints: n.hints,
     );
 
     LearningNode availableNode(LearningNode n) => LearningNode.available(
@@ -247,6 +249,7 @@ class LearningProgressNotifier extends StateNotifier<IslandsState> {
       points: n.points,
       emoji: n.emoji,
       order: n.order,
+      hints: n.hints,
     );
 
     if (prevAllCompleted) {
